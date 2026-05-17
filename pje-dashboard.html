@@ -273,6 +273,18 @@ tr:hover td{background:rgba(200,167,91,.04)}
 .proc-empty h3{color:var(--text);font-size:.95rem;font-weight:600}
 .proc-empty p{color:var(--muted);font-size:.82rem;max-width:300px}
 .proc-not-found{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);border-radius:var(--r);padding:1rem 1.25rem;color:#f87171;font-size:.84rem}
+.btn-voltar{
+  width:100%;padding:.55rem .75rem;text-align:left;
+  background:rgba(200,167,91,.08);border:1px solid rgba(200,167,91,.2);border-radius:var(--r);
+  color:var(--gold);font-size:.78rem;font-weight:600;cursor:pointer;
+  display:flex;align-items:center;gap:.4rem;transition:background .2s;
+}
+.btn-voltar:hover{background:rgba(200,167,91,.15)}
+.proc-view-header{margin-bottom:1.5rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.proc-view-header-left{flex:1}
+.proc-loading{display:flex;align-items:center;gap:.75rem;color:var(--muted);padding:3rem 0;font-size:.85rem}
+.proc-error{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);border-radius:var(--r-lg);padding:1.5rem;color:#f87171;font-size:.875rem;margin-top:1rem}
+.proc-source-note{font-size:.7rem;color:rgba(232,230,224,.25);text-align:center;padding:1.5rem 0;letter-spacing:.05em}
 
 /* ── Period toggle ──────────────────────────────────────────── */
 .period-toggle{display:flex;gap:.3rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r);padding:.25rem;margin-bottom:.5rem}
@@ -372,7 +384,13 @@ tr:hover td{background:rgba(200,167,91,.04)}
     <div class="period-active-label" id="period-active-label"></div>
   </div>
 
-  <!-- Busca por número -->
+  <!-- Voltar às Métricas (visível ao ver um processo) -->
+  <button id="btn-voltar-metricas" class="btn-voltar" style="display:none" onclick="voltarMetricas()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    Voltar às Métricas
+  </button>
+
+  <!-- Buscar Processo -->
   <div>
     <div class="sec-label">Buscar Processo</div>
     <div class="proc-search">
@@ -597,6 +615,13 @@ tr:hover td{background:rgba(200,167,91,.04)}
     </div><!-- /comparativo-view -->
 
     </div><!-- /dash-content -->
+
+    <!-- ── Processo detail view ───────────────────────────────── -->
+    <div id="processo-view" style="display:none">
+      <div id="processo-detail-content">
+        <!-- rendered by JS -->
+      </div>
+    </div>
 
   </div>
 </div><!-- .main -->
@@ -1005,30 +1030,138 @@ function renderComparativo(data) {
   }).join('');
 }
 
+// ── Processo detail view ──────────────────────────────────────────────────────
+function voltarMetricas() {
+  document.getElementById('processo-view').style.display        = 'none';
+  document.getElementById('btn-voltar-metricas').style.display  = 'none';
+  document.getElementById('proc-result').className              = 'proc-result';
+  if (currentVara) {
+    document.getElementById('dash-content').style.display  = '';
+    document.getElementById('view-tabs').classList.add('show');
+    switchTab(currentTab === 'comparativo' ? 'comparativo' : 'metricas');
+  } else {
+    document.getElementById('empty-state').style.display = '';
+  }
+}
+
+function mostrarProcesso(proc) {
+  document.getElementById('empty-state').style.display   = 'none';
+  document.getElementById('dash-content').style.display  = 'none';
+  document.getElementById('view-tabs').classList.remove('show');
+  document.getElementById('processo-view').style.display = '';
+  document.getElementById('btn-voltar-metricas').style.display = '';
+  renderProcessoDetail(proc);
+}
+
+function renderProcessoDetail(proc) {
+  const fmtData = s => {
+    const raw = String(s || '');
+    if (raw.length >= 8 && /^\d+$/.test(raw.replace(/\D/g,''))) {
+      const d = raw.replace(/\D/g,'');
+      return `${d.slice(6,8)}/${d.slice(4,6)}/${d.slice(0,4)}`;
+    }
+    return raw.slice(0,10).replace(/(\d{4})-(\d{2})-(\d{2})/, '$3/$2/$1') || '—';
+  };
+
+  const grauLabel = { G1: '1º Grau', G2: '2º Grau', JE: 'Juizado Especial' };
+  const sigilo = proc.nivelSigilo != null
+    ? (proc.nivelSigilo === 0 ? 'Público' : `Sigiloso (nível ${proc.nivelSigilo})`)
+    : '—';
+
+  const assuntos = (proc.assuntos || []);
+  const movs     = (proc.movimentos || [])
+    .sort((a,b) => (b.dataHora||'').localeCompare(a.dataHora||''));
+
+  const assuntosHtml = assuntos.length
+    ? `<div class="proc-section">
+        <div class="proc-section-title">Assuntos <span style="font-weight:400;color:var(--muted)">${assuntos.length}</span></div>
+        <div class="proc-assuntos">${assuntos.map(a => `<span class="proc-assunto-tag">${esc(a.nome||a)}</span>`).join('')}</div>
+       </div>`
+    : '';
+
+  const movsHtml = movs.length
+    ? movs.map(m => `
+        <div class="proc-mov">
+          <div class="proc-mov-date">${fmtData(m.dataHora)}</div>
+          <div>
+            <div class="proc-mov-name">${esc(m.nome||'—')}</div>
+            ${m.codigo ? `<div class="proc-mov-code">cód. ${m.codigo}</div>` : ''}
+          </div>
+        </div>`).join('')
+    : '<div style="color:var(--muted);font-size:.82rem;padding:.5rem 0">Sem movimentos registrados.</div>';
+
+  document.getElementById('processo-detail-content').innerHTML = `
+    <div class="proc-detail-wrap">
+      <div class="proc-view-header">
+        <div class="proc-view-header-left">
+          <div class="proc-number">${esc(proc.numeroProcesso||'—')}</div>
+          <div class="proc-class-row">
+            <span class="proc-class-badge">${esc(proc.classe?.nome||'Classe não informada')}</span>
+            ${proc.grau ? `<span class="tag ${proc.grau==='G2'?'tag-g2':proc.grau==='JE'?'tag-je':'tag-g1'}">${grauLabel[proc.grau]||proc.grau}</span>` : ''}
+          </div>
+        </div>
+      </div>
+
+      <div class="proc-info-grid">
+        <div class="proc-info-card">
+          <div class="proc-info-label">Ajuizamento</div>
+          <div class="proc-info-val">${fmtData(proc.dataAjuizamento)}</div>
+        </div>
+        <div class="proc-info-card">
+          <div class="proc-info-label">Vara / Órgão</div>
+          <div class="proc-info-val" style="font-size:.78rem;line-height:1.35">${esc(proc.orgaoJulgador?.nome||'—')}</div>
+        </div>
+        <div class="proc-info-card">
+          <div class="proc-info-label">Tribunal</div>
+          <div class="proc-info-val">${esc(proc.tribunal||'—')}</div>
+        </div>
+        <div class="proc-info-card">
+          <div class="proc-info-label">Sistema</div>
+          <div class="proc-info-val">${esc(proc.sistema?.nome||'—')}</div>
+        </div>
+        <div class="proc-info-card">
+          <div class="proc-info-label">Formato</div>
+          <div class="proc-info-val">${esc(proc.formato?.nome||'—')}</div>
+        </div>
+        <div class="proc-info-card">
+          <div class="proc-info-label">Sigilo</div>
+          <div class="proc-info-val">${sigilo}</div>
+        </div>
+      </div>
+
+      ${assuntosHtml}
+
+      <div class="proc-section">
+        <div class="proc-section-title">
+          Movimentações
+          <span style="font-weight:400;color:var(--muted);font-size:.72rem;text-transform:none;letter-spacing:0">${movs.length} registros</span>
+        </div>
+        <div class="proc-timeline">${movsHtml}</div>
+      </div>
+
+      <div class="proc-source-note">DADOS: DATAJUD / CNJ · ${esc(proc.numeroProcesso||'')}</div>
+    </div>`;
+}
+
 // ── Busca processo ────────────────────────────────────────────────────────────
 async function buscarProcesso() {
   const num = document.getElementById('proc-num-input').value.trim();
   const res = document.getElementById('proc-result');
   if (!num) return;
-  res.className='proc-result show';
-  res.innerHTML='<span class="spinner"></span> Buscando...';
+  res.className = 'proc-result show';
+  res.innerHTML = '<span class="spinner"></span> Buscando...';
   try {
-    const r = await fetch('/api/pje/processo/'+encodeURIComponent(num));
+    const r    = await fetch('/api/pje/processo/' + encodeURIComponent(num));
     const data = await r.json();
-    if (r.status===404) { res.innerHTML='<span style="color:var(--muted)">Processo não encontrado.</span>'; return; }
-    if (!r.ok) throw new Error(data.error||`HTTP ${r.status}`);
-    const p = data.processo;
-    const raw = p.dataAjuizamento||'';
-    const dt = raw.length>=8 ? `${raw.slice(6,8)}/${raw.slice(4,6)}/${raw.slice(0,4)}` : raw;
-    res.innerHTML=`
-      <strong>${esc(p.numeroProcesso||num)}</strong>
-      <span>Classe: ${esc(p.classe?.nome||'—')}</span>
-      <span>Ajuizamento: ${esc(dt||'—')}</span>
-      <span>Grau: ${esc(p.grau||'—')}</span>
-      ${p.orgaoJulgador?.nome?`<span>Vara: ${esc(p.orgaoJulgador.nome)}</span>`:''}
-      ${p.sistema?.nome?`<span>Sistema: ${esc(p.sistema.nome)}</span>`:''}`;
+    if (r.status === 404) {
+      res.innerHTML = '<span style="color:var(--muted)">Processo não encontrado no DataJud.</span>';
+      return;
+    }
+    if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+    res.className = 'proc-result';
+    mostrarProcesso(data.processo);
   } catch(e) {
-    res.innerHTML=`<span style="color:#f87171">Erro: ${esc(e.message)}</span>`;
+    res.innerHTML = `<span style="color:#f87171">Erro: ${esc(e.message)}</span>`;
   }
 }
 

@@ -181,7 +181,8 @@ function dashAuth(req, res, next) {
   `);
 }
 
-const IDX = `/${INDEX_NAME}/_search`;
+const IDX   = `/${INDEX_NAME}/_search`;
+const IDX_COUNT = `/${INDEX_NAME}/_count`;
 
 // Retorna query ElasticSearch por vara — usa ?vara= do query param
 function varaQuery(req) {
@@ -206,18 +207,20 @@ app.get('/api/pje/stats', async (req, res) => {
   if (!q) return res.json({ ...MOCK_STATS, ultima_atualizacao: new Date().toISOString() });
   const hasPeriod = !!(req.query.mes || req.query.ano);
   try {
-    const body = { query: q, size: 0 };
-    if (!hasPeriod) {
-      const inicioMes = new Date(); inicioMes.setDate(1);
-      body.aggs = { dist_mes: { filter: { range: { dataAjuizamento: { gte: inicioMes.toISOString().slice(0,7) } } } } };
-    }
-    const r = await datajudPost(IDX, body);
-    if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
-    const total = r.body.hits?.total?.value ?? 0;
+    // _count retorna total exato sem limitação de 10k
+    const [rCount, rAggs] = await Promise.all([
+      datajudPost(IDX_COUNT, { query: q }),
+      hasPeriod ? Promise.resolve(null) : datajudPost(IDX, {
+        query: q, size: 0,
+        aggs: { dist_mes: { filter: { range: { dataAjuizamento: { gte: new Date().toISOString().slice(0,7) } } } } },
+      }),
+    ]);
+    if (rCount.status !== 200) throw new Error(`DataJud ${rCount.status}`);
+    const total = rCount.body.count ?? 0;
     res.json({
       acervo:            hasPeriod ? null  : total,
       ajuizados_periodo: hasPeriod ? total : null,
-      distribuidos_mes:  hasPeriod ? null  : (r.body.aggregations?.dist_mes?.doc_count ?? 0),
+      distribuidos_mes:  hasPeriod ? null  : (rAggs?.body?.aggregations?.dist_mes?.doc_count ?? 0),
       periodo_filtrado:  hasPeriod,
       concluidos_mes: null, taxa_acordo: null,
       ultima_atualizacao: new Date().toISOString(), mock: false,
