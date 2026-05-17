@@ -92,6 +92,18 @@ const MOCK_PROCESSOS = Array.from({ length: 20 }, (_, i) => {
   };
 });
 
+// ── Cache em memória ──────────────────────────────────────────────────────────
+const _cache = new Map();
+function cacheGet(key) {
+  const hit = _cache.get(key);
+  if (!hit) return null;
+  if (Date.now() > hit.expires) { _cache.delete(key); return null; }
+  return hit.data;
+}
+function cacheSet(key, data, ttlMs = 30 * 60 * 1000) {
+  _cache.set(key, { data, expires: Date.now() + ttlMs });
+}
+
 // ── Helper: proxy POST to DataJud ─────────────────────────────────────────────
 function datajudPost(indexPath, body) {
   return new Promise((resolve, reject) => {
@@ -422,14 +434,23 @@ app.get('/api/pje/varas-comparativo', async (req, res) => {
   const grupo         = req.query.grupo || 'proximas';
   if (!varaPrincipal) return res.json({ ...MOCK_VARAS_COMPARATIVO });
 
+  const cacheKey = `varas-comp:${varaPrincipal}:${grupo}`;
+  const cached = cacheGet(cacheKey);
+  if (cached) return res.json(cached);
+
   try {
-    // Buscar todas as varas do TRT-3 para montar grupo BH e calcular ranking
-    const rVaras = await datajudPost(IDX, {
-      size: 0,
-      aggs: { varas: { terms: { field: 'orgaoJulgador.nome.keyword', size: 300, order: { _count: 'desc' } } } },
-    });
-    if (rVaras.status !== 200) throw new Error(`DataJud ${rVaras.status}`);
-    const todasVaras = (rVaras.body.aggregations?.varas?.buckets ?? []).map(b => ({ nome: b.key, acervo: b.doc_count }));
+    // Buscar todas as varas (cache 1h pois muda pouco)
+    const varasKey = 'todas-varas';
+    let todasVaras = cacheGet(varasKey);
+    if (!todasVaras) {
+      const rVaras = await datajudPost(IDX, {
+        size: 0,
+        aggs: { varas: { terms: { field: 'orgaoJulgador.nome.keyword', size: 300, order: { _count: 'desc' } } } },
+      });
+      if (rVaras.status !== 200) throw new Error(`DataJud ${rVaras.status}`);
+      todasVaras = (rVaras.body.aggregations?.varas?.buckets ?? []).map(b => ({ nome: b.key, acervo: b.doc_count }));
+      cacheSet(varasKey, todasVaras, 60 * 60 * 1000);
+    }
 
     // Filtrar apenas BH
     const varasBH = todasVaras.filter(v => /BELO HORIZONTE/i.test(v.nome));
@@ -502,7 +523,9 @@ app.get('/api/pje/varas-comparativo', async (req, res) => {
       }
     }));
 
-    res.json({ vara_principal: varaPrincipal, ranking_bh: rankingBH, varas: detalhes, mock: false });
+    const result = { vara_principal: varaPrincipal, ranking_bh: rankingBH, varas: detalhes, mock: false };
+    cacheSet(cacheKey, result, 30 * 60 * 1000);
+    res.json(result);
   } catch (e) {
     console.error('[pje/varas-comparativo]', e.message);
     res.status(502).json({ error: e.message });

@@ -1373,6 +1373,14 @@ function renderVarasComparativo(data) {
 }
 
 // ── Processo detail view ──────────────────────────────────────────────────────
+function copyProcNum(btn) {
+  const num = btn.dataset.num;
+  navigator.clipboard.writeText(num).then(() => {
+    btn.textContent = '✓ copiado';
+    setTimeout(() => { btn.textContent = '📋 copiar'; }, 1500);
+  }).catch(() => { btn.textContent = '✗ erro'; });
+}
+
 function voltarMetricas() {
   document.getElementById('processo-view').style.display        = 'none';
   document.getElementById('btn-voltar-metricas').style.display  = 'none';
@@ -1507,7 +1515,7 @@ function renderProcessoDetail(proc) {
         <div>
           <div class="proc-hero-num-row">
             <span class="proc-hero-num">${esc(proc.numeroProcesso||'—')}</span>
-            <button class="proc-copy-btn" onclick="navigator.clipboard.writeText('${esc(proc.numeroProcesso||'')}').then(()=>{this.textContent='✓ copiado';setTimeout(()=>this.textContent='📋 copiar',1500})">📋 copiar</button>
+            <button class="proc-copy-btn" data-num="${esc(proc.numeroProcesso||'')}" onclick="copyProcNum(this)">📋 copiar</button>
           </div>
           <div class="proc-badges">
             <span class="proc-class-badge">${esc(proc.classe?.nome||'Classe não informada')}</span>
