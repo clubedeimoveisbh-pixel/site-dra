@@ -8,7 +8,7 @@
 <nav id="site-nav">
   <div class="nav-inner">
     <a href="/index.html" class="nav-logo">
-      <span class="nav-logo-name">Dra. Ana Paula Oliveira</span>
+      <span class="nav-logo-name">Marina Trabalhista</span>
       <span class="nav-logo-subtitle">Direito do Trabalho &amp; IA</span>
     </a>
     <div class="nav-links">
@@ -42,7 +42,7 @@
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <div class="footer-logo-name">Dra. Ana Paula Oliveira</div>
+        <div class="footer-logo-name">Marina Trabalhista</div>
         <div class="footer-logo-sub">Direito do Trabalho &amp; IA</div>
         <p class="footer-desc">
           Servidora pública, assistente de juiz do trabalho e criadora de conteúdo
@@ -84,7 +84,7 @@
     </div>
     <div class="footer-bottom">
       <p class="footer-copy">
-        &copy; 2025 <span>Dra. Ana Paula Oliveira</span>. Todos os direitos reservados.
+        &copy; 2025 <span>Marina Trabalhista</span>. Todos os direitos reservados.
       </p>
       <div class="footer-legal">
         <a href="#">Política de Privacidade</a>

@@ -1,4 +1,4 @@
-# Site Dra. Ana Paula Oliveira — Direito do Trabalho & IA
+# Site Marina Trabalhista — Direito do Trabalho & IA
 
 Site profissional estático para servidora pública / assistente de juiz do trabalho e criadora de conteúdo jurídico.
 
