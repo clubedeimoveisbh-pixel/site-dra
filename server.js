@@ -204,7 +204,7 @@ app.get('/api/pje/stats', async (req, res) => {
   if (!q) return res.json({ ...MOCK_STATS, ultima_atualizacao: new Date().toISOString() });
   const hasPeriod = !!(req.query.mes || req.query.ano);
   try {
-    const body = { query: q, size: 0, track_total_hits: true };
+    const body = { query: q, size: 0 };
     if (!hasPeriod) {
       const inicioMes = new Date(); inicioMes.setDate(1);
       body.aggs = { dist_mes: { filter: { range: { dataAjuizamento: { gte: inicioMes.toISOString().slice(0,7) } } } } };
@@ -240,10 +240,13 @@ app.get('/api/pje/volume-mensal', async (req, res) => {
   const q = buildQuery(req);
   if (!q) return res.json({ por_mes: MOCK_POR_MES, mock: true });
   try {
-    const body = { query: q, size: 0, aggs: { por_mes: { date_histogram: { field: 'dataAjuizamento', calendar_interval: 'month', format: 'MM/yy' } } } };
+    const body = { query: q, size: 0, aggs: { por_mes: { date_histogram: { field: 'dataAjuizamento', calendar_interval: 'month', format: 'MM/yyyy' } } } };
     const r = await datajudPost(IDX, body);
     if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
-    res.json({ por_mes: (r.body.aggregations?.por_mes?.buckets ?? []).slice(-24).map(b => ({ mes: b.key_as_string, total: b.doc_count })), mock: false });
+    const yearNow = new Date().getFullYear();
+    const valid = (r.body.aggregations?.por_mes?.buckets ?? [])
+      .filter(b => { const y = new Date(b.key).getFullYear(); return y >= 2000 && y <= yearNow + 1; });
+    res.json({ por_mes: valid.slice(-24).map(b => ({ mes: b.key_as_string, total: b.doc_count })), mock: false });
   } catch (e) { console.error('[pje/volume-mensal]', e.message); res.status(502).json({ error: e.message }); }
 });
 
@@ -287,9 +290,11 @@ app.get('/api/pje/processo/:numero', async (req, res) => {
   const numero = req.params.numero.replace(/[^\d.\-]/g, '');
   if (!numero) return res.status(400).json({ error: 'Número inválido' });
   try {
+    const soDigits = numero.replace(/\D/g, '');
     const body = { query: { bool: { should: [
-      { term:  { 'numeroProcesso.keyword': numero } },
-      { match: { numeroProcesso: numero } },
+      { term:         { 'numeroProcesso.keyword': numero } },
+      { query_string: { query: `"${numero}"`, default_field: 'numeroProcesso' } },
+      { term:         { 'numeroProcesso.keyword': soDigits } },
     ], minimum_should_match: 1 } }, size: 1 };
     const r = await datajudPost(IDX, body);
     if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
@@ -325,9 +330,11 @@ app.get('/api/pje/comparativo', async (req, res) => {
     if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
     const buckets = r.body.aggregations?.por_periodo?.buckets ?? [];
     const slice   = tipo === 'mes' ? 24 : 10;
+    const ynow    = new Date().getFullYear();
+    const validB  = buckets.filter(b => { const y = new Date(b.key).getFullYear(); return y >= 2000 && y <= ynow + 1; });
     res.json({
       tipo,
-      periodos: buckets.filter(b => b.doc_count > 0).slice(-slice).map(b => ({
+      periodos: validB.filter(b => b.doc_count > 0).slice(-slice).map(b => ({
         label:   b.key_as_string,
         total:   b.doc_count,
         classes: (b.por_classe?.buckets ?? []).map(c => ({ nome: c.key, total: c.doc_count })),
