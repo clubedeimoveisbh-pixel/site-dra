@@ -62,6 +62,21 @@ const MOCK_TEMPOS = [
   { faixa: 'Mais de 24 meses',  total: 423 },
 ];
 
+const MOCK_VARAS_COMPARATIVO = {
+  vara_principal: '17ª VARA DO TRABALHO DE BELO HORIZONTE',
+  ranking_bh: { posicao: 42, total_varas: 67, percentil: 37 },
+  varas: [
+    { nome: '14ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 1203, ultimos_12m: 287, top_classe: 'Reclamação Trabalhista' },
+    { nome: '15ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 985,  ultimos_12m: 241, top_classe: 'Reclamação Trabalhista' },
+    { nome: '16ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 1074, ultimos_12m: 263, top_classe: 'Execução de Título Extrajudicial' },
+    { nome: '17ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 847,  ultimos_12m: 198, top_classe: 'Reclamação Trabalhista' },
+    { nome: '18ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 921,  ultimos_12m: 219, top_classe: 'Reclamação Trabalhista' },
+    { nome: '19ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 1138, ultimos_12m: 274, top_classe: 'Mandado de Segurança' },
+    { nome: '20ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 762,  ultimos_12m: 183, top_classe: 'Reclamação Trabalhista' },
+  ],
+  mock: true,
+};
+
 const MOCK_PROCESSOS = Array.from({ length: 20 }, (_, i) => {
   const classes = MOCK_CLASSES.map(c => c.nome);
   const fases   = ['Conhecimento', 'Instrução', 'Sentença', 'Recurso', 'Execução'];
@@ -273,6 +288,57 @@ app.get('/api/pje/tempos', async (req, res) => {
   res.json({ tempos: MOCK_TEMPOS, mock: true });
 });
 
+// ── API: eficiência — distribuição do acervo por antiguidade ─────────────────
+const MOCK_EFICIENCIA = {
+  faixas: [
+    { nome: 'Menos de 1 ano', total: 94,  pct: 11.1 },
+    { nome: '1 a 2 anos',     total: 178, pct: 21.0 },
+    { nome: '2 a 4 anos',     total: 253, pct: 29.9 },
+    { nome: 'Mais de 4 anos', total: 322, pct: 38.0 },
+  ],
+  total_acervo: 847,
+  tempo_medio_estimado_anos: 2.9,
+  mock: true,
+};
+
+app.get('/api/pje/eficiencia', async (req, res) => {
+  const q = buildQuery(req);
+  if (!q) return res.json({ ...MOCK_EFICIENCIA });
+  try {
+    const body = {
+      query: q,
+      size: 0,
+      aggs: {
+        por_faixa: {
+          date_range: {
+            field: 'dataAjuizamento',
+            ranges: [
+              { key: 'Menos de 1 ano', from: 'now-1y/d' },
+              { key: '1 a 2 anos',     from: 'now-2y/d', to: 'now-1y/d' },
+              { key: '2 a 4 anos',     from: 'now-4y/d', to: 'now-2y/d' },
+              { key: 'Mais de 4 anos', to:   'now-4y/d' },
+            ],
+          },
+        },
+      },
+    };
+    const r = await datajudPost(IDX, body);
+    if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
+    const buckets   = r.body.aggregations?.por_faixa?.buckets ?? [];
+    const total     = buckets.reduce((s, b) => s + b.doc_count, 0);
+    const midpoints = { 'Menos de 1 ano': 0.5, '1 a 2 anos': 1.5, '2 a 4 anos': 3, 'Mais de 4 anos': 5 };
+    const faixas    = buckets.map(b => ({
+      nome:  b.key,
+      total: b.doc_count,
+      pct:   total ? Number((b.doc_count / total * 100).toFixed(1)) : 0,
+    }));
+    const tempoMedio = total
+      ? Number((faixas.reduce((s, f) => s + f.total * (midpoints[f.nome] ?? 3), 0) / total).toFixed(2))
+      : 0;
+    res.json({ faixas, total_acervo: total, tempo_medio_estimado_anos: tempoMedio, mock: false });
+  } catch (e) { console.error('[pje/eficiencia]', e.message); res.status(502).json({ error: e.message }); }
+});
+
 // ── API: processos recentes ───────────────────────────────────────────────────
 app.get('/api/pje/processos', async (req, res) => {
   const q = buildQuery(req);
@@ -348,6 +414,99 @@ app.get('/api/pje/comparativo', async (req, res) => {
       mock: false,
     });
   } catch (e) { console.error('[pje/comparativo]', e.message); res.status(502).json({ error: e.message }); }
+});
+
+// ── API: varas comparativo ────────────────────────────────────────────────────
+app.get('/api/pje/varas-comparativo', async (req, res) => {
+  const varaPrincipal = req.query.vara || VARA_NOME;
+  const grupo         = req.query.grupo || 'proximas';
+  if (!varaPrincipal) return res.json({ ...MOCK_VARAS_COMPARATIVO });
+
+  try {
+    // Buscar todas as varas do TRT-3 para montar grupo BH e calcular ranking
+    const rVaras = await datajudPost(IDX, {
+      size: 0,
+      aggs: { varas: { terms: { field: 'orgaoJulgador.nome.keyword', size: 300, order: { _count: 'desc' } } } },
+    });
+    if (rVaras.status !== 200) throw new Error(`DataJud ${rVaras.status}`);
+    const todasVaras = (rVaras.body.aggregations?.varas?.buckets ?? []).map(b => ({ nome: b.key, acervo: b.doc_count }));
+
+    // Filtrar apenas BH
+    const varasBH = todasVaras.filter(v => /BELO HORIZONTE/i.test(v.nome));
+
+    // Ranking da vara principal no universo BH (por acervo, maior = 1º)
+    const rankingBH = (() => {
+      const idx = varasBH.findIndex(v => v.nome === varaPrincipal);
+      return idx === -1
+        ? { posicao: null, total_varas: varasBH.length, percentil: null }
+        : { posicao: idx + 1, total_varas: varasBH.length, percentil: Math.round((1 - idx / varasBH.length) * 100) };
+    })();
+
+    // Montar grupo de varas a detalhar (max 8)
+    let grupoVaras;
+    if (grupo === 'bh') {
+      // Varas BH ordenadas por acervo, limitar a 8 ao redor da vara principal
+      const idxPrincipal = varasBH.findIndex(v => v.nome === varaPrincipal);
+      if (idxPrincipal === -1) {
+        grupoVaras = varasBH.slice(0, 8).map(v => v.nome);
+      } else {
+        const start = Math.max(0, idxPrincipal - 3);
+        grupoVaras = varasBH.slice(start, start + 8).map(v => v.nome);
+      }
+    } else {
+      // Varas próximas numericamente (extrair número da vara)
+      const numMatch = varaPrincipal.match(/(\d+)ª/);
+      if (numMatch) {
+        const num = parseInt(numMatch[1], 10);
+        const prefix = varaPrincipal.replace(/^\d+ª/, '').trim();
+        const proximas = [];
+        for (let delta = -3; delta <= 3; delta++) {
+          const n = num + delta;
+          if (n < 1) continue;
+          const ordinal = `${n}ª`;
+          const candidata = todasVaras.find(v => v.nome.startsWith(ordinal) && v.nome.includes('BELO HORIZONTE'));
+          if (candidata) proximas.push(candidata.nome);
+        }
+        // Garantir que a vara principal esteja incluída
+        if (!proximas.includes(varaPrincipal)) proximas.unshift(varaPrincipal);
+        grupoVaras = proximas.slice(0, 8);
+      } else {
+        grupoVaras = [varaPrincipal];
+      }
+    }
+
+    // Buscar ultimos_12m e top_classe para cada vara do grupo em paralelo
+    const gte12m = new Date();
+    gte12m.setFullYear(gte12m.getFullYear() - 1);
+    const gte12mStr = gte12m.toISOString().slice(0, 10);
+
+    const detalhes = await Promise.all(grupoVaras.map(async nome => {
+      const acervoLocal = todasVaras.find(v => v.nome === nome)?.acervo ?? 0;
+      const body12m = {
+        query: {
+          bool: { filter: [
+            { term: { 'orgaoJulgador.nome.keyword': nome } },
+            { range: { dataAjuizamento: { gte: gte12mStr } } },
+          ] },
+        },
+        size: 0,
+        aggs: { por_classe: { terms: { field: 'classe.nome.keyword', size: 3 } } },
+      };
+      try {
+        const r = await datajudPost(IDX, body12m);
+        const hits12m    = r.body?.hits?.total?.value ?? 0;
+        const topClasse  = r.body?.aggregations?.por_classe?.buckets?.[0]?.key ?? '—';
+        return { nome, acervo: acervoLocal, ultimos_12m: hits12m, top_classe: topClasse };
+      } catch {
+        return { nome, acervo: acervoLocal, ultimos_12m: 0, top_classe: '—' };
+      }
+    }));
+
+    res.json({ vara_principal: varaPrincipal, ranking_bh: rankingBH, varas: detalhes, mock: false });
+  } catch (e) {
+    console.error('[pje/varas-comparativo]', e.message);
+    res.status(502).json({ error: e.message });
+  }
 });
 
 // ── Dashboard (protected) ─────────────────────────────────────────────────────

@@ -311,10 +311,19 @@ tr:hover td{background:rgba(200,167,91,.04)}
 .comp-stat-val{font-size:1.5rem;font-weight:700;color:var(--gold-b)}
 .comp-stat-sub{font-size:.7rem;color:rgba(232,230,224,.4);margin-top:.2rem}
 
+/* ── Eficiência KPI grid ────────────────────────────────────── */
+.efic-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem}
+.efic-kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.2rem 1.5rem;position:relative;overflow:hidden}
+.efic-kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-b))}
+.efic-kpi-val{font-size:1.9rem;font-weight:700;color:var(--gold-b);line-height:1;margin-bottom:.2rem}
+.efic-kpi-label{font-size:.75rem;color:var(--muted);font-weight:500}
+.efic-note{font-size:.72rem;color:rgba(232,230,224,.35);background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:var(--r);padding:.7rem 1rem;margin-top:1.25rem;line-height:1.5}
+
 /* ── Responsive ─────────────────────────────────────────────── */
 @media(max-width:1100px){
   .metrics-grid{grid-template-columns:repeat(2,1fr)}
   .comp-stat-grid{grid-template-columns:1fr 1fr}
+  .efic-kpi-grid{grid-template-columns:1fr 1fr}
 }
 @media(max-width:860px){
   .charts-grid{grid-template-columns:1fr}
@@ -426,6 +435,7 @@ tr:hover td{background:rgba(200,167,91,.04)}
     <div class="view-tabs" id="view-tabs">
       <button id="tab-metricas" class="view-tab active" onclick="switchTab('metricas')">Métricas</button>
       <button id="tab-comparativo" class="view-tab" onclick="switchTab('comparativo')">Comparativo</button>
+      <button id="tab-eficiencia" class="view-tab" onclick="switchTab('eficiencia')">Eficiência</button>
     </div>
 
     <!-- Empty state -->
@@ -614,6 +624,65 @@ tr:hover td{background:rgba(200,167,91,.04)}
       </div>
     </div><!-- /comparativo-view -->
 
+    <!-- Eficiência view -->
+    <div id="eficiencia-view" style="display:none">
+      <div class="comp-header">
+        <h3>Eficiência — Antiguidade do Acervo</h3>
+        <p>Distribuição dos processos em acervo por tempo desde o ajuizamento.</p>
+      </div>
+
+      <!-- KPI cards -->
+      <div class="efic-kpi-grid">
+        <div class="efic-kpi">
+          <div class="efic-kpi-val" id="efic-tempo-medio">—</div>
+          <div class="efic-kpi-label">Tempo médio estimado (anos)</div>
+        </div>
+        <div class="efic-kpi">
+          <div class="efic-kpi-val" id="efic-pct-menos2">—</div>
+          <div class="efic-kpi-label">% processos com menos de 2 anos</div>
+        </div>
+        <div class="efic-kpi">
+          <div class="efic-kpi-val" id="efic-pct-mais4">—</div>
+          <div class="efic-kpi-label">% processos com mais de 4 anos</div>
+        </div>
+      </div>
+
+      <!-- Doughnut chart + table side by side -->
+      <div class="charts-grid" style="margin-bottom:1.25rem">
+        <div class="chart-card">
+          <div class="chart-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Distribuição por Faixa de Antiguidade
+          </div>
+          <div class="chart-wrap">
+            <canvas id="chart-eficiencia"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            Detalhamento por Faixa
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Faixa</th>
+                  <th>Processos</th>
+                  <th>%</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-eficiencia"></tbody>
+            </table>
+          </div>
+          <div class="efic-note">
+            Baseado na data de ajuizamento dos processos em acervo. Processos com datas inconsistentes no DataJud podem distorcer levemente os resultados.
+          </div>
+        </div>
+      </div>
+    </div><!-- /eficiencia-view -->
+
     </div><!-- /dash-content -->
 
     <!-- ── Processo detail view ───────────────────────────────── -->
@@ -638,7 +707,8 @@ let loadingData   = false;
 let periodType    = 'mes';   // 'mes' | 'ano'
 let selectedMes   = '';      // 'YYYY-MM'
 let selectedAno   = '';      // 'YYYY'
-let currentTab    = 'metricas'; // 'metricas' | 'comparativo'
+let currentTab    = 'metricas'; // 'metricas' | 'comparativo' | 'eficiencia'
+let chartEfic     = null;
 
 // ── Chart.js defaults ─────────────────────────────────────────────────────────
 Chart.defaults.color       = 'rgba(232,230,224,.55)';
@@ -715,9 +785,12 @@ function switchTab(tab) {
   currentTab = tab;
   document.getElementById('tab-metricas').classList.toggle('active', tab === 'metricas');
   document.getElementById('tab-comparativo').classList.toggle('active', tab === 'comparativo');
-  document.getElementById('metricas-view').style.display   = tab === 'metricas'    ? '' : 'none';
-  document.getElementById('comparativo-view').style.display = tab === 'comparativo' ? '' : 'none';
+  document.getElementById('tab-eficiencia').classList.toggle('active', tab === 'eficiencia');
+  document.getElementById('metricas-view').style.display    = tab === 'metricas'    ? '' : 'none';
+  document.getElementById('comparativo-view').style.display  = tab === 'comparativo' ? '' : 'none';
+  document.getElementById('eficiencia-view').style.display   = tab === 'eficiencia'  ? '' : 'none';
   if (tab === 'comparativo' && currentVara) loadComparativo(currentVara);
+  if (tab === 'eficiencia'  && currentVara) loadEficiencia(currentVara);
 }
 
 // ── Vara list ──────────────────────────────────────────────────────────────────
@@ -1030,6 +1103,72 @@ function renderComparativo(data) {
   }).join('');
 }
 
+// ── Eficiência ────────────────────────────────────────────────────────────────
+async function loadEficiencia(vara) {
+  try {
+    const data = await apiFetch('/api/pje/eficiencia', vara);
+    renderEficiencia(data);
+  } catch(e) {
+    console.error('[eficiencia]', e);
+  }
+}
+
+function renderEficiencia(data) {
+  const faixas = data.faixas || [];
+  const total  = data.total_acervo || 0;
+
+  // KPIs
+  setEl('efic-tempo-medio', data.tempo_medio_estimado_anos != null ? data.tempo_medio_estimado_anos.toFixed(1) + ' anos' : '—');
+
+  const menos2 = faixas.filter(f => f.nome === 'Menos de 1 ano' || f.nome === '1 a 2 anos')
+                        .reduce((s, f) => s + f.pct, 0);
+  const mais4  = faixas.find(f => f.nome === 'Mais de 4 anos')?.pct ?? 0;
+  setEl('efic-pct-menos2', menos2.toFixed(1) + '%');
+  setEl('efic-pct-mais4',  mais4.toFixed(1) + '%');
+
+  // Doughnut chart
+  if (chartEfic) { chartEfic.destroy(); chartEfic = null; }
+  const ctx = document.getElementById('chart-eficiencia');
+  if (ctx) {
+    const colors = ['#4ade80', '#C8A75B', '#f97316', '#ef4444'];
+    chartEfic = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: faixas.map(f => f.nome),
+        datasets: [{
+          data: faixas.map(f => f.total),
+          backgroundColor: colors.map(c => c + 'cc'),
+          borderColor: colors,
+          borderWidth: 2,
+          hoverOffset: 6,
+        }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '60%',
+        plugins: {
+          legend: { position: 'bottom', labels: { padding: 12, font: { size: 10 }, color: 'rgba(232,230,224,.6)', boxWidth: 10, boxHeight: 10 } },
+          tooltip: { callbacks: { label: c => {
+            const t = c.dataset.data.reduce((a, b) => a + b, 0);
+            return ` ${fmt(c.parsed)} (${((c.parsed / t) * 100).toFixed(1)}%)`;
+          } } },
+        },
+      },
+    });
+  }
+
+  // Table
+  const tbody = document.getElementById('tbody-eficiencia');
+  if (!faixas.length) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:1.5rem">Sem dados</td></tr>';
+    return;
+  }
+  tbody.innerHTML = faixas.map(f => `<tr>
+    <td>${esc(f.nome)}</td>
+    <td>${fmt(f.total)}</td>
+    <td style="color:var(--gold);font-weight:600">${f.pct.toFixed(1)}%</td>
+  </tr>`).join('');
+}
+
 // ── Processo detail view ──────────────────────────────────────────────────────
 function voltarMetricas() {
   document.getElementById('processo-view').style.display        = 'none';
@@ -1038,7 +1177,7 @@ function voltarMetricas() {
   if (currentVara) {
     document.getElementById('dash-content').style.display  = '';
     document.getElementById('view-tabs').classList.add('show');
-    switchTab(currentTab === 'comparativo' ? 'comparativo' : 'metricas');
+    switchTab(['comparativo','eficiencia'].includes(currentTab) ? currentTab : 'metricas');
   } else {
     document.getElementById('empty-state').style.display = '';
   }
