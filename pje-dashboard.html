@@ -319,6 +319,29 @@ tr:hover td{background:rgba(200,167,91,.04)}
 .efic-kpi-label{font-size:.75rem;color:var(--muted);font-weight:500}
 .efic-note{font-size:.72rem;color:rgba(232,230,224,.35);background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:var(--r);padding:.7rem 1rem;margin-top:1.25rem;line-height:1.5}
 
+/* ── Varas comparativo ──────────────────────────────────────────── */
+.varas-header{margin-bottom:1.25rem}
+.varas-header h3{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.2rem}
+.varas-header p{font-size:.8rem;color:var(--muted)}
+.varas-grupo-toggle{display:inline-flex;gap:.2rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r);padding:.2rem;margin-bottom:1.25rem}
+.varas-grupo-btn{padding:.38rem 1rem;border-radius:5px;font-size:.76rem;font-weight:600;color:var(--muted);transition:all .2s}
+.varas-grupo-btn.active{background:linear-gradient(135deg,var(--gold),var(--gold-b));color:var(--navy)}
+.ranking-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.2rem 1.5rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap}
+.ranking-main{display:flex;flex-direction:column;gap:.15rem}
+.ranking-pos{font-size:2.5rem;font-weight:700;color:var(--gold-b);line-height:1}
+.ranking-label{font-size:.73rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.ranking-sub{font-size:.78rem;color:rgba(232,230,224,.5)}
+.ranking-bar-wrap{flex:1;min-width:180px}
+.ranking-bar-label{font-size:.7rem;color:var(--muted);margin-bottom:.4rem}
+.ranking-bar-track{height:8px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden}
+.ranking-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold),var(--gold-b));transition:width .6s ease}
+.varas-table-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:1.25rem}
+.vara-row-principal td{border-left:3px solid var(--gold)!important}
+.vara-row-principal td:first-child{font-weight:700;color:var(--gold)}
+.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:.68rem;font-weight:700;background:rgba(200,167,91,.12);border:1px solid rgba(200,167,91,.25);color:var(--gold)}
+.varas-delay-note{text-align:center;font-size:.68rem;color:rgba(232,230,224,.25);letter-spacing:.05em;padding:1rem 0}
+.varas-loading{display:flex;align-items:center;gap:.75rem;color:var(--muted);padding:2.5rem 0;font-size:.85rem;justify-content:center}
+
 /* ── Responsive ─────────────────────────────────────────────── */
 @media(max-width:1100px){
   .metrics-grid{grid-template-columns:repeat(2,1fr)}
@@ -436,6 +459,7 @@ tr:hover td{background:rgba(200,167,91,.04)}
       <button id="tab-metricas" class="view-tab active" onclick="switchTab('metricas')">Métricas</button>
       <button id="tab-comparativo" class="view-tab" onclick="switchTab('comparativo')">Comparativo</button>
       <button id="tab-eficiencia" class="view-tab" onclick="switchTab('eficiencia')">Eficiência</button>
+      <button id="tab-varas" class="view-tab" onclick="switchTab('varas')">Varas</button>
     </div>
 
     <!-- Empty state -->
@@ -683,6 +707,52 @@ tr:hover td{background:rgba(200,167,91,.04)}
       </div>
     </div><!-- /eficiencia-view -->
 
+    <!-- Varas view -->
+    <div id="varas-view" style="display:none">
+      <div class="varas-header">
+        <h3>Comparativo entre Varas</h3>
+        <p>Compare o acervo e volume de distribuição da vara selecionada com outras varas do TRT-3.</p>
+      </div>
+
+      <!-- Grupo toggle -->
+      <div class="varas-grupo-toggle">
+        <button id="varas-btn-proximas" class="varas-grupo-btn active" onclick="setVarasGrupo('proximas')">Varas Próximas</button>
+        <button id="varas-btn-bh" class="varas-grupo-btn" onclick="setVarasGrupo('bh')">BH Completo</button>
+      </div>
+
+      <!-- Ranking card -->
+      <div class="ranking-card" id="varas-ranking-card">
+        <div class="ranking-main">
+          <div class="ranking-pos" id="varas-ranking-pos">—</div>
+          <div class="ranking-label">Posição em BH</div>
+          <div class="ranking-sub" id="varas-ranking-sub">de — varas</div>
+        </div>
+        <div class="ranking-bar-wrap">
+          <div class="ranking-bar-label" id="varas-ranking-pct-label">Percentil —</div>
+          <div class="ranking-bar-track">
+            <div class="ranking-bar-fill" id="varas-ranking-bar" style="width:0%"></div>
+          </div>
+          <div style="font-size:.7rem;color:rgba(232,230,224,.3);margin-top:.35rem">por volume de acervo · ranking BH</div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="varas-table-wrap">
+        <div class="table-header">
+          <div class="table-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            Comparativo de Varas
+          </div>
+          <span class="badge mock" id="varas-badge" style="display:none">simulado</span>
+        </div>
+        <div id="varas-table-content">
+          <div class="varas-loading"><span class="spinner"></span> Carregando dados das varas...</div>
+        </div>
+      </div>
+
+      <div class="varas-delay-note">DADOS: DATAJUD/CNJ · DELAY MÉDIO DE ~47 DIAS · RANKING POR ACERVO TOTAL</div>
+    </div><!-- /varas-view -->
+
     </div><!-- /dash-content -->
 
     <!-- ── Processo detail view ───────────────────────────────── -->
@@ -707,8 +777,9 @@ let loadingData   = false;
 let periodType    = 'mes';   // 'mes' | 'ano'
 let selectedMes   = '';      // 'YYYY-MM'
 let selectedAno   = '';      // 'YYYY'
-let currentTab    = 'metricas'; // 'metricas' | 'comparativo' | 'eficiencia'
+let currentTab    = 'metricas'; // 'metricas' | 'comparativo' | 'eficiencia' | 'varas'
 let chartEfic     = null;
+let varasGrupo    = 'proximas'; // 'proximas' | 'bh'
 
 // ── Chart.js defaults ─────────────────────────────────────────────────────────
 Chart.defaults.color       = 'rgba(232,230,224,.55)';
@@ -786,11 +857,14 @@ function switchTab(tab) {
   document.getElementById('tab-metricas').classList.toggle('active', tab === 'metricas');
   document.getElementById('tab-comparativo').classList.toggle('active', tab === 'comparativo');
   document.getElementById('tab-eficiencia').classList.toggle('active', tab === 'eficiencia');
-  document.getElementById('metricas-view').style.display    = tab === 'metricas'    ? '' : 'none';
+  document.getElementById('tab-varas').classList.toggle('active', tab === 'varas');
+  document.getElementById('metricas-view').style.display     = tab === 'metricas'    ? '' : 'none';
   document.getElementById('comparativo-view').style.display  = tab === 'comparativo' ? '' : 'none';
   document.getElementById('eficiencia-view').style.display   = tab === 'eficiencia'  ? '' : 'none';
+  document.getElementById('varas-view').style.display        = tab === 'varas'       ? '' : 'none';
   if (tab === 'comparativo' && currentVara) loadComparativo(currentVara);
   if (tab === 'eficiencia'  && currentVara) loadEficiencia(currentVara);
+  if (tab === 'varas'       && currentVara) loadVarasComparativo(currentVara);
 }
 
 // ── Vara list ──────────────────────────────────────────────────────────────────
@@ -1167,6 +1241,107 @@ function renderEficiencia(data) {
     <td>${fmt(f.total)}</td>
     <td style="color:var(--gold);font-weight:600">${f.pct.toFixed(1)}%</td>
   </tr>`).join('');
+}
+
+// ── Varas comparativo ─────────────────────────────────────────────────────────
+function setVarasGrupo(grupo) {
+  varasGrupo = grupo;
+  document.getElementById('varas-btn-proximas').classList.toggle('active', grupo === 'proximas');
+  document.getElementById('varas-btn-bh').classList.toggle('active', grupo === 'bh');
+  if (currentVara) loadVarasComparativo(currentVara);
+}
+
+async function loadVarasComparativo(vara) {
+  const content = document.getElementById('varas-table-content');
+  content.innerHTML = '<div class="varas-loading"><span class="spinner"></span> Carregando dados das varas...</div>';
+  document.getElementById('varas-ranking-pos').textContent = '—';
+  document.getElementById('varas-ranking-sub').textContent = 'de — varas';
+  document.getElementById('varas-ranking-pct-label').textContent = 'Percentil —';
+  document.getElementById('varas-ranking-bar').style.width = '0%';
+
+  try {
+    const data = await apiFetch('/api/pje/varas-comparativo', vara, { grupo: varasGrupo });
+    renderVarasComparativo(data);
+  } catch(e) {
+    content.innerHTML = `<div style="padding:1.5rem;color:#f87171;font-size:.84rem">Erro ao carregar: ${esc(e.message)}</div>`;
+  }
+}
+
+function renderVarasComparativo(data) {
+  const varas    = data.varas || [];
+  const principal = data.vara_principal || '';
+  const ranking  = data.ranking_bh || {};
+  const isMock   = data.mock;
+
+  // Badge
+  document.getElementById('varas-badge').style.display = isMock ? '' : 'none';
+
+  // Ranking card
+  if (ranking.posicao != null) {
+    document.getElementById('varas-ranking-pos').textContent = `${ranking.posicao}º`;
+    document.getElementById('varas-ranking-sub').textContent = `de ${ranking.total_varas} varas em BH`;
+    document.getElementById('varas-ranking-pct-label').textContent = `Top ${100 - ranking.percentil}% · Percentil ${ranking.percentil}`;
+    document.getElementById('varas-ranking-bar').style.width = `${ranking.percentil}%`;
+  } else {
+    document.getElementById('varas-ranking-pos').textContent = '—';
+    document.getElementById('varas-ranking-sub').textContent = 'Vara não encontrada no ranking BH';
+    document.getElementById('varas-ranking-pct-label').textContent = '—';
+  }
+
+  // Table
+  if (!varas.length) {
+    document.getElementById('varas-table-content').innerHTML =
+      '<div style="padding:1.5rem;color:var(--muted);font-size:.84rem;text-align:center">Sem dados disponíveis.</div>';
+    return;
+  }
+
+  // Sort by acervo desc for ranking
+  const sorted = varas.slice().sort((a, b) => b.acervo - a.acervo);
+  const maxAcervo = sorted[0]?.acervo || 1;
+  const maxDist   = Math.max(...varas.map(v => v.ultimos_12m), 1);
+
+  const rows = sorted.map((v, i) => {
+    const isPrincipal = v.nome === principal;
+    const rankPos     = i + 1;
+    const acervoPct   = ((v.acervo / maxAcervo) * 100).toFixed(0);
+    const distPct     = ((v.ultimos_12m / maxDist) * 100).toFixed(0);
+    return `<tr class="${isPrincipal ? 'vara-row-principal' : ''}">
+      <td>
+        <div style="display:flex;align-items:center;gap:.6rem">
+          <span class="rank-badge">${rankPos}</span>
+          <span style="font-size:.79rem;line-height:1.3">${esc(v.nome)}</span>
+        </div>
+      </td>
+      <td>
+        <div style="font-weight:600;font-size:.85rem">${fmt(v.acervo)}</div>
+        <div class="ranking-bar-track" style="margin-top:.3rem;height:4px;width:80px">
+          <div class="ranking-bar-fill" style="width:${acervoPct}%"></div>
+        </div>
+      </td>
+      <td>
+        <div style="font-size:.85rem">${fmt(v.ultimos_12m)}</div>
+        <div class="ranking-bar-track" style="margin-top:.3rem;height:4px;width:80px">
+          <div class="ranking-bar-fill" style="width:${distPct}%;background:linear-gradient(90deg,#60a5fa,#3b82f6)"></div>
+        </div>
+      </td>
+      <td style="color:var(--muted);font-size:.79rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(v.top_classe)}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('varas-table-content').innerHTML = `
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Vara</th>
+            <th>Acervo</th>
+            <th>Distribuídos (12m)</th>
+            <th>Top Classe</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
 }
 
 // ── Processo detail view ──────────────────────────────────────────────────────
