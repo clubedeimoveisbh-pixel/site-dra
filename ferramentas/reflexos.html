@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tabela de Reflexos — Marina Trabalhista</title>
+  <meta name="description" content="Tabela completa de natureza salarial vs. indenizatória: quais verbas integram FGTS, férias e 13º salário. Com filtros e busca.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9878;</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .tool-page-hero { background: linear-gradient(160deg, var(--navy-deep), var(--navy-mid)); padding: 130px 0 64px; position: relative; overflow: hidden; }
+    .tool-page-hero::after { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(200,167,91,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(200,167,91,0.05) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; }
+    .tool-page-hero-inner { position: relative; z-index: 1; }
+    .tool-page-hero h1 { color: var(--white); font-size: clamp(1.8rem, 3.5vw, 2.8rem); }
+    .tool-page-hero .hero-sub { color: rgba(255,255,255,0.6); font-size: 1rem; max-width: 600px; margin: 0; line-height: 1.75; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; color: rgba(255,255,255,0.45); letter-spacing: 0.06em; margin-bottom: 2rem; transition: color 0.2s; text-decoration: none; }
+    .back-link:hover { color: var(--gold); }
+
+    .tool-page-section { background: var(--cream); padding: 60px 0 96px; }
+    .tool-card { background: var(--white); border: 1px solid rgba(200,167,91,0.16); border-radius: var(--radius-lg); max-width: 1100px; margin: 0 auto; box-shadow: var(--shadow-sm); overflow: hidden; }
+    .tool-card-body { padding: 2.5rem; }
+    .tool-card-title { font-family: var(--ff-title); font-size: 1.15rem; color: var(--navy-deep); margin-bottom: 1.75rem; display: flex; align-items: center; gap: 0.75rem; }
+    .tool-card-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(200,167,91,0.3), transparent); }
+
+    /* Controls bar */
+    .controls-bar {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Search */
+    .search-wrap { position: relative; flex: 1; min-width: 220px; }
+    .search-icon { position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); color: var(--text-light); font-size: 0.9rem; pointer-events: none; }
+    .search-input { width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; border: 1.5px solid rgba(200,167,91,0.25); border-radius: var(--radius); font-family: var(--ff-body); font-size: 0.9rem; color: var(--text-dark); background: var(--cream); outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    .search-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(200,167,91,0.12); background: var(--white); }
+
+    /* Filter pills */
+    .filter-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .pill {
+      padding: 0.45rem 1.1rem;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: 1.5px solid rgba(200,167,91,0.25);
+      color: var(--text-mid);
+      background: transparent;
+      transition: all 0.2s;
+      font-family: var(--ff-body);
+    }
+    .pill:hover { border-color: var(--gold); color: var(--navy-mid); }
+    .pill.active { background: var(--gold); border-color: var(--gold); color: var(--navy-deep); }
+
+    /* Print button */
+    .print-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1.2rem;
+      border: 1.5px solid rgba(200,167,91,0.30);
+      border-radius: var(--radius);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--gold-muted);
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: var(--ff-body);
+      white-space: nowrap;
+    }
+    .print-btn:hover { background: var(--gold); color: var(--navy-deep); border-color: var(--gold); }
+
+    /* Counter */
+    .table-counter { font-size: 0.75rem; color: var(--text-light); margin-bottom: 1rem; }
+    .table-counter strong { color: var(--navy-mid); }
+
+    /* Table */
+    .refl-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .refl-table thead tr { background: linear-gradient(135deg, var(--navy-deep), var(--navy-mid)); }
+    .refl-table th { padding: 0.9rem 1rem; text-align: left; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: var(--gold); white-space: nowrap; }
+    .refl-table th:first-child { border-radius: var(--radius) 0 0 0; }
+    .refl-table th:last-child { border-radius: 0 var(--radius) 0 0; }
+    .refl-table td { padding: 0.85rem 1rem; font-size: 0.87rem; color: var(--text-mid); border-bottom: 1px solid rgba(200,167,91,0.09); vertical-align: middle; line-height: 1.45; }
+    .refl-table tr:last-child td { border-bottom: none; }
+    .refl-table tr:nth-child(even) td { background: rgba(200,167,91,0.025); }
+    .refl-table tr:hover td { background: rgba(200,167,91,0.055); }
+    .refl-table tr.hidden { display: none; }
+
+    .verba-name { font-weight: 600; color: var(--navy-deep); }
+
+    .nat-badge { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; padding: 0.2rem 0.65rem; border-radius: 100px; white-space: nowrap; }
+    .nat-salarial { background: rgba(34,197,94,0.10); border: 1px solid rgba(34,197,94,0.28); color: #15803d; }
+    .nat-indenizatorio { background: rgba(248,113,113,0.10); border: 1px solid rgba(248,113,113,0.28); color: #b91c1c; }
+    .nat-remuneratorio { background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.30); color: #92400e; }
+
+    .yn-badge { display: inline-flex; align-items: center; justify-content: center; width: 58px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; padding: 0.2rem 0.4rem; border-radius: 100px; }
+    .yn-yes { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.28); color: #15803d; }
+    .yn-no  { background: rgba(248,113,113,0.10); border: 1px solid rgba(248,113,113,0.25); color: #b91c1c; }
+
+    .legal-ref { font-size: 0.73rem; color: var(--text-light); font-style: italic; }
+
+    .no-results { text-align: center; padding: 3rem; color: var(--text-light); font-size: 0.9rem; display: none; }
+
+    /* Bottom note */
+    .legal-note { max-width: 1100px; margin: 2rem auto 0; text-align: center; font-size: 0.78rem; color: var(--text-light); line-height: 1.65; }
+
+    /* Overflow wrapper for table */
+    .table-overflow { overflow-x: auto; border-radius: var(--radius); border: 1px solid rgba(200,167,91,0.14); }
+
+    @media (max-width: 700px) {
+      .tool-card-body { padding: 1.25rem; }
+      .refl-table th, .refl-table td { padding: 0.75rem 0.65rem; font-size: 0.78rem; }
+    }
+
+    @media print {
+      .tool-page-hero, #site-nav, #site-footer, .back-link, .controls-bar, .print-btn { display: none !important; }
+      body { background: white; }
+      .tool-card { box-shadow: none; border: none; }
+      .refl-table { font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<section class="tool-page-hero">
+  <div class="container tool-page-hero-inner">
+    <a href="../ferramentas.html" class="back-link">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      Ferramentas
+    </a>
+    <span class="section-label">Tabela de Referência</span>
+    <h1>Natureza das Verbas — Reflexos</h1>
+    <div class="gold-divider"></div>
+    <p class="hero-sub">Quais verbas trabalhistas s&atilde;o de natureza salarial ou indenizat&oacute;ria e como refletem em FGTS, f&eacute;rias e 13&ordm; sal&aacute;rio. Use os filtros ou a busca para localizar rapidamente.</p>
+  </div>
+</section>
+
+<section class="tool-page-section">
+  <div class="container">
+    <div class="tool-card">
+      <div class="tool-card-body">
+
+        <div class="tool-card-title">💰 Tabela de Reflexos e Natureza Jurídica</div>
+
+        <div class="controls-bar">
+          <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="table-search" placeholder="Buscar verba..." oninput="filterTable()">
+          </div>
+          <div class="filter-pills">
+            <button class="pill active" data-filter="todas" onclick="setPill(this,'todas')">Todas</button>
+            <button class="pill" data-filter="salarial" onclick="setPill(this,'salarial')">Salariais</button>
+            <button class="pill" data-filter="indenizatorio" onclick="setPill(this,'indenizatorio')">Indenizatórias</button>
+            <button class="pill" data-filter="remuneratorio" onclick="setPill(this,'remuneratorio')">Remuneratórias</button>
+          </div>
+          <button class="print-btn" onclick="window.print()">🖨 Imprimir / PDF</button>
+        </div>
+
+        <div class="table-counter" id="table-counter">Exibindo <strong>20</strong> verbas</div>
+
+        <div class="table-overflow">
+          <table class="refl-table" id="refl-table">
+            <thead>
+              <tr>
+                <th>Verba</th>
+                <th>Natureza</th>
+                <th>FGTS</th>
+                <th>Férias</th>
+                <th>13º</th>
+                <th>Fundamento Legal</th>
+              </tr>
+            </thead>
+            <tbody id="refl-body">
+            <!-- Rows injected by JS -->
+            </tbody>
+          </table>
+          <div class="no-results" id="no-results">Nenhuma verba encontrada para este filtro.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <p class="legal-note">&#9432;&nbsp; Tabela elaborada com base na CLT, CF/88, jurisprudência do TST e orientações jurisprudenciais (OJs). A natureza jurídica das verbas pode ser modificada por convenção coletiva ou acordo individual em alguns casos. Esta tabela é informativa — consulte um advogado para casos específicos.</p>
+  </div>
+</section>
+
+<div id="footer-placeholder"></div>
+<script src="../js/nav.js"></script>
+<script>
+const VERBAS = [
+  { nome:'Salário-base', nat:'salarial', fgts:'S', ferias:'S', dec:'S', fund:'Art. 457, caput, CLT' },
+  { nome:'Horas extras', nat:'salarial', fgts:'S', ferias:'S', dec:'S', fund:'Art. 7º, XVI, CF; Sm. 376, TST' },
+  { nome:'Adicional noturno', nat:'salarial', fgts:'S', ferias:'S', dec:'S', fund:'Art. 73, CLT; Sm. 60, TST' },
+  { nome:'Adicional de insalubridade', nat:'salarial', fgts:'S', ferias:'S', dec:'S', fund:'Art. 192, CLT; OJ 103, SDI-1' },
+  { nome:'Adicional de periculosidade', nat:'salarial', fgts:'S', ferias:'S', dec:'S', fund:'Art. 193, §1º, CLT; Sm. 132, TST' },
+  { nome:'Adicional de transferência', nat:'salarial', fgts:'S', ferias:'S', dec:'S', fund:'Art. 469, §3º, CLT; Sm. 29, TST' },
+  { nome:'Comissões e percentagens', nat:'salarial', fgts:'S', ferias:'S', dec:'S', fund:'Art. 457, §1º, CLT' },
+  { nome:'Gratificação habitual', nat:'salarial', fgts:'S', ferias:'S', dec:'S', fund:'Art. 457, §1º, CLT; Sm. 209, TST' },
+  { nome:'Gorjetas', nat:'remuneratorio', fgts:'S', ferias:'S', dec:'S', fund:'Art. 457, §3º, CLT; Sm. 354, TST' },
+  { nome:'Diárias acima de 50% do salário', nat:'salarial', fgts:'S', ferias:'S', dec:'S', fund:'Art. 457, §2º, CLT; Sm. 101, TST' },
+  { nome:'Aviso prévio trabalhado', nat:'salarial', fgts:'S', ferias:'N', dec:'S', fund:'Art. 487, CLT; Art. 15, Lei 8.036/1990' },
+  { nome:'Salário-família', nat:'salarial', fgts:'N', ferias:'N', dec:'N', fund:'Art. 65, Lei 8.213/1991' },
+  { nome:'Férias indenizadas + 1/3', nat:'indenizatorio', fgts:'N', ferias:'N', dec:'N', fund:'Art. 144 e 148, CLT; Sm. 328, TST' },
+  { nome:'Aviso prévio indenizado', nat:'indenizatorio', fgts:'S', ferias:'N', dec:'N', fund:'Art. 487, §1º, CLT; OJ 195, SDI-1' },
+  { nome:'FGTS + multa de 40%', nat:'indenizatorio', fgts:'N', ferias:'N', dec:'N', fund:'Art. 18, §1º, Lei 8.036/1990' },
+  { nome:'Indenização por dano moral', nat:'indenizatorio', fgts:'N', ferias:'N', dec:'N', fund:'Art. 5º, X, CF; Art. 223-A, CLT' },
+  { nome:'Ajuda de custo', nat:'indenizatorio', fgts:'N', ferias:'N', dec:'N', fund:'Art. 457, §2º, CLT' },
+  { nome:'Vale-transporte', nat:'indenizatorio', fgts:'N', ferias:'N', dec:'N', fund:'Art. 2º, §2º, Lei 7.418/1985' },
+  { nome:'Vale-refeição / alimentação (PAT)', nat:'indenizatorio', fgts:'N', ferias:'N', dec:'N', fund:'Art. 457, §2º, CLT; OJ 133, SDI-1' },
+  { nome:'Diárias até 50% do salário', nat:'indenizatorio', fgts:'N', ferias:'N', dec:'N', fund:'Art. 457, §2º, CLT; Sm. 101, TST' },
+  { nome:'PLR — Participação nos Lucros', nat:'indenizatorio', fgts:'N', ferias:'N', dec:'N', fund:'Art. 7º, XI, CF; Sm. 451, TST' },
+  { nome:'Auxílio-doença (INSS)', nat:'indenizatorio', fgts:'N', ferias:'N', dec:'N', fund:'Art. 476, CLT; Sm. 46, TST' },
+  { nome:'Quebra de caixa (habitual)', nat:'salarial', fgts:'S', ferias:'S', dec:'S', fund:'OJ 247, SDI-1, TST' },
+  { nome:'Salário in natura (alimentação/moradia)', nat:'salarial', fgts:'S', ferias:'S', dec:'S', fund:'Art. 458, CLT' },
+  { nome:'Seguro de vida contratual', nat:'indenizatorio', fgts:'N', ferias:'N', dec:'N', fund:'Art. 457, §2º, CLT' },
+  { nome:'Auxílio-creche / babá', nat:'indenizatorio', fgts:'N', ferias:'N', dec:'N', fund:'Art. 389, §1º, CLT; OJ 19, SDI-1' },
+  { nome:'Bônus anual sem habitualidade', nat:'indenizatorio', fgts:'N', ferias:'N', dec:'N', fund:'Art. 457, §2º, CLT; Sm. 209, TST' },
+  { nome:'Remuneração de cargo de confiança', nat:'salarial', fgts:'S', ferias:'S', dec:'S', fund:'Art. 62, II e 457, CLT' },
+];
+
+const NAT_MAP = {
+  salarial: { label:'Salarial', cls:'nat-salarial' },
+  indenizatorio: { label:'Indenizatório', cls:'nat-indenizatorio' },
+  remuneratorio: { label:'Remuneratório', cls:'nat-remuneratorio' },
+};
+
+function ynBadge(v){
+  return v==='S'
+    ? '<span class="yn-badge yn-yes">✓ Sim</span>'
+    : '<span class="yn-badge yn-no">✗ Não</span>';
+}
+
+function buildTable(){
+  const tbody=document.getElementById('refl-body');
+  tbody.innerHTML='';
+  VERBAS.forEach((v,i)=>{
+    const n=NAT_MAP[v.nat];
+    const tr=document.createElement('tr');
+    tr.dataset.nat=v.nat;
+    tr.dataset.nome=v.nome.toLowerCase();
+    tr.innerHTML=`
+      <td><span class="verba-name">${v.nome}</span></td>
+      <td><span class="nat-badge ${n.cls}">${n.label}</span></td>
+      <td>${ynBadge(v.fgts)}</td>
+      <td>${ynBadge(v.ferias)}</td>
+      <td>${ynBadge(v.dec)}</td>
+      <td class="legal-ref">${v.fund}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  updateCounter();
+}
+
+let currentFilter='todas';
+let currentSearch='';
+
+function setPill(el,filter){
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter=filter;
+  filterTable();
+}
+
+function filterTable(){
+  currentSearch=document.getElementById('table-search').value.toLowerCase();
+  const rows=document.querySelectorAll('#refl-body tr');
+  let visible=0;
+  rows.forEach(row=>{
+    const natMatch = currentFilter==='todas' || row.dataset.nat===currentFilter;
+    const searchMatch = !currentSearch || row.dataset.nome.includes(currentSearch) || row.cells[5]?.textContent.toLowerCase().includes(currentSearch);
+    if(natMatch && searchMatch){ row.classList.remove('hidden'); visible++; }
+    else row.classList.add('hidden');
+  });
+  document.getElementById('no-results').style.display = visible===0?'block':'none';
+  updateCounter(visible);
+}
+
+function updateCounter(n){
+  const total=n??VERBAS.length;
+  document.getElementById('table-counter').innerHTML=`Exibindo <strong>${total}</strong> verba${total!==1?'s':''}`;
+}
+
+buildTable();
+</script>
+</body>
+</html>

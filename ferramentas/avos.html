@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Avos — Férias e 13º — Marina Trabalhista</title>
+  <meta name="description" content="Calcule avos de férias e 13º proporcional. Períodos aquisitivos, Art. 130 CLT e Art. 133 CLT. Slider de faltas. Gratuito.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9878;</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .tool-page-hero { background: linear-gradient(160deg, var(--navy-deep), var(--navy-mid)); padding: 130px 0 64px; position: relative; overflow: hidden; }
+    .tool-page-hero::after { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(200,167,91,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(200,167,91,0.05) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; }
+    .tool-page-hero-inner { position: relative; z-index: 1; }
+    .tool-page-hero h1 { color: var(--white); font-size: clamp(1.8rem, 3.5vw, 2.8rem); }
+    .tool-page-hero .hero-sub { color: rgba(255,255,255,0.6); font-size: 1rem; max-width: 560px; margin: 0; line-height: 1.75; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; color: rgba(255,255,255,0.45); letter-spacing: 0.06em; margin-bottom: 2rem; transition: color 0.2s; text-decoration: none; }
+    .back-link:hover { color: var(--gold); }
+
+    .tool-page-section { background: var(--cream); padding: 60px 0 96px; }
+    .tool-card { background: var(--white); border: 1px solid rgba(200,167,91,0.16); border-radius: var(--radius-lg); max-width: 860px; margin: 0 auto; box-shadow: var(--shadow-sm); overflow: hidden; }
+    .tool-card-body { padding: 2.5rem; }
+    .tool-card-title { font-family: var(--ff-title); font-size: 1.15rem; color: var(--navy-deep); margin-bottom: 1.75rem; display: flex; align-items: center; gap: 0.75rem; }
+    .tool-card-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(200,167,91,0.3), transparent); }
+
+    .input-label { display: block; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--navy-mid); margin-bottom: 0.5rem; }
+    .input-field { width: 100%; padding: 0.95rem 1.1rem; border: 1.5px solid rgba(200,167,91,0.25); border-radius: var(--radius); font-family: var(--ff-body); font-size: 1rem; color: var(--text-dark); background: var(--cream); transition: border-color 0.2s, box-shadow 0.2s, background 0.2s; outline: none; }
+    .input-field:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(200,167,91,0.12); background: var(--white); }
+    .input-field:disabled { opacity: 0.5; }
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.75rem; }
+    .input-group { margin-bottom: 1.75rem; }
+    .checkbox-label { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.83rem; color: var(--text-mid); cursor: pointer; margin-top: 0.5rem; }
+    .checkbox-label input[type="checkbox"] { accent-color: var(--gold); width: 15px; height: 15px; }
+
+    /* Faltas slider */
+    .slider-section { background: rgba(200,167,91,0.04); border: 1px solid rgba(200,167,91,0.14); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.75rem; }
+    .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .slider-lbl { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--navy-mid); }
+    .slider-val { font-family: var(--ff-title); font-size: 1.4rem; color: var(--gold-muted); font-weight: 700; }
+    .slider-val small { font-family: var(--ff-body); font-size: 0.72rem; color: var(--text-light); font-weight: 400; margin-left: 0.25rem; }
+
+    input[type="range"].faltas-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 100px; background: rgba(200,167,91,0.2); outline: none; cursor: pointer; margin-bottom: 0.75rem; }
+    input[type="range"].faltas-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--gold-bright)); box-shadow: 0 2px 8px rgba(200,167,91,0.4); cursor: grab; }
+    input[type="range"].faltas-slider::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--gold-bright)); border: none; }
+
+    .faltas-scale { display: flex; justify-content: space-between; }
+    .faltas-mark { font-size: 0.68rem; color: var(--text-light); text-align: center; }
+    .faltas-mark.warn { color: #f87171; }
+    .faltas-result-inline { margin-top: 0.6rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+    .faltas-dias-badge { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.9rem; border-radius: 100px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; }
+    .faltas-dias-badge--ok { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.28); color: #16a34a; }
+    .faltas-dias-badge--warn { background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.28); color: #d97706; }
+    .faltas-dias-badge--bad { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.28); color: #dc2626; }
+
+    /* Art. 133 accordion */
+    .accordion { border: 1px solid rgba(200,167,91,0.16); border-radius: var(--radius); margin-bottom: 1.75rem; overflow: hidden; }
+    .accordion-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; cursor: pointer; background: rgba(200,167,91,0.04); user-select: none; }
+    .accordion-header:hover { background: rgba(200,167,91,0.07); }
+    .accordion-title { font-size: 0.83rem; font-weight: 600; color: var(--navy-mid); }
+    .accordion-chevron { transition: transform 0.25s; color: var(--gold-muted); font-size: 0.7rem; }
+    .accordion.open .accordion-chevron { transform: rotate(180deg); }
+    .accordion-body { display: none; padding: 1.25rem; border-top: 1px solid rgba(200,167,91,0.12); }
+    .accordion.open .accordion-body { display: block; }
+    .art133-item { display: flex; align-items: flex-start; gap: 0.6rem; margin-bottom: 0.75rem; font-size: 0.84rem; color: var(--text-mid); line-height: 1.5; }
+    .art133-item:last-child { margin-bottom: 0; }
+    .art133-item input[type="checkbox"] { accent-color: var(--gold); width: 15px; height: 15px; margin-top: 0.1rem; flex-shrink: 0; }
+
+    /* Calc button */
+    .calc-btn { display: block; width: 100%; padding: 1rem; background: linear-gradient(135deg, var(--gold), var(--gold-bright)); color: var(--navy-deep); border: none; border-radius: var(--radius); font-family: var(--ff-body); font-size: 0.9rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: var(--shadow-gold); }
+    .calc-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(200,167,91,0.35); }
+    .calc-btn:active { transform: translateY(0); }
+
+    /* Results */
+    .result-area { margin-top: 2rem; animation: fadeSlideIn 0.4s ease; }
+    @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .result-section-title { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin: 1.5rem 0 0.6rem; }
+    .result-section-title:first-child { margin-top: 0; }
+
+    /* Periodo card */
+    .periodo-card { background: linear-gradient(135deg, var(--navy-deep), #0d1e40); border: 1px solid rgba(200,167,91,0.18); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 0.75rem; }
+    .periodo-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem; }
+    .periodo-num { font-size: 0.72rem; font-weight: 700; color: rgba(255,255,255,0.45); letter-spacing: 0.08em; text-transform: uppercase; }
+    .periodo-status { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.2rem 0.7rem; border-radius: 100px; }
+    .periodo-status--concessivo { background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.3); color: #d97706; }
+    .periodo-status--vencida { background: rgba(248,113,113,0.15); border: 1px solid rgba(248,113,113,0.3); color: #f87171; }
+    .periodo-status--perdida { background: rgba(248,113,113,0.10); border: 1px solid rgba(248,113,113,0.25); color: #fca5a5; }
+    .periodo-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.65rem; }
+    .periodo-col {}
+    .periodo-col-label { font-size: 0.65rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.15rem; }
+    .periodo-col-val { font-size: 0.85rem; font-weight: 600; color: var(--white); }
+    .periodo-col-val.gold { color: var(--gold-bright); }
+    .periodo-formula { margin-top: 0.75rem; font-size: 0.8rem; color: rgba(255,255,255,0.5); border-top: 1px solid rgba(255,255,255,0.07); padding-top: 0.6rem; }
+    .periodo-formula strong { color: var(--gold); }
+
+    /* Avos visual bar */
+    .avos-bar-wrap { background: linear-gradient(135deg, var(--navy-deep), #0d1e40); border: 1px solid rgba(200,167,91,0.18); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 0.75rem; }
+    .avos-bar-label { font-size: 0.72rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.5rem; }
+    .avos-bar-fraction { font-family: var(--ff-title); font-size: 1.8rem; color: var(--gold-bright); font-weight: 700; margin-bottom: 0.5rem; }
+    .avos-bar-track { height: 10px; background: rgba(255,255,255,0.1); border-radius: 100px; overflow: hidden; margin-bottom: 0.5rem; }
+    .avos-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-bright)); border-radius: 100px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+    .avos-bar-fill--13 { background: linear-gradient(90deg, #60a5fa, #3b82f6); }
+    .avos-bar-sub { font-size: 0.78rem; color: rgba(255,255,255,0.5); }
+
+    .explain-box { background: rgba(200,167,91,0.06); border-left: 3px solid var(--gold); border-radius: 0 var(--radius) var(--radius) 0; padding: 1rem 1.25rem; margin-top: 0.75rem; }
+    .explain-box p { font-size: 0.83rem; color: var(--text-mid); line-height: 1.65; margin: 0; }
+    .explain-box strong { color: var(--navy-mid); }
+    .explain-box--warn { border-color: #f87171; background: rgba(248,113,113,0.05); }
+    .explain-box--warn p { color: var(--text-mid); }
+
+    .legal-note { max-width: 860px; margin: 2rem auto 0; text-align: center; font-size: 0.78rem; color: var(--text-light); line-height: 1.65; }
+
+    @media (max-width: 600px) {
+      .input-row { grid-template-columns: 1fr; }
+      .tool-card-body { padding: 1.5rem; }
+      .periodo-row { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<section class="tool-page-hero">
+  <div class="container tool-page-hero-inner">
+    <a href="../ferramentas.html" class="back-link">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      Ferramentas
+    </a>
+    <span class="section-label">Calculadora</span>
+    <h1>Avos — F&eacute;rias e 13&ordm;</h1>
+    <div class="gold-divider"></div>
+    <p class="hero-sub">Per&iacute;odos aquisitivos, f&eacute;rias proporcionais e 13&ordm; proporcional. Art. 130 e 142 CLT, com slider de faltas e hip&oacute;teses do Art. 133.</p>
+  </div>
+</section>
+
+<section class="tool-page-section">
+  <div class="container">
+    <div class="tool-card">
+      <div class="tool-card-body">
+
+        <div class="tool-card-title">📆 Dados do Vínculo</div>
+
+        <div class="input-row">
+          <div>
+            <label class="input-label" for="avos-admissao">Data de admiss&atilde;o</label>
+            <input type="date" id="avos-admissao" class="input-field" max="2099-12-31">
+          </div>
+          <div>
+            <label class="input-label" for="avos-saida">Data de sa&iacute;da</label>
+            <input type="date" id="avos-saida" class="input-field" max="2099-12-31">
+            <label class="checkbox-label">
+              <input type="checkbox" id="avos-ainda-contratado"> Ainda contratado (usar hoje)
+            </label>
+          </div>
+        </div>
+
+        <!-- Faltas slider -->
+        <div class="slider-section">
+          <div class="slider-header">
+            <span class="slider-lbl">Faltas injustificadas</span>
+            <div class="slider-val" id="faltas-display">0<small>faltas</small></div>
+          </div>
+          <input type="range" class="faltas-slider" id="faltas-slider" min="0" max="33" value="0" step="1">
+          <div class="faltas-scale">
+            <span class="faltas-mark">0<br><small>30d</small></span>
+            <span class="faltas-mark">5<br><small>30d</small></span>
+            <span class="faltas-mark">14<br><small>24d</small></span>
+            <span class="faltas-mark">23<br><small>18d</small></span>
+            <span class="faltas-mark">32<br><small>12d</small></span>
+            <span class="faltas-mark warn">33+<br><small>0d ⚠</small></span>
+          </div>
+          <div class="faltas-result-inline">
+            <span id="faltas-badge" class="faltas-dias-badge faltas-dias-badge--ok">30 dias de férias</span>
+            <span id="faltas-art" style="font-size:0.75rem;color:var(--text-light)">Art. 130, I CLT</span>
+          </div>
+        </div>
+
+        <!-- Art. 133 accordion -->
+        <div class="accordion" id="art133-accordion">
+          <div class="accordion-header" onclick="toggleAcordeon()">
+            <span class="accordion-title">&#9660;&nbsp; Hip&oacute;teses Art. 133 CLT — perda do per&iacute;odo aquisitivo</span>
+            <span class="accordion-chevron">▲</span>
+          </div>
+          <div class="accordion-body">
+            <label class="art133-item"><input type="checkbox" id="art133-1"> <span>Licen&ccedil;a remunerada por mais de 30 dias (inc. I)</span></label>
+            <label class="art133-item"><input type="checkbox" id="art133-2"> <span>Licen&ccedil;a por acidente ou doen&ccedil;a por mais de 6 meses (inc. II)</span></label>
+            <label class="art133-item"><input type="checkbox" id="art133-3"> <span>Recebimento de presta&ccedil;&otilde;es de acidente do trabalho (inc. III)</span></label>
+            <label class="art133-item"><input type="checkbox" id="art133-4"> <span>Aposentadoria por invalidez provis&oacute;ria (inc. IV)</span></label>
+            <label class="art133-item"><input type="checkbox" id="art133-5"> <span>Paralisa&ccedil;&atilde;o parcial ou total do servi&ccedil;o por mais de 3 meses (inc. V)</span></label>
+            <p style="font-size:0.76rem;color:var(--text-light);margin-top:0.75rem;line-height:1.5">Se marcada, todos os per&iacute;odos aquisitivos completos ser&atilde;o tratados como perdidos. Para cen&aacute;rios mistos, consulte um advogado.</p>
+          </div>
+        </div>
+
+        <button class="calc-btn" onclick="calcAvos()">Calcular avos e per&iacute;odos</button>
+
+        <div id="result-avos" style="display:none;margin-top:2rem"></div>
+
+      </div>
+    </div>
+
+    <p class="legal-note">&#9432;&nbsp; Esta calculadora é informativa. Mês conta como avo quando o empregado trabalhou mais de 14 dias naquele mês (Art. 142, §2º, CLT). Para casos com hipóteses do Art. 133 simultâneas ou regras coletivas diferenciadas, consulte um advogado.</p>
+  </div>
+</section>
+
+<div id="footer-placeholder"></div>
+<script src="../js/nav.js"></script>
+<script>
+function parseLocalDate(s) { const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
+function addMonths(date,n){ const d=new Date(date); d.setMonth(d.getMonth()+n); return d; }
+function addYears(date,n){ const d=new Date(date); d.setFullYear(d.getFullYear()+n); return d; }
+function diffDias(a,b){ return Math.round((b-a)/(1000*60*60*24)); }
+function fmt(date){ return date.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+
+function diasFeriasPorFaltas(f){ if(f<=5)return 30; if(f<=14)return 24; if(f<=23)return 18; if(f<=32)return 12; return 0; }
+
+function avosEntre(inicio,fim){
+  let avos=0; let cursor=new Date(inicio);
+  while(cursor<fim){
+    const prox=addMonths(cursor,1);
+    const fimP=prox<=fim?prox:fim;
+    if(diffDias(cursor,fimP)>14) avos++;
+    cursor=prox;
+  }
+  return Math.min(avos,12);
+}
+
+function toggleAcordeon(){
+  const acc=document.getElementById('art133-accordion');
+  acc.classList.toggle('open');
+}
+
+// Faltas slider
+document.getElementById('faltas-slider').addEventListener('input', function(){
+  const f=parseInt(this.value);
+  document.getElementById('faltas-display').innerHTML = f + '<small>faltas</small>';
+  const dias=diasFeriasPorFaltas(f);
+  const badge=document.getElementById('faltas-badge');
+  const art=document.getElementById('faltas-art');
+  badge.textContent = dias + ' dias de férias';
+  badge.className='faltas-dias-badge';
+  if(dias===30){ badge.classList.add('faltas-dias-badge--ok'); art.textContent='Art. 130, I CLT'; }
+  else if(dias===24){ badge.classList.add('faltas-dias-badge--ok'); art.textContent='Art. 130, II CLT'; }
+  else if(dias===18){ badge.classList.add('faltas-dias-badge--warn'); art.textContent='Art. 130, III CLT'; }
+  else if(dias===12){ badge.classList.add('faltas-dias-badge--warn'); art.textContent='Art. 130, IV CLT'; }
+  else { badge.classList.add('faltas-dias-badge--bad'); art.textContent='Art. 130, §2º — perda total'; }
+});
+
+// Ainda contratado
+document.getElementById('avos-ainda-contratado').addEventListener('change', function(){
+  const el=document.getElementById('avos-saida');
+  if(this.checked){
+    const h=new Date();
+    el.value=h.getFullYear()+'-'+String(h.getMonth()+1).padStart(2,'0')+'-'+String(h.getDate()).padStart(2,'0');
+    el.disabled=true;
+  } else { el.disabled=false; el.value=''; }
+});
+
+function calcAvos(){
+  const admVal=document.getElementById('avos-admissao').value;
+  const saidaVal=document.getElementById('avos-saida').value;
+  if(!admVal){alert('Informe a data de admissão.');return;}
+  if(!saidaVal){alert('Informe a data de saída.');return;}
+  const admissao=parseLocalDate(admVal);
+  const saida=parseLocalDate(saidaVal);
+  if(saida<admissao){alert('A data de saída deve ser posterior à admissão.');return;}
+
+  const faltas=parseInt(document.getElementById('faltas-slider').value)||0;
+  const diasFerias=diasFeriasPorFaltas(faltas);
+  const temHip133=[1,2,3,4,5].some(i=>document.getElementById('art133-'+i)?.checked);
+
+  const periodos=[];
+  let ini=new Date(admissao);
+  while(ini<saida){
+    const fimAq=addYears(ini,1);
+    const iniCon=new Date(fimAq);
+    const fimCon=addYears(fimAq,1);
+    const hoje=new Date(); hoje.setHours(0,0,0,0);
+    if(fimAq<=saida){
+      let status,cor,statusClass;
+      if(temHip133){status='Perdidas (Art. 133)';statusClass='periodo-status--perdida';}
+      else if(hoje<iniCon){status='Em período concessivo';statusClass='periodo-status--concessivo';}
+      else if(hoje>fimCon){status='Vencidas';statusClass='periodo-status--vencida';}
+      else{status='Em período concessivo';statusClass='periodo-status--concessivo';}
+      periodos.push({tipo:'completo',ini,fimAq,iniCon,fimCon,diasFerias,status,statusClass});
+    } else {
+      const avos=avosEntre(ini,saida);
+      periodos.push({tipo:'proporcional',ini,fimAq:saida,avos,diasFerias,diasProp:+(avos/12*diasFerias).toFixed(2)});
+    }
+    ini=new Date(fimAq);
+  }
+
+  // 13º
+  const anoSaida=saida.getFullYear();
+  const inicioAno=new Date(anoSaida,0,1);
+  const inicioC=admissao>inicioAno?admissao:inicioAno;
+  const avos13=avosEntre(inicioC,saida);
+
+  const result=document.getElementById('result-avos');
+  let html='<div class="result-area">';
+
+  const completos=periodos.filter(p=>p.tipo==='completo');
+  const prop=periodos.find(p=>p.tipo==='proporcional');
+
+  if(completos.length>0){
+    html+=`<div class="result-section-title">Férias — Períodos Aquisitivos Completos</div>`;
+    completos.forEach((p,i)=>{
+      const fim1=new Date(p.fimAq.getTime()-86400000);
+      const fim2=new Date(p.fimCon.getTime()-86400000);
+      html+=`
+        <div class="periodo-card">
+          <div class="periodo-head">
+            <span class="periodo-num">${i+1}º Período Aquisitivo</span>
+            <span class="periodo-status ${p.statusClass}">${p.status}</span>
+          </div>
+          <div class="periodo-row">
+            <div class="periodo-col"><div class="periodo-col-label">Aquisitivo</div><div class="periodo-col-val">${fmt(p.ini)} – ${fmt(fim1)}</div></div>
+            <div class="periodo-col"><div class="periodo-col-label">Concessivo</div><div class="periodo-col-val">${fmt(p.iniCon)} – ${fmt(fim2)}</div></div>
+            <div class="periodo-col"><div class="periodo-col-label">Dias de Férias (Art. 130)</div><div class="periodo-col-val gold">${p.diasFerias===0?'0 — perdidas por faltas':p.diasFerias+' dias'}</div></div>
+          </div>
+        </div>`;
+    });
+  }
+
+  if(prop && prop.avos>0){
+    html+=`<div class="result-section-title">Férias Proporcionais</div>
+      <div class="avos-bar-wrap">
+        <div class="avos-bar-label">Período proporcional atual</div>
+        <div class="avos-bar-fraction">${prop.avos}/12</div>
+        <div class="avos-bar-track"><div class="avos-bar-fill" style="width:${(prop.avos/12*100).toFixed(0)}%"></div></div>
+        <div class="avos-bar-sub">${prop.avos} meses completos × ${prop.diasFerias}/12 = <strong style="color:var(--gold-bright)">${prop.diasProp} dias</strong></div>
+      </div>`;
+  } else if(!prop && completos.length===0){
+    html+=`<div class="periodo-card" style="text-align:center;padding:1.5rem"><span style="color:rgba(255,255,255,0.5);font-size:0.88rem">Menos de 15 dias trabalhados — sem direito a férias proporcionais.</span></div>`;
+  }
+
+  html+=`<div class="result-section-title">13º Salário Proporcional</div>
+    <div class="avos-bar-wrap">
+      <div class="avos-bar-label">Avos do 13º no ano ${anoSaida}</div>
+      <div class="avos-bar-fraction" style="color:#93c5fd">${avos13}/12</div>
+      <div class="avos-bar-track"><div class="avos-bar-fill avos-bar-fill--13" style="width:${(avos13/12*100).toFixed(0)}%"></div></div>
+      <div class="avos-bar-sub">Período contado: ${fmt(inicioC)} – ${fmt(new Date(saida.getTime()-86400000))} • Fórmula: salário ÷ 12 × ${avos13} = <strong style="color:#93c5fd">${avos13}/12 do salário bruto</strong></div>
+    </div>`;
+
+  html+=`<div class="explain-box" style="margin-top:1.25rem">
+    <p><strong>Tabela Art. 130 CLT (faltas injustificadas):</strong><br>
+    0–5 faltas: 30 dias &bull; 6–14: 24 dias &bull; 15–23: 18 dias &bull; 24–32: 12 dias &bull; 33+: 0 dias (perda total)</p>
+  </div>`;
+
+  if(temHip133){
+    html+=`<div class="explain-box explain-box--warn" style="margin-top:0.75rem">
+      <p><strong>⚠ Art. 133 CLT aplicado:</strong> As hipóteses marcadas interrompem o período aquisitivo, implicando perda do direito às férias referentes ao período em que ocorreram. O ciclo recomeça a partir do retorno.</p>
+    </div>`;
+  }
+
+  html+=`<div class="explain-box" style="margin-top:0.75rem">
+    <p>&#9432;&nbsp; Mês conta como avo quando o empregado trabalhou mais de 14 dias naquele mês (Art. 142, §2º, CLT).</p>
+  </div>`;
+
+  html+='</div>';
+  result.innerHTML=html;
+  result.style.display='block';
+  result.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+</script>
+</body>
+</html>

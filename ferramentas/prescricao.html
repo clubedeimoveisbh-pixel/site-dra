@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Prescrição — Marina Trabalhista</title>
+  <meta name="description" content="Calcule a prescrição quinquenal trabalhista e a suspensão da Lei 14.010/2020 (141 dias). Gratuito, sem cadastro.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9878;</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* ── Tool page shared base ── */
+    .tool-page-hero {
+      background: linear-gradient(160deg, var(--navy-deep), var(--navy-mid));
+      padding: 130px 0 64px;
+      position: relative;
+      overflow: hidden;
+    }
+    .tool-page-hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(200,167,91,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200,167,91,0.05) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+    .tool-page-hero-inner {
+      position: relative;
+      z-index: 1;
+    }
+    .tool-page-hero h1 {
+      color: var(--white);
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      margin-bottom: 0.5rem;
+    }
+    .tool-page-hero .hero-sub {
+      color: rgba(255,255,255,0.6);
+      font-size: 1rem;
+      max-width: 560px;
+      margin: 0;
+      line-height: 1.75;
+    }
+    .tool-page-hero .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 0.06em;
+      margin-bottom: 2rem;
+      transition: color 0.2s;
+    }
+    .tool-page-hero .back-link:hover { color: var(--gold); }
+
+    /* ── Tool card ── */
+    .tool-page-section {
+      background: var(--cream);
+      padding: 60px 0 96px;
+    }
+    .tool-card {
+      background: var(--white);
+      border: 1px solid rgba(200,167,91,0.16);
+      border-radius: var(--radius-lg);
+      max-width: 800px;
+      margin: 0 auto;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .tool-card-body {
+      padding: 2.5rem;
+    }
+    .tool-card-title {
+      font-family: var(--ff-title);
+      font-size: 1.15rem;
+      color: var(--navy-deep);
+      margin-bottom: 1.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .tool-card-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(200,167,91,0.3), transparent);
+    }
+
+    /* ── Inputs ── */
+    .input-group {
+      margin-bottom: 1.75rem;
+    }
+    .input-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--navy-mid);
+      margin-bottom: 0.5rem;
+    }
+    .input-field {
+      width: 100%;
+      padding: 0.95rem 1.1rem;
+      border: 1.5px solid rgba(200,167,91,0.25);
+      border-radius: var(--radius);
+      font-family: var(--ff-body);
+      font-size: 1rem;
+      color: var(--text-dark);
+      background: var(--cream);
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      outline: none;
+    }
+    .input-field:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(200,167,91,0.12);
+      background: var(--white);
+    }
+
+    /* ── Result area ── */
+    .result-area {
+      margin-top: 2rem;
+      animation: fadeSlideIn 0.4s ease;
+    }
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Result cards side by side */
+    .result-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .res-card {
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .res-card--quinquenal {
+      background: linear-gradient(135deg, var(--navy-deep), var(--navy-mid));
+      border: 1px solid rgba(200,167,91,0.20);
+    }
+    .res-card--suspensao {
+      background: linear-gradient(135deg, #0d2318, #123d25);
+      border: 1px solid rgba(74,222,128,0.22);
+    }
+    .res-card--suspensao.inactive {
+      background: linear-gradient(135deg, #1a1a2e, #1e2040);
+      border: 1px solid rgba(100,116,139,0.20);
+    }
+    .res-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 16px 16px;
+      pointer-events: none;
+    }
+    .res-card-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.4rem;
+      position: relative;
+    }
+    .res-card--suspensao .res-card-label { color: #4ade80; }
+    .res-card--suspensao.inactive .res-card-label { color: rgba(255,255,255,0.35); }
+    .res-card-date {
+      font-family: var(--ff-title);
+      font-size: 1.55rem;
+      color: var(--white);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 0.5rem;
+      position: relative;
+    }
+    .res-card--suspensao:not(.inactive) .res-card-date { color: #86efac; }
+    .res-card--suspensao.inactive .res-card-date { color: rgba(255,255,255,0.3); }
+    .res-card-sub {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.5;
+      position: relative;
+    }
+    .res-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.65rem;
+      border-radius: 100px;
+      margin-top: 0.6rem;
+      position: relative;
+    }
+    .res-badge--active {
+      background: rgba(74,222,128,0.15);
+      border: 1px solid rgba(74,222,128,0.35);
+      color: #4ade80;
+    }
+    .res-badge--inactive {
+      background: rgba(100,116,139,0.15);
+      border: 1px solid rgba(100,116,139,0.25);
+      color: rgba(255,255,255,0.35);
+    }
+
+    /* Timeline */
+    .timeline-wrap {
+      background: linear-gradient(135deg, var(--navy-deep), #0f1e40);
+      border: 1px solid rgba(200,167,91,0.16);
+      border-radius: var(--radius);
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.25rem;
+    }
+    .timeline-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.25rem;
+    }
+    .timeline-track {
+      position: relative;
+      height: 8px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 100px;
+      margin-bottom: 1.5rem;
+    }
+    .timeline-fill {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+      border-radius: 100px;
+      transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+    }
+    .timeline-fill--susp {
+      background: linear-gradient(90deg, #4ade80, #22c55e);
+    }
+    .timeline-suspension-zone {
+      position: absolute;
+      top: -4px; bottom: -4px;
+      background: rgba(248,113,113,0.25);
+      border-radius: 4px;
+      border: 1px solid rgba(248,113,113,0.35);
+    }
+    .timeline-markers {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .tl-marker {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .tl-marker-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      border: 2px solid;
+    }
+    .tl-marker-dot--gold { background: var(--gold); border-color: var(--gold-bright); }
+    .tl-marker-dot--green { background: #4ade80; border-color: #86efac; }
+    .tl-marker-dot--white { background: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.9); }
+    .tl-marker-date {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.55);
+      text-align: center;
+      line-height: 1.3;
+      max-width: 80px;
+    }
+    .tl-marker-date strong { color: rgba(255,255,255,0.85); display: block; }
+
+    /* Detail row */
+    .detail-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .detail-chip {
+      background: rgba(200,167,91,0.07);
+      border: 1px solid rgba(200,167,91,0.16);
+      border-radius: var(--radius);
+      padding: 0.85rem 1rem;
+    }
+    .detail-chip-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--text-light);
+      margin-bottom: 0.25rem;
+    }
+    .detail-chip-val {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--navy-deep);
+      line-height: 1.35;
+    }
+
+    /* Explanation note */
+    .explain-box {
+      background: rgba(200,167,91,0.06);
+      border-left: 3px solid var(--gold);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 1rem 1.25rem;
+      margin-top: 1rem;
+    }
+    .explain-box p {
+      font-size: 0.83rem;
+      color: var(--text-mid);
+      line-height: 1.65;
+      margin: 0;
+    }
+    .explain-box strong { color: var(--navy-mid); }
+
+    /* Legal note at bottom */
+    .legal-note {
+      max-width: 800px;
+      margin: 2rem auto 0;
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--text-light);
+      line-height: 1.65;
+    }
+
+    @media (max-width: 560px) {
+      .result-pair { grid-template-columns: 1fr; }
+      .detail-row { grid-template-columns: 1fr 1fr; }
+      .tool-card-body { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<!-- HERO -->
+<section class="tool-page-hero">
+  <div class="container tool-page-hero-inner">
+    <a href="../ferramentas.html" class="back-link">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      Ferramentas
+    </a>
+    <span class="section-label">Calculadora</span>
+    <h1>Prescri&ccedil;&atilde;o Trabalhista</h1>
+    <div class="gold-divider"></div>
+    <p class="hero-sub">Prazo quinquenal (Art. 7&ordm;, XXIX, CF) + suspens&atilde;o pand&ecirc;mica de 141 dias — Lei 14.010/2020. Resultado imediato ao selecionar a data.</p>
+  </div>
+</section>
+
+<!-- TOOL -->
+<section class="tool-page-section">
+  <div class="container">
+
+    <div class="tool-card">
+      <div class="tool-card-body">
+
+        <div class="tool-card-title">
+          ⏳ Informe a data do ajuizamento
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="data-prescricao">Data do ajuizamento da a&ccedil;&atilde;o</label>
+          <input type="date" id="data-prescricao" class="input-field" max="2040-12-31">
+        </div>
+
+        <!-- Result — hidden until date chosen -->
+        <div id="result-prescricao" style="display:none"></div>
+
+      </div>
+    </div>
+
+    <p class="legal-note">
+      &#9432;&nbsp; Esta calculadora &eacute; meramente informativa e n&atilde;o substitui assessoria jur&iacute;dica profissional.
+      A suspens&atilde;o da Lei 14.010/2020 foi reconhecida pelo TST para prazos que se iniciaram ou correram entre 12/06/2020 e 30/10/2020.
+      Para casos espec&iacute;ficos, consulte um advogado especializado em Direito do Trabalho.
+    </p>
+
+  </div>
+</section>
+
+<div id="footer-placeholder"></div>
+<script src="../js/nav.js"></script>
+<script>
+/* ── Utils ── */
+function parseLocalDate(s) {
+  const [y,m,d] = s.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+function addDays(date, days) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+function subtractYears(date, years) {
+  const d = new Date(date);
+  d.setFullYear(d.getFullYear() - years);
+  return d;
+}
+function fmt(date) {
+  return date.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+function fmtLong(date) {
+  return date.toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
+}
+
+const SUSP_INI  = new Date(2020, 5, 12);
+const SUSP_FIM  = new Date(2020, 9, 30);
+const DIAS_SUSP = 141;
+
+function calcPrescricao() {
+  const val = document.getElementById('data-prescricao').value;
+  const container = document.getElementById('result-prescricao');
+  if (!val) { container.style.display = 'none'; return; }
+
+  const ajuiz    = parseLocalDate(val);
+  const prescQ   = subtractYears(ajuiz, 5);
+  const aplicaSusp = prescQ < SUSP_FIM && ajuiz > SUSP_INI;
+  const prescS   = aplicaSusp ? addDays(prescQ, -DIAS_SUSP) : null;
+
+  /* Timeline percentages */
+  const rangeStart = aplicaSusp ? prescS : prescQ;
+  const totalMs    = ajuiz - rangeStart;
+
+  function pct(d) {
+    const p = (d - rangeStart) / totalMs * 100;
+    return Math.max(0, Math.min(100, p)).toFixed(1);
+  }
+
+  /* Suspension zone on timeline */
+  let suspZoneHTML = '';
+  if (aplicaSusp && SUSP_INI > rangeStart && SUSP_FIM < ajuiz) {
+    const left  = pct(SUSP_INI);
+    const right = 100 - pct(SUSP_FIM);
+    suspZoneHTML = `<div class="timeline-suspension-zone" style="left:${left}%;right:${right}%" title="Suspensão 12/06–30/10/2020"></div>`;
+  }
+
+  container.style.display = 'block';
+  container.innerHTML = `
+    <div class="result-area">
+
+      <!-- Two result cards -->
+      <div class="result-pair">
+        <div class="res-card res-card--quinquenal">
+          <div class="res-card-label">Prescri&ccedil;&atilde;o Quinquenal</div>
+          <div class="res-card-date">${fmt(prescQ)}</div>
+          <div class="res-card-sub">Art. 7&ordm;, XXIX, CF &mdash; ajuizamento &minus; 5 anos</div>
+          <div class="res-card-sub" style="margin-top:0.35rem">A a&ccedil;&atilde;o alcança fatos a partir de <strong style="color:rgba(255,255,255,0.85)">${fmtLong(prescQ)}</strong></div>
+        </div>
+
+        <div class="res-card res-card--suspensao${aplicaSusp ? '' : ' inactive'}">
+          <div class="res-card-label">Com Suspens&atilde;o Lei 14.010/2020</div>
+          <div class="res-card-date">${aplicaSusp ? fmt(prescS) : '—'}</div>
+          <div class="res-card-sub">
+            ${aplicaSusp
+              ? `Quinquenal &minus; ${DIAS_SUSP} dias de suspens&atilde;o`
+              : 'O per&iacute;odo prescricional n&atilde;o inclui a janela de suspens&atilde;o'}
+          </div>
+          <span class="res-badge ${aplicaSusp ? 'res-badge--active' : 'res-badge--inactive'}">
+            ${aplicaSusp ? '✓ Suspensão aplicável' : '✗ Suspensão não aplicável'}
+          </span>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="timeline-wrap">
+        <div class="timeline-label">&#x1F4C5;&nbsp; Timeline do per&iacute;odo prescricional</div>
+        <div class="timeline-track">
+          <div class="timeline-fill${aplicaSusp ? ' timeline-fill--susp' : ''}" style="width:${aplicaSusp ? '100' : pct(ajuiz)}%"></div>
+          ${suspZoneHTML}
+        </div>
+        <div class="timeline-markers">
+          ${aplicaSusp ? `
+          <div class="tl-marker">
+            <div class="tl-marker-dot tl-marker-dot--green"></div>
+            <div class="tl-marker-date"><strong>${fmt(prescS)}</strong>Com suspensão</div>
+          </div>` : ''}
+          <div class="tl-marker">
+            <div class="tl-marker-dot tl-marker-dot--gold"></div>
+            <div class="tl-marker-date"><strong>${fmt(prescQ)}</strong>Quinquenal</div>
+          </div>
+          ${aplicaSusp ? `
+          <div class="tl-marker">
+            <div class="tl-marker-dot" style="background:rgba(248,113,113,0.6);border-color:#f87171;width:8px;height:8px"></div>
+            <div class="tl-marker-date"><strong>12/06/2020</strong>Início suspensão</div>
+          </div>
+          <div class="tl-marker">
+            <div class="tl-marker-dot" style="background:rgba(248,113,113,0.6);border-color:#f87171;width:8px;height:8px"></div>
+            <div class="tl-marker-date"><strong>30/10/2020</strong>Fim suspensão</div>
+          </div>` : ''}
+          <div class="tl-marker">
+            <div class="tl-marker-dot tl-marker-dot--white"></div>
+            <div class="tl-marker-date"><strong>${fmt(ajuiz)}</strong>Ajuizamento</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail chips -->
+      <div class="detail-row">
+        <div class="detail-chip">
+          <div class="detail-chip-label">Data do ajuizamento</div>
+          <div class="detail-chip-val">${fmt(ajuiz)}</div>
+        </div>
+        <div class="detail-chip">
+          <div class="detail-chip-label">Per&iacute;odo prescricional</div>
+          <div class="detail-chip-val">${fmt(prescQ)} – ${fmt(ajuiz)}</div>
+        </div>
+        <div class="detail-chip">
+          <div class="detail-chip-label">Suspens&atilde;o (141 dias)</div>
+          <div class="detail-chip-val">${aplicaSusp ? 'Aplicada' : 'N&atilde;o aplicável'}</div>
+        </div>
+      </div>
+
+      <!-- Explanation -->
+      <div class="explain-box">
+        <p>
+          ${aplicaSusp
+            ? `<strong>Suspens&atilde;o aplicada:</strong> O per&iacute;odo de 5 anos retroativos ao ajuizamento (${fmt(prescQ)} – ${fmt(ajuiz)}) engloba a janela de suspens&atilde;o da Lei 14.010/2020 (12/06/2020 a 30/10/2020 — 141 dias). Com a suspens&atilde;o, a prescri&ccedil;&atilde;o alcança <strong>${fmtLong(prescS)}</strong>, ou seja, 141 dias adicionais para trás.`
+            : `O per&iacute;odo de 5 anos retroativos ao ajuizamento (${fmt(prescQ)} – ${fmt(ajuiz)}) n&atilde;o engloba a janela de suspens&atilde;o da Lei 14.010/2020 (12/06/2020 a 30/10/2020). Aplica-se apenas o prazo quinquenal simples: a a&ccedil;&atilde;o alcança fatos a partir de <strong>${fmtLong(prescQ)}</strong>.`
+          }
+        </p>
+      </div>
+
+    </div>
+  `;
+}
+
+document.getElementById('data-prescricao').addEventListener('input', calcPrescricao);
+document.getElementById('data-prescricao').addEventListener('change', calcPrescricao);
+</script>
+</body>
+</html>

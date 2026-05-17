@@ -4,407 +4,330 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ferramentas — Marina Trabalhista</title>
-  <meta name="description" content="Calculadoras gratuitas de prescrição trabalhista e aviso prévio proporcional.">
+  <meta name="description" content="Calculadoras jurídicas gratuitas: prescrição trabalhista, aviso prévio, avos de férias e 13º, tabela de reflexos e removedor de espaços.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9878;</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .hub-hero {
+      background: linear-gradient(160deg, var(--navy-deep) 0%, var(--navy-mid) 55%, #1e3a6e 100%);
+      padding: 140px 0 100px;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+    .hub-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 50% 0%, rgba(200,167,91,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 80% 80%, rgba(200,167,91,0.06) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hub-hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(200,167,91,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200,167,91,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+    .hub-hero-inner {
+      position: relative;
+      z-index: 1;
+    }
+    .hub-hero .breadcrumb {
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+    .hub-hero h1 {
+      color: var(--white);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      margin-bottom: 0;
+    }
+    .hub-hero h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hub-hero-sub {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.65);
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+    .hub-section {
+      background: var(--cream);
+      padding: 80px 0 100px;
+    }
+    .hub-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.75rem;
+      margin-top: 3.5rem;
+    }
+    .hub-card {
+      background: var(--white);
+      border: 1px solid rgba(200,167,91,0.15);
+      border-radius: var(--radius-lg);
+      padding: 2.25rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+    }
+    .hub-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+    .hub-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-md);
+      border-color: rgba(200,167,91,0.30);
+    }
+    .hub-card:hover::before { transform: scaleX(1); }
+    .hub-icon-wrap {
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, var(--navy-mid), var(--navy-deep));
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .hub-icon-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-lg);
+      background-image:
+        linear-gradient(rgba(200,167,91,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200,167,91,0.08) 1px, transparent 1px);
+      background-size: 12px 12px;
+    }
+    .hub-card-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(74,222,128,0.10);
+      border: 1px solid rgba(74,222,128,0.28);
+      color: #2db980;
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.7rem;
+      border-radius: 100px;
+      margin-bottom: 0.25rem;
+      width: fit-content;
+    }
+    .hub-card-badge::before {
+      content: '';
+      width: 5px; height: 5px;
+      background: #2db980;
+      border-radius: 50%;
+    }
+    .hub-card h3 {
+      font-family: var(--ff-title);
+      font-size: 1.1rem;
+      color: var(--navy-deep);
+      line-height: 1.3;
+      margin: 0;
+    }
+    .hub-card p {
+      font-size: 0.875rem;
+      color: var(--text-light);
+      line-height: 1.65;
+      flex: 1;
+      margin: 0;
+    }
+    .hub-card-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gold-muted);
+      transition: gap 0.2s, color 0.2s;
+      margin-top: auto;
+    }
+    .hub-card:hover .hub-card-cta {
+      gap: 0.8rem;
+      color: var(--gold);
+    }
+    .hub-card-cta svg {
+      transition: transform 0.2s;
+    }
+    .hub-card:hover .hub-card-cta svg {
+      transform: translateX(3px);
+    }
+    /* Wide card (last if odd) */
+    .hub-card.hub-card--wide {
+      grid-column: span 1;
+    }
+    /* Bottom CTA strip */
+    .hub-note {
+      text-align: center;
+      margin-top: 3rem;
+      padding: 2rem;
+      background: rgba(200,167,91,0.05);
+      border: 1px solid rgba(200,167,91,0.14);
+      border-radius: var(--radius-lg);
+    }
+    .hub-note p {
+      font-size: 0.88rem;
+      color: var(--text-light);
+      margin: 0;
+      line-height: 1.7;
+    }
+    .hub-note strong { color: var(--navy-mid); }
+
+    @media (max-width: 900px) {
+      .hub-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .hub-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
 <div id="nav-placeholder"></div>
 
-<section class="page-hero">
-  <div class="container page-hero-inner">
+<!-- HUB HERO -->
+<section class="hub-hero">
+  <div class="container hub-hero-inner">
     <div class="breadcrumb">
       <a href="index.html">In&iacute;cio</a><span>/</span><span>Ferramentas</span>
     </div>
     <span class="section-label">Ferramentas Gratuitas</span>
-    <h1>Calculadoras Jur&iacute;dicas</h1>
-    <div class="gold-divider"></div>
-    <p>Ferramentas pr&aacute;ticas e gratuitas baseadas na legisla&ccedil;&atilde;o vigente. Calcule com precis&atilde;o, decida com seguran&ccedil;a.</p>
+    <h1>Calculadoras <em>Jur&iacute;dicas</em></h1>
+    <div class="gold-divider centered"></div>
+    <p class="hub-hero-sub">
+      Cinco ferramentas pr&aacute;ticas, 100% gratuitas, sem cadastro. Calcule com precis&atilde;o e decida com seguran&ccedil;a.
+    </p>
   </div>
 </section>
 
-<section class="section tools-section">
+<!-- HUB GRID -->
+<section class="hub-section">
   <div class="container">
 
-    <!-- Ferramenta 1: Prescrição -->
-    <div class="tool-block" id="prescricao">
-      <div class="tool-header">
-        <div class="tool-header-icon">&#x23F3;</div>
-        <div class="tool-header-text">
-          <h3>Calculadora de Prescri&ccedil;&atilde;o — Lei 14.010/2020</h3>
-          <p>Informe a data do ajuizamento e obtenha a prescri&ccedil;&atilde;o quinquenal simples e com a suspens&atilde;o pand&ecirc;mica de 141 dias</p>
-        </div>
-      </div>
-      <div class="tool-body">
-        <div class="form-group">
-          <label for="data-prescricao">Data do ajuizamento da a&ccedil;&atilde;o</label>
-          <input type="date" id="data-prescricao" max="2030-12-31">
-        </div>
-        <button class="btn btn-primary" onclick="calcPrescricao()">Calcular</button>
-
-        <div class="tool-result" id="result-prescricao">
-        </div>
-      </div>
+    <div style="text-align:center">
+      <span class="section-label">Acesso imediato</span>
+      <h2 class="section-title" style="font-size:clamp(1.5rem,3vw,2.2rem)">Escolha uma ferramenta</h2>
     </div>
 
-    <!-- Ferramenta 2: Aviso Prévio -->
-    <div class="tool-block" id="aviso-previo">
-      <div class="tool-header">
-        <div class="tool-header-icon">&#x1F4C5;</div>
-        <div class="tool-header-text">
-          <h3>Calculadora de Aviso Pr&eacute;vio Proporcional</h3>
-          <p>C&aacute;lculo conforme a Lei 12.506/2011 — at&eacute; 90 dias proporcionais ao tempo de servi&ccedil;o</p>
-        </div>
-      </div>
-      <div class="tool-body">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="data-admissao">Data de Admiss&atilde;o</label>
-            <input type="date" id="data-admissao" max="2030-12-31">
-          </div>
-          <div class="form-group">
-            <label for="data-dispensa">Data de Dispensa</label>
-            <input type="date" id="data-dispensa" max="2030-12-31">
-          </div>
-        </div>
-        <button class="btn btn-primary" onclick="calcAvisoPrevio()">Calcular</button>
+    <div class="hub-grid">
 
-        <div class="tool-result" id="result-aviso">
-          <div class="result-label">Dura&ccedil;&atilde;o do Aviso Pr&eacute;vio</div>
-          <div class="result-value" id="aviso-total">—</div>
-          <div class="result-detail">
-            <div class="result-detail-item">
-              <div class="rd-label">Tempo de servi&ccedil;o</div>
-              <div class="rd-value" id="aviso-tempo">—</div>
-            </div>
-            <div class="result-detail-item">
-              <div class="rd-label">Anos completos</div>
-              <div class="rd-value" id="aviso-anos">—</div>
-            </div>
-            <div class="result-detail-item">
-              <div class="rd-label">Base (legal)</div>
-              <div class="rd-value">30 dias</div>
-            </div>
-            <div class="result-detail-item">
-              <div class="rd-label">Dias adicionais</div>
-              <div class="rd-value" id="aviso-adicionais">—</div>
-            </div>
-            <div class="result-detail-item">
-              <div class="rd-label">Proje&ccedil;&atilde;o do aviso</div>
-              <div class="rd-value" id="aviso-projecao">—</div>
-            </div>
-          </div>
-          <div class="result-note">
-            <p>&#9432;&nbsp; Lei 12.506/2011: aviso pr&eacute;vio de 30 dias + 3 dias por ano de servi&ccedil;o completo al&eacute;m do primeiro, at&eacute; o limite de 60 dias adicionais (total m&aacute;ximo: 90 dias). Exemplo: 8 anos de servi&ccedil;o &rarr; 30 + 24 = 54 dias.</p>
-          </div>
+      <!-- Prescrição -->
+      <a href="ferramentas/prescricao.html" class="hub-card fade-up">
+        <div class="hub-icon-wrap">⏳</div>
+        <div>
+          <div class="hub-card-badge">Gratuito</div>
+          <h3>Calculadora de Prescri&ccedil;&atilde;o</h3>
         </div>
-      </div>
+        <p>Prazo quinquenal + suspens&atilde;o Lei 14.010/2020 (141 dias), com timeline visual de datas.</p>
+        <span class="hub-card-cta">
+          Acessar ferramenta
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+          </svg>
+        </span>
+      </a>
+
+      <!-- Aviso Prévio -->
+      <a href="ferramentas/aviso-previo.html" class="hub-card fade-up">
+        <div class="hub-icon-wrap">📅</div>
+        <div>
+          <div class="hub-card-badge">Gratuito</div>
+          <h3>Calculadora de Aviso Pr&eacute;vio</h3>
+        </div>
+        <p>C&aacute;lculo proporcional (Lei 12.506/2011) com barra visual, slider de anos e data de proje&ccedil;&atilde;o.</p>
+        <span class="hub-card-cta">
+          Acessar ferramenta
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+          </svg>
+        </span>
+      </a>
+
+      <!-- Avos -->
+      <a href="ferramentas/avos.html" class="hub-card fade-up">
+        <div class="hub-icon-wrap">📆</div>
+        <div>
+          <div class="hub-card-badge">Gratuito</div>
+          <h3>Calculadora de Avos</h3>
+        </div>
+        <p>Per&iacute;odos aquisitivos, f&eacute;rias proporcionais e 13&ordm; proporcional com slider de faltas e cards visuais.</p>
+        <span class="hub-card-cta">
+          Acessar ferramenta
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+          </svg>
+        </span>
+      </a>
+
+      <!-- Reflexos -->
+      <a href="ferramentas/reflexos.html" class="hub-card fade-up">
+        <div class="hub-icon-wrap">💰</div>
+        <div>
+          <div class="hub-card-badge">Gratuito</div>
+          <h3>Tabela de Reflexos</h3>
+        </div>
+        <p>Natureza salarial vs. indenizat&oacute;ria com filtros por categoria, busca e badges coloridos.</p>
+        <span class="hub-card-cta">
+          Acessar ferramenta
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+          </svg>
+        </span>
+      </a>
+
+      <!-- Remover Espaços -->
+      <a href="ferramentas/remover-espacos.html" class="hub-card fade-up">
+        <div class="hub-icon-wrap">✂️</div>
+        <div>
+          <div class="hub-card-badge">Gratuito</div>
+          <h3>Remover Espa&ccedil;os</h3>
+        </div>
+        <p>Limpe, normalize e compacte textos copiados de PDFs. Resultado em tempo real com bot&atilde;o copiar.</p>
+        <span class="hub-card-cta">
+          Acessar ferramenta
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+          </svg>
+        </span>
+      </a>
+
     </div>
 
-    <!-- Ferramenta 3: Tabela de Reflexos -->
-    <div class="tool-block" id="reflexos">
-      <div class="tool-header">
-        <div class="tool-header-icon">&#x1F4B0;</div>
-        <div class="tool-header-text">
-          <h3>Tabela de Natureza Salarial vs. Indenizat&oacute;ria</h3>
-          <p>Verbas que refletem em FGTS, f&eacute;rias e 13&ordm; sal&aacute;rio versus as que n&atilde;o refletem</p>
-        </div>
-      </div>
-      <div class="tool-body">
-        <p style="margin-bottom:1rem;font-size:0.9rem">A natureza jur&iacute;dica das verbas trabalhistas determina quais parcelas integram a remunera&ccedil;&atilde;o para c&aacute;lculo de FGTS, f&eacute;rias, 13&ordm; sal&aacute;rio, aviso pr&eacute;vio e contribui&ccedil;&otilde;es previdenci&aacute;rias, entre outros.</p>
-
-        <table class="reflexos-table">
-          <thead>
-            <tr>
-              <th>Verba</th>
-              <th>Natureza</th>
-              <th>Fundamento Legal</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Sal&aacute;rio-base</strong></td>
-              <td><span class="badge-salarial">Salarial</span></td>
-              <td class="legal-ref">Art. 457, caput, CLT</td>
-            </tr>
-            <tr>
-              <td><strong>Horas extras</strong></td>
-              <td><span class="badge-salarial">Salarial</span></td>
-              <td class="legal-ref">Art. 7&ordm;, XVI, CF; Sm. 376, TST</td>
-            </tr>
-            <tr>
-              <td><strong>Adicional noturno</strong></td>
-              <td><span class="badge-salarial">Salarial</span></td>
-              <td class="legal-ref">Art. 73, CLT; Sm. 60, TST</td>
-            </tr>
-            <tr>
-              <td><strong>Adicional de insalubridade</strong></td>
-              <td><span class="badge-salarial">Salarial</span></td>
-              <td class="legal-ref">Art. 192, CLT; OJ 103, SDI-1</td>
-            </tr>
-            <tr>
-              <td><strong>Adicional de periculosidade</strong></td>
-              <td><span class="badge-salarial">Salarial</span></td>
-              <td class="legal-ref">Art. 193, &sect;1&ordm;, CLT; Sm. 132, TST</td>
-            </tr>
-            <tr>
-              <td><strong>Comiss&otilde;es e percentagens</strong></td>
-              <td><span class="badge-salarial">Salarial</span></td>
-              <td class="legal-ref">Art. 457, &sect;1&ordm;, CLT</td>
-            </tr>
-            <tr>
-              <td><strong>Gorjetas</strong></td>
-              <td><span class="badge-remuneratorio">Remuneratório</span></td>
-              <td class="legal-ref">Art. 457, &sect;3&ordm;, CLT; Sm. 354, TST</td>
-            </tr>
-            <tr>
-              <td><strong>Gratifica&ccedil;&atilde;o habitual</strong></td>
-              <td><span class="badge-salarial">Salarial</span></td>
-              <td class="legal-ref">Art. 457, &sect;1&ordm;, CLT; Sm. 209, TST</td>
-            </tr>
-            <tr>
-              <td><strong>Di&aacute;rias acima de 50% do sal&aacute;rio</strong></td>
-              <td><span class="badge-salarial">Salarial</span></td>
-              <td class="legal-ref">Art. 457, &sect;2&ordm;, CLT; Sm. 101, TST</td>
-            </tr>
-            <tr>
-              <td><strong>Aviso pr&eacute;vio trabalhado</strong></td>
-              <td><span class="badge-salarial">Salarial</span></td>
-              <td class="legal-ref">Art. 487, CLT; Art. 15, Lei 8.036/1990</td>
-            </tr>
-            <tr>
-              <td><strong>F&eacute;rias indenizadas + 1/3</strong></td>
-              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
-              <td class="legal-ref">Art. 144 e 148, CLT; Sm. 328, TST</td>
-            </tr>
-            <tr>
-              <td><strong>Aviso pr&eacute;vio indenizado</strong></td>
-              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
-              <td class="legal-ref">Art. 487, &sect;1&ordm;, CLT; OJ 195, SDI-1</td>
-            </tr>
-            <tr>
-              <td><strong>FGTS + multa de 40%</strong></td>
-              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
-              <td class="legal-ref">Art. 18, &sect;1&ordm;, Lei 8.036/1990</td>
-            </tr>
-            <tr>
-              <td><strong>Indeniza&ccedil;&atilde;o por dano moral</strong></td>
-              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
-              <td class="legal-ref">Art. 5&ordm;, X, CF; Art. 223-A, CLT</td>
-            </tr>
-            <tr>
-              <td><strong>Ajuda de custo</strong></td>
-              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
-              <td class="legal-ref">Art. 457, &sect;2&ordm;, CLT</td>
-            </tr>
-            <tr>
-              <td><strong>Vale-transporte</strong></td>
-              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
-              <td class="legal-ref">Art. 2&ordm;, &sect;2&ordm;, Lei 7.418/1985</td>
-            </tr>
-            <tr>
-              <td><strong>Vale-refei&ccedil;&atilde;o / alimenta&ccedil;&atilde;o (PAT)</strong></td>
-              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
-              <td class="legal-ref">Art. 457, &sect;2&ordm;, CLT; OJ 133, SDI-1</td>
-            </tr>
-            <tr>
-              <td><strong>Di&aacute;rias at&eacute; 50% do sal&aacute;rio</strong></td>
-              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
-              <td class="legal-ref">Art. 457, &sect;2&ordm;, CLT; Sm. 101, TST</td>
-            </tr>
-            <tr>
-              <td><strong>PLR — Participa&ccedil;&atilde;o nos Lucros</strong></td>
-              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
-              <td class="legal-ref">Art. 7&ordm;, XI, CF; Sm. 451, TST</td>
-            </tr>
-            <tr>
-              <td><strong>Aux&iacute;lio-doen&ccedil;a (INSS)</strong></td>
-              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
-              <td class="legal-ref">Art. 476, CLT; Sm. 46, TST</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Ferramenta 4: Remover Espaços em Branco -->
-    <div class="tool-block" id="remover-espacos">
-      <div class="tool-header">
-        <div class="tool-header-icon">&#x2702;</div>
-        <div class="tool-header-text">
-          <h3>Remover Espa&ccedil;os em Branco</h3>
-          <p>Limpe, normalize ou compacte textos — ideal para peças e documentos copiados de PDFs</p>
-        </div>
-      </div>
-      <div class="tool-body">
-
-        <div class="form-group" style="position:relative">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
-            <label for="espacos-input" style="margin-bottom:0">Texto de entrada</label>
-            <span id="espacos-contador" style="font-size:0.72rem;color:var(--text-light);letter-spacing:0.04em">Caract: 0 | Palavras: 0 | Linhas: 0 | Espa&ccedil;os: 0</span>
-          </div>
-          <textarea id="espacos-input" placeholder="Cole ou digite seu texto aqui..." rows="8" style="width:100%;padding:0.85rem 1.1rem;border:1.5px solid rgba(200,167,91,0.25);border-radius:6px;font-family:inherit;font-size:0.95rem;color:var(--text-dark);background:var(--cream);resize:vertical;outline:none;transition:border-color 0.2s,box-shadow 0.2s;line-height:1.6" onfocus="this.style.borderColor='var(--gold)';this.style.boxShadow='0 0 0 3px rgba(200,167,91,0.12)';this.style.background='var(--white)'" onblur="this.style.borderColor='rgba(200,167,91,0.25)';this.style.boxShadow='none';this.style.background='var(--cream)'"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label style="display:block;margin-bottom:0.75rem">Modo de opera&ccedil;&atilde;o</label>
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0.6rem">
-
-            <label class="espacos-modo-card" style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.85rem 1rem;border:1.5px solid rgba(200,167,91,0.22);border-radius:6px;cursor:pointer;transition:border-color 0.2s,background 0.2s">
-              <input type="radio" name="espacos-modo" value="normalizar" checked style="margin-top:0.15rem;accent-color:var(--gold)">
-              <div>
-                <div style="font-size:0.83rem;font-weight:600;color:var(--navy-deep)">Normalizar espa&ccedil;os</div>
-                <div style="font-size:0.75rem;color:var(--text-light);line-height:1.4">Substitui m&uacute;ltiplos espa&ccedil;os por um &uacute;nico</div>
-              </div>
-            </label>
-
-            <label class="espacos-modo-card" style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.85rem 1rem;border:1.5px solid rgba(200,167,91,0.22);border-radius:6px;cursor:pointer;transition:border-color 0.2s,background 0.2s">
-              <input type="radio" name="espacos-modo" value="remover-todos" style="margin-top:0.15rem;accent-color:var(--gold)">
-              <div>
-                <div style="font-size:0.83rem;font-weight:600;color:var(--navy-deep)">Remover todos os espa&ccedil;os</div>
-                <div style="font-size:0.75rem;color:var(--text-light);line-height:1.4">Exclui todos os caracteres de espa&ccedil;o</div>
-              </div>
-            </label>
-
-            <label class="espacos-modo-card" style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.85rem 1rem;border:1.5px solid rgba(200,167,91,0.22);border-radius:6px;cursor:pointer;transition:border-color 0.2s,background 0.2s">
-              <input type="radio" name="espacos-modo" value="cortar-linhas" style="margin-top:0.15rem;accent-color:var(--gold)">
-              <div>
-                <div style="font-size:0.83rem;font-weight:600;color:var(--navy-deep)">Cortar linhas</div>
-                <div style="font-size:0.75rem;color:var(--text-light);line-height:1.4">Remove espa&ccedil;os no in&iacute;cio/fim de cada linha</div>
-              </div>
-            </label>
-
-            <label class="espacos-modo-card" style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.85rem 1rem;border:1.5px solid rgba(200,167,91,0.22);border-radius:6px;cursor:pointer;transition:border-color 0.2s,background 0.2s">
-              <input type="radio" name="espacos-modo" value="remover-vazias" style="margin-top:0.15rem;accent-color:var(--gold)">
-              <div>
-                <div style="font-size:0.83rem;font-weight:600;color:var(--navy-deep)">Remover linhas em branco</div>
-                <div style="font-size:0.75rem;color:var(--text-light);line-height:1.4">Mant&eacute;m o texto, remove linhas vazias</div>
-              </div>
-            </label>
-
-            <label class="espacos-modo-card" style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.85rem 1rem;border:1.5px solid rgba(200,167,91,0.22);border-radius:6px;cursor:pointer;transition:border-color 0.2s,background 0.2s">
-              <input type="radio" name="espacos-modo" value="compacto" style="margin-top:0.15rem;accent-color:var(--gold)">
-              <div>
-                <div style="font-size:0.83rem;font-weight:600;color:var(--navy-deep)">Modo compacto</div>
-                <div style="font-size:0.75rem;color:var(--text-light);line-height:1.4">Cortar linhas + remover vazias + normalizar</div>
-              </div>
-            </label>
-
-            <label class="espacos-modo-card" style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.85rem 1rem;border:1.5px solid rgba(200,167,91,0.22);border-radius:6px;cursor:pointer;transition:border-color 0.2s,background 0.2s">
-              <input type="radio" name="espacos-modo" value="linha-unica" style="margin-top:0.15rem;accent-color:var(--gold)">
-              <div>
-                <div style="font-size:0.83rem;font-weight:600;color:var(--navy-deep)">Linha &uacute;nica</div>
-                <div style="font-size:0.75rem;color:var(--text-light);line-height:1.4">Converte todo o texto em uma &uacute;nica linha</div>
-              </div>
-            </label>
-
-            <label class="espacos-modo-card" style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.85rem 1rem;border:1.5px solid rgba(200,167,91,0.22);border-radius:6px;cursor:pointer;transition:border-color 0.2s,background 0.2s">
-              <input type="radio" name="espacos-modo" value="remover-tudo" style="margin-top:0.15rem;accent-color:var(--gold)">
-              <div>
-                <div style="font-size:0.83rem;font-weight:600;color:var(--navy-deep)">Remover tudo</div>
-                <div style="font-size:0.75rem;color:var(--text-light);line-height:1.4">Remove espa&ccedil;os, abas e quebras de linha</div>
-              </div>
-            </label>
-
-          </div>
-        </div>
-
-        <div class="form-group" style="display:flex;gap:1.5rem;flex-wrap:wrap;margin-bottom:1.5rem">
-          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.85rem;color:var(--text-mid);text-transform:none;letter-spacing:normal;font-weight:400">
-            <input type="checkbox" id="espacos-preservar" checked style="accent-color:var(--gold)">
-            Preservar quebras de linha
-          </label>
-          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.85rem;color:var(--text-mid);text-transform:none;letter-spacing:normal;font-weight:400">
-            <input type="checkbox" id="espacos-cortar" style="accent-color:var(--gold)">
-            Cortar espa&ccedil;os no in&iacute;cio/fim do texto
-          </label>
-        </div>
-
-        <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
-          <button class="btn btn-navy" onclick="executarRemocaoEspacos()">Remover espa&ccedil;os</button>
-          <button class="btn btn-outline btn-sm" onclick="limparRemocaoEspacos()" style="padding:0.9rem 2.1rem">Limpar</button>
-        </div>
-
-        <div id="espacos-result-wrap" style="display:none;margin-top:1.75rem">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
-            <label style="font-size:0.82rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--navy-mid)">Resultado</label>
-            <button id="espacos-copiar-btn" class="btn btn-outline btn-sm" onclick="copiarEspacosOutput()" style="padding:0.4rem 1.1rem;font-size:0.78rem">Copiar</button>
-          </div>
-          <textarea id="espacos-output" rows="8" readonly style="width:100%;padding:0.85rem 1.1rem;border:1.5px solid rgba(200,167,91,0.30);border-radius:6px;font-family:inherit;font-size:0.95rem;color:var(--text-dark);background:var(--cream-dark);resize:vertical;outline:none;line-height:1.6"></textarea>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Ferramenta 5: Calculadora de Avos -->
-    <div class="tool-block" id="calc-avos">
-      <div class="tool-header">
-        <div class="tool-header-icon">&#x1F4C6;</div>
-        <div class="tool-header-text">
-          <h3>Calculadora de Avos — F&eacute;rias e 13&ordm;</h3>
-          <p>Per&iacute;odos aquisitivos, concessivos, f&eacute;rias proporcionais e 13&ordm; proporcional (Art. 130 e 142 CLT)</p>
-        </div>
-      </div>
-      <div class="tool-body">
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="avos-admissao">Data de admiss&atilde;o</label>
-            <input type="date" id="avos-admissao" max="2099-12-31">
-          </div>
-          <div class="form-group">
-            <label for="avos-saida" style="display:flex;justify-content:space-between;align-items:center">
-              <span>Data de sa&iacute;da</span>
-              <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.78rem;font-weight:400;letter-spacing:normal;text-transform:none;cursor:pointer;color:var(--gold-muted)">
-                <input type="checkbox" id="avos-ainda-contratado" style="accent-color:var(--gold)">
-                Ainda contratado
-              </label>
-            </label>
-            <input type="date" id="avos-saida" max="2099-12-31">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="avos-faltas">N&uacute;mero de faltas injustificadas</label>
-          <input type="number" id="avos-faltas" value="0" min="0" max="999" placeholder="0">
-        </div>
-
-        <div class="form-group">
-          <label style="display:block;margin-bottom:0.75rem">Hip&oacute;teses do Art. 133 da CLT — perda do per&iacute;odo aquisitivo</label>
-          <div style="display:flex;flex-direction:column;gap:0.6rem;padding:1.25rem;background:rgba(200,167,91,0.04);border:1px solid rgba(200,167,91,0.18);border-radius:6px">
-            <label style="display:flex;align-items:flex-start;gap:0.6rem;cursor:pointer;font-size:0.85rem;color:var(--text-mid);text-transform:none;letter-spacing:normal;font-weight:400">
-              <input type="checkbox" id="art133-1" style="accent-color:var(--gold);margin-top:0.15rem">
-              <span>Licen&ccedil;a remunerada por mais de 30 dias (inc. I)</span>
-            </label>
-            <label style="display:flex;align-items:flex-start;gap:0.6rem;cursor:pointer;font-size:0.85rem;color:var(--text-mid);text-transform:none;letter-spacing:normal;font-weight:400">
-              <input type="checkbox" id="art133-2" style="accent-color:var(--gold);margin-top:0.15rem">
-              <span>Licen&ccedil;a por acidente ou doen&ccedil;a por mais de 6 meses (inc. II)</span>
-            </label>
-            <label style="display:flex;align-items:flex-start;gap:0.6rem;cursor:pointer;font-size:0.85rem;color:var(--text-mid);text-transform:none;letter-spacing:normal;font-weight:400">
-              <input type="checkbox" id="art133-3" style="accent-color:var(--gold);margin-top:0.15rem">
-              <span>Recebimento de presta&ccedil;&otilde;es de acidente do trabalho (inc. III)</span>
-            </label>
-            <label style="display:flex;align-items:flex-start;gap:0.6rem;cursor:pointer;font-size:0.85rem;color:var(--text-mid);text-transform:none;letter-spacing:normal;font-weight:400">
-              <input type="checkbox" id="art133-4" style="accent-color:var(--gold);margin-top:0.15rem">
-              <span>Aposentadoria por invalidez provis&oacute;ria (inc. IV)</span>
-            </label>
-            <label style="display:flex;align-items:flex-start;gap:0.6rem;cursor:pointer;font-size:0.85rem;color:var(--text-mid);text-transform:none;letter-spacing:normal;font-weight:400">
-              <input type="checkbox" id="art133-5" style="accent-color:var(--gold);margin-top:0.15rem">
-              <span>Paralisa&ccedil;&atilde;o parcial ou total do servi&ccedil;o por mais de 3 meses (inc. V)</span>
-            </label>
-          </div>
-          <p style="font-size:0.78rem;color:var(--text-light);margin-top:0.5rem;line-height:1.5">Se alguma hip&oacute;tese estiver marcada, todos os per&iacute;odos aquisitivos completos ser&atilde;o tratados como perdidos. Para cen&aacute;rios mistos, consulte um advogado.</p>
-        </div>
-
-        <button class="btn btn-primary" onclick="calcAvos()">Calcular avos</button>
-
-        <div class="tool-result" id="result-avos" style="padding:2rem">
-        </div>
-
-      </div>
+    <div class="hub-note fade-up">
+      <p>
+        <strong>Todas as ferramentas s&atilde;o 100% gratuitas</strong> — sem cadastro, sem coleta de dados, sem gate de WhatsApp.
+        Os c&aacute;lculos s&atilde;o realizados inteiramente no seu navegador.
+        Para casos espec&iacute;ficos ou d&uacute;vidas complexas, consulte um advogado especializado.
+      </p>
     </div>
 
   </div>
@@ -412,6 +335,5 @@
 
 <div id="footer-placeholder"></div>
 <script src="js/nav.js"></script>
-<script src="js/calculadoras.js"></script>
 </body>
 </html>

@@ -64,8 +64,8 @@
         <div class="footer-links">
           <a href="/modelos.html">Modelos Gratuitos</a>
           <a href="/cursos.html">Cursos</a>
-          <a href="/ferramentas.html#prescricao">Calc. Prescrição</a>
-          <a href="/ferramentas.html#aviso-previo">Calc. Aviso Prévio</a>
+          <a href="/ferramentas/prescricao.html">Calc. Prescrição</a>
+          <a href="/ferramentas/aviso-previo.html">Calc. Aviso Prévio</a>
         </div>
       </div>
       <div>
@@ -115,9 +115,14 @@
 
     // Active link
     const path = window.location.pathname.split('/').pop() || 'index.html';
+    const fullPath = window.location.pathname;
     nav.querySelectorAll('.nav-links a, .nav-mobile a').forEach(a => {
       const href = a.getAttribute('href').split('/').pop();
-      if (href === path || (path === '' && href === 'index.html')) {
+      const hrefFull = a.getAttribute('href');
+      // Mark ferramentas.html active when on any ferramentas/* subpage
+      if (fullPath.includes('/ferramentas') && hrefFull.includes('ferramentas.html')) {
+        a.classList.add('active');
+      } else if (href === path || (path === '' && href === 'index.html')) {
         a.classList.add('active');
       }
     });
