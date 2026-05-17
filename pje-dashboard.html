@@ -239,7 +239,23 @@ tr:hover td{background:rgba(200,167,91,.04)}
 .vara-toggle-btn.open svg{transform:rotate(180deg)}
 .vara-toggle-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* ── Sidebar mode toggle ────────────────────────────────────── */
+/* ── Sortable headers ───────────────────────────────────────── */
+.th-sort{cursor:pointer;user-select:none;transition:color .15s;white-space:nowrap}
+.th-sort:hover{color:var(--gold)}
+.th-sort.asc::after{content:' ▲';font-size:.65em;opacity:.7}
+.th-sort.desc::after{content:' ▼';font-size:.65em;opacity:.7}
+/* Varas charts */
+.varas-charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem}
+.varas-chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.1rem 1.4rem}
+.varas-chart-title{font-size:.75rem;font-weight:700;color:var(--text);margin-bottom:.85rem;display:flex;align-items:center;gap:.4rem}
+.varas-bar-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.55rem}
+.varas-bar-label{font-size:.7rem;color:var(--muted);width:32px;text-align:right;flex-shrink:0}
+.varas-bar-track{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;position:relative}
+.varas-bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.varas-bar-val{font-size:.7rem;font-weight:600;color:var(--text);min-width:50px;text-align:right}
+.varas-bar-row.principal .varas-bar-label{color:var(--gold)}
+.varas-bar-row.principal .varas-bar-val{color:var(--gold)}
+/* Sidebar mode toggle ────────────────────────────────────────── */
 .sidebar-mode{display:flex;gap:.25rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r);padding:.2rem}
 .sidebar-mode-btn{flex:1;padding:.4rem;border-radius:5px;font-size:.73rem;font-weight:600;color:var(--muted);text-align:center;transition:all .2s;cursor:pointer}
 .sidebar-mode-btn.active{background:linear-gradient(135deg,var(--gold),var(--gold-b));color:var(--navy)}
@@ -808,6 +824,9 @@ let selectedAno   = '';      // 'YYYY'
 let currentTab    = 'metricas'; // 'metricas' | 'comparativo' | 'eficiencia' | 'varas'
 let chartEfic     = null;
 let varasGrupo    = 'proximas'; // 'proximas' | 'bh'
+let varasData     = null;
+let varasSortKey  = 'acervo';
+let varasSortDir  = 'desc';
 
 // ── Chart.js defaults ─────────────────────────────────────────────────────────
 Chart.defaults.color       = 'rgba(232,230,224,.55)';
@@ -1295,78 +1314,143 @@ async function loadVarasComparativo(vara) {
   }
 }
 
-function renderVarasComparativo(data) {
-  const varas    = data.varas || [];
-  const principal = data.vara_principal || '';
-  const ranking  = data.ranking_bh || {};
-  const isMock   = data.mock;
+function varasSortBy(key) {
+  if (varasSortKey === key) {
+    varasSortDir = varasSortDir === 'desc' ? 'asc' : 'desc';
+  } else {
+    varasSortKey = key;
+    varasSortDir = 'desc';
+  }
+  if (varasData) renderVarasComparativo(varasData);
+}
 
-  // Badge
+function renderVarasComparativo(data) {
+  varasData = data;
+  const varas     = data.varas || [];
+  const principal = data.vara_principal || '';
+  const ranking   = data.ranking_bh || {};
+  const isMock    = data.mock;
+
   document.getElementById('varas-badge').style.display = isMock ? '' : 'none';
 
   // Ranking card
   if (ranking.posicao != null) {
     document.getElementById('varas-ranking-pos').textContent = `${ranking.posicao}º`;
     document.getElementById('varas-ranking-sub').textContent = `de ${ranking.total_varas} varas em BH`;
-    document.getElementById('varas-ranking-pct-label').textContent = `Top ${100 - ranking.percentil}% · Percentil ${ranking.percentil}`;
+    document.getElementById('varas-ranking-pct-label').textContent = `Top ${100-ranking.percentil}% · Percentil ${ranking.percentil}`;
     document.getElementById('varas-ranking-bar').style.width = `${ranking.percentil}%`;
-  } else {
-    document.getElementById('varas-ranking-pos').textContent = '—';
-    document.getElementById('varas-ranking-sub').textContent = 'Vara não encontrada no ranking BH';
-    document.getElementById('varas-ranking-pct-label').textContent = '—';
   }
 
-  // Table
   if (!varas.length) {
     document.getElementById('varas-table-content').innerHTML =
-      '<div style="padding:1.5rem;color:var(--muted);font-size:.84rem;text-align:center">Sem dados disponíveis.</div>';
+      '<div style="padding:1.5rem;color:var(--muted);text-align:center">Sem dados.</div>';
     return;
   }
 
-  // Sort by acervo desc for ranking
-  const sorted = varas.slice().sort((a, b) => b.acervo - a.acervo);
-  const maxAcervo = sorted[0]?.acervo || 1;
-  const maxDist   = Math.max(...varas.map(v => v.ultimos_12m), 1);
+  // Sort
+  const sorted = varas.slice().sort((a, b) => {
+    const av = a[varasSortKey] ?? 0, bv = b[varasSortKey] ?? 0;
+    const cmp = typeof av === 'string' ? av.localeCompare(bv) : av - bv;
+    return varasSortDir === 'desc' ? -cmp : cmp;
+  });
 
+  const maxAcervo  = Math.max(...varas.map(v => v.acervo), 1);
+  const maxDist    = Math.max(...varas.map(v => v.ultimos_12m), 1);
+  const maxMensal  = Math.max(...varas.map(v => v.media_mensal ?? 0), 1);
+  const maxAntigos = Math.max(...varas.map(v => v.pct_antigos ?? 0), 1);
+
+  // Thème para cada coluna sortável
+  const thCls = key => {
+    if (varasSortKey !== key) return 'th-sort';
+    return `th-sort ${varasSortDir}`;
+  };
+
+  // ── Gráficos horizontais ──────────────────────────────────────
+  const byAcervo = varas.slice().sort((a,b) => b.acervo - a.acervo);
+
+  const barsAcervo = byAcervo.map(v => {
+    const pct = ((v.acervo / maxAcervo) * 100).toFixed(0);
+    const nm  = v.nome.replace(/^(\d+)ª VARA DO TRABALHO DE BELO HORIZONTE$/, '$1ª');
+    const isPr = v.nome === principal;
+    return `<div class="varas-bar-row${isPr?' principal':''}">
+      <div class="varas-bar-label">${esc(nm.length>6?nm.slice(0,5)+'…':nm)}</div>
+      <div class="varas-bar-track">
+        <div class="varas-bar-fill" style="width:${pct}%;background:${isPr?'linear-gradient(90deg,#C8A75B,#d4af37)':'rgba(200,167,91,.4)'}"></div>
+      </div>
+      <div class="varas-bar-val">${fmt(v.acervo)}</div>
+    </div>`;
+  }).join('');
+
+  const barsAntigos = byAcervo.map(v => {
+    const pct  = ((( v.pct_antigos??0) / Math.max(maxAntigos,1)) * 100).toFixed(0);
+    const nm   = v.nome.replace(/^(\d+)ª VARA DO TRABALHO DE BELO HORIZONTE$/, '$1ª');
+    const isPr = v.nome === principal;
+    const cor  = (v.pct_antigos??0) > 60 ? '#ef4444' : (v.pct_antigos??0) > 40 ? '#f97316' : '#4ade80';
+    return `<div class="varas-bar-row${isPr?' principal':''}">
+      <div class="varas-bar-label">${esc(nm.length>6?nm.slice(0,5)+'…':nm)}</div>
+      <div class="varas-bar-track">
+        <div class="varas-bar-fill" style="width:${pct}%;background:${isPr?cor:cor+'80'}"></div>
+      </div>
+      <div class="varas-bar-val">${(v.pct_antigos??0).toFixed(1)}%</div>
+    </div>`;
+  }).join('');
+
+  // ── Tabela ──────────────────────────────────────────────────────
   const rows = sorted.map((v, i) => {
-    const isPrincipal = v.nome === principal;
-    const rankPos     = i + 1;
-    const acervoPct   = ((v.acervo / maxAcervo) * 100).toFixed(0);
-    const distPct     = ((v.ultimos_12m / maxDist) * 100).toFixed(0);
-    return `<tr class="${isPrincipal ? 'vara-row-principal' : ''}">
+    const isPr = v.nome === principal;
+    const acPct = ((v.acervo / maxAcervo) * 100).toFixed(0);
+    const diPct = ((v.ultimos_12m / maxDist) * 100).toFixed(0);
+    const anCor = (v.pct_antigos??0)>60?'#f87171':(v.pct_antigos??0)>40?'#fbbf24':'#4ade80';
+    return `<tr class="${isPr?'vara-row-principal':''}">
+      <td><div style="display:flex;align-items:center;gap:.6rem">
+        <span class="rank-badge">${i+1}</span>
+        <span style="font-size:.77rem;line-height:1.3">${esc(v.nome)}</span>
+      </div></td>
       <td>
-        <div style="display:flex;align-items:center;gap:.6rem">
-          <span class="rank-badge">${rankPos}</span>
-          <span style="font-size:.79rem;line-height:1.3">${esc(v.nome)}</span>
+        <div style="font-weight:600;font-size:.84rem">${fmt(v.acervo)}</div>
+        <div class="ranking-bar-track" style="margin-top:.3rem;height:4px;width:70px">
+          <div class="ranking-bar-fill" style="width:${acPct}%"></div>
         </div>
       </td>
       <td>
-        <div style="font-weight:600;font-size:.85rem">${fmt(v.acervo)}</div>
-        <div class="ranking-bar-track" style="margin-top:.3rem;height:4px;width:80px">
-          <div class="ranking-bar-fill" style="width:${acervoPct}%"></div>
+        <div style="font-size:.84rem">${fmt(v.ultimos_12m)}</div>
+        <div class="ranking-bar-track" style="margin-top:.3rem;height:4px;width:70px">
+          <div class="ranking-bar-fill" style="width:${diPct}%;background:linear-gradient(90deg,#60a5fa,#3b82f6)"></div>
         </div>
       </td>
-      <td>
-        <div style="font-size:.85rem">${fmt(v.ultimos_12m)}</div>
-        <div class="ranking-bar-track" style="margin-top:.3rem;height:4px;width:80px">
-          <div class="ranking-bar-fill" style="width:${distPct}%;background:linear-gradient(90deg,#60a5fa,#3b82f6)"></div>
-        </div>
+      <td style="font-size:.82rem;color:${isPr?'var(--gold)':'var(--text)'};font-weight:600">
+        ${fmt(v.media_mensal??0)}<span style="font-size:.65rem;color:var(--muted);font-weight:400">/mês</span>
       </td>
-      <td style="color:var(--muted);font-size:.79rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(v.top_classe)}</td>
+      <td style="font-size:.82rem;color:${anCor};font-weight:600">${(v.pct_antigos??0).toFixed(1)}%</td>
+      <td style="color:var(--muted);font-size:.76rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+          title="${esc(v.top_classe)}">${esc(v.top_classe)}</td>
+      <td style="color:var(--muted);font-size:.76rem;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+          title="${esc(v.top_assunto??'—')}">${esc(v.top_assunto??'—')}</td>
     </tr>`;
   }).join('');
 
   document.getElementById('varas-table-content').innerHTML = `
+    <div class="varas-charts-grid">
+      <div class="varas-chart-card">
+        <div class="varas-chart-title">📊 Acervo total</div>
+        ${barsAcervo}
+      </div>
+      <div class="varas-chart-card">
+        <div class="varas-chart-title">⏳ % Processos &gt; 4 anos</div>
+        ${barsAntigos}
+      </div>
+    </div>
     <div style="overflow-x:auto">
       <table>
-        <thead>
-          <tr>
-            <th>Vara</th>
-            <th>Acervo</th>
-            <th>Distribuídos (12m)</th>
-            <th>Top Classe</th>
-          </tr>
-        </thead>
+        <thead><tr>
+          <th class="${thCls('nome')}"      onclick="varasSortBy('nome')">Vara</th>
+          <th class="${thCls('acervo')}"    onclick="varasSortBy('acervo')">Acervo</th>
+          <th class="${thCls('ultimos_12m')}" onclick="varasSortBy('ultimos_12m')">Distribuídos (12m)</th>
+          <th class="${thCls('media_mensal')}" onclick="varasSortBy('media_mensal')">Média/mês</th>
+          <th class="${thCls('pct_antigos')}" onclick="varasSortBy('pct_antigos')">% &gt; 4 anos</th>
+          <th class="${thCls('top_classe')}"  onclick="varasSortBy('top_classe')">Top Classe</th>
+          <th class="${thCls('top_assunto')}" onclick="varasSortBy('top_assunto')">Top Assunto</th>
+        </tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>`;

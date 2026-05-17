@@ -500,26 +500,41 @@ app.get('/api/pje/varas-comparativo', async (req, res) => {
     const gte12m = new Date();
     gte12m.setFullYear(gte12m.getFullYear() - 1);
     const gte12mStr = gte12m.toISOString().slice(0, 10);
+    const gte4y     = new Date(); gte4y.setFullYear(gte4y.getFullYear() - 4);
+    const gte4yStr  = gte4y.toISOString().slice(0, 10);
 
     const detalhes = await Promise.all(grupoVaras.map(async nome => {
       const acervoLocal = todasVaras.find(v => v.nome === nome)?.acervo ?? 0;
+      const varaFilter  = { term: { 'orgaoJulgador.nome.keyword': nome } };
       const body12m = {
-        query: {
-          bool: { filter: [
-            { term: { 'orgaoJulgador.nome.keyword': nome } },
-            { range: { dataAjuizamento: { gte: gte12mStr } } },
-          ] },
-        },
+        query: { bool: { filter: [varaFilter, { range: { dataAjuizamento: { gte: gte12mStr } } }] } },
         size: 0,
-        aggs: { por_classe: { terms: { field: 'classe.nome.keyword', size: 3 } } },
+        aggs: {
+          por_classe:  { terms: { field: 'classe.nome.keyword',   size: 1 } },
+          por_assunto: { terms: { field: 'assuntos.nome.keyword', size: 1 } },
+        },
+      };
+      const bodyAntigos = {
+        query: { bool: { filter: [varaFilter, { range: { dataAjuizamento: { lt: gte4yStr } } }] } },
+        size: 0,
       };
       try {
-        const r = await datajudPost(IDX, body12m);
-        const hits12m    = r.body?.hits?.total?.value ?? 0;
-        const topClasse  = r.body?.aggregations?.por_classe?.buckets?.[0]?.key ?? '—';
-        return { nome, acervo: acervoLocal, ultimos_12m: hits12m, top_classe: topClasse };
+        const [r12m, rAnt] = await Promise.all([
+          datajudPost(IDX,       body12m),
+          datajudPost(IDX_COUNT, bodyAntigos),
+        ]);
+        const hits12m    = r12m.body?.hits?.total?.value ?? 0;
+        const antigos    = rAnt.body?.count ?? 0;
+        const topClasse  = r12m.body?.aggregations?.por_classe?.buckets?.[0]?.key  ?? '—';
+        const topAssunto = r12m.body?.aggregations?.por_assunto?.buckets?.[0]?.key ?? '—';
+        const pctAntigos = acervoLocal > 0 ? +((antigos / acervoLocal) * 100).toFixed(1) : 0;
+        return { nome, acervo: acervoLocal, ultimos_12m: hits12m,
+                 media_mensal: Math.round(hits12m / 12),
+                 top_classe: topClasse, top_assunto: topAssunto,
+                 pct_antigos: pctAntigos };
       } catch {
-        return { nome, acervo: acervoLocal, ultimos_12m: 0, top_classe: '—' };
+        return { nome, acervo: acervoLocal, ultimos_12m: 0, media_mensal: 0,
+                 top_classe: '—', top_assunto: '—', pct_antigos: 0 };
       }
     }));
 
