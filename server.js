@@ -250,8 +250,9 @@ app.get('/api/pje/volume-mensal', async (req, res) => {
     if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
     const yearNow = new Date().getFullYear();
     const valid = (r.body.aggregations?.por_mes?.buckets ?? [])
+      .filter(b => b.doc_count > 0)
       .filter(b => { const y = new Date(b.key).getFullYear(); return y >= 2000 && y <= yearNow + 1; });
-    res.json({ por_mes: valid.slice(-24).map(b => ({ mes: b.key_as_string, total: b.doc_count })), mock: false });
+    res.json({ por_mes: valid.slice(-36).map(b => ({ mes: b.key_as_string, total: b.doc_count })), mock: false });
   } catch (e) { console.error('[pje/volume-mensal]', e.message); res.status(502).json({ error: e.message }); }
 });
 
