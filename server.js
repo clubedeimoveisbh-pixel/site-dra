@@ -155,150 +155,99 @@ function dashAuth(req, res, next) {
   `);
 }
 
+const IDX = `/${INDEX_NAME}/_search`;
+
+// Retorna query ElasticSearch por vara — usa ?vara= do query param
+function varaQuery(req) {
+  const vara = req.query.vara || VARA_NOME;
+  if (!vara) return null;
+  return { term: { 'orgaoJulgador.nome.keyword': vara } };
+}
+
+// ── API: lista todas as varas do TRT-3 ───────────────────────────────────────
+app.get('/api/pje/varas', async (req, res) => {
+  try {
+    const body = { size: 0, aggs: { varas: { terms: { field: 'orgaoJulgador.nome.keyword', size: 300, order: { _key: 'asc' } } } } };
+    const r = await datajudPost(IDX, body);
+    if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
+    res.json({ varas: (r.body.aggregations?.varas?.buckets ?? []).map(b => ({ nome: b.key, total: b.doc_count })) });
+  } catch (e) { console.error('[pje/varas]', e.message); res.status(502).json({ error: e.message }); }
+});
+
 // ── API: stats ────────────────────────────────────────────────────────────────
 app.get('/api/pje/stats', async (req, res) => {
-  if (!DATAJUD_KEY || !VARA_CODIGO) {
-    return res.json({ ...MOCK_STATS, ultima_atualizacao: new Date().toISOString() });
-  }
+  const q = varaQuery(req);
+  if (!q) return res.json({ ...MOCK_STATS, ultima_atualizacao: new Date().toISOString() });
   try {
+    const inicioMes = new Date(); inicioMes.setDate(1);
     const body = {
-      query: { bool: { must: [{ term: { 'orgaoJulgador.codigo': VARA_CODIGO } }] } },
-      aggs: {
-        distribuidos_mes: {
-          filter: {
-            range: {
-              dataAjuizamento: {
-                gte: new Date(new Date().setDate(1)).toISOString().slice(0, 10),
-                lte: new Date().toISOString().slice(0, 10),
-              },
-            },
-          },
-        },
-      },
-      size: 0,
+      query: q, size: 0,
+      aggs: { dist_mes: { filter: { range: { dataAjuizamento: { gte: inicioMes.toISOString().slice(0,7) } } } } },
     };
-    const r = await datajudPost('/api_trt3/_search', body);
+    const r = await datajudPost(IDX, body);
     if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
-    const hits = r.body.hits?.total?.value ?? 0;
-    const distMes = r.body.aggregations?.distribuidos_mes?.doc_count ?? 0;
-    res.json({
-      acervo:             hits,
-      distribuidos_mes:   distMes,
-      concluidos_mes:     null,
-      taxa_acordo:        null,
-      tempo_medio_dias:   null,
-      ultima_atualizacao: new Date().toISOString(),
-      mock:               false,
-    });
-  } catch (e) {
-    console.error('[pje/stats]', e.message);
-    res.status(502).json({ error: e.message });
-  }
+    res.json({ acervo: r.body.hits?.total?.value ?? 0, distribuidos_mes: r.body.aggregations?.dist_mes?.doc_count ?? 0,
+               concluidos_mes: null, taxa_acordo: null, ultima_atualizacao: new Date().toISOString(), mock: false });
+  } catch (e) { console.error('[pje/stats]', e.message); res.status(502).json({ error: e.message }); }
 });
 
 // ── API: classes ──────────────────────────────────────────────────────────────
 app.get('/api/pje/classes', async (req, res) => {
-  if (!DATAJUD_KEY || !VARA_CODIGO) return res.json({ classes: MOCK_CLASSES, mock: true });
+  const q = varaQuery(req);
+  if (!q) return res.json({ classes: MOCK_CLASSES, mock: true });
   try {
-    const body = {
-      query: { term: { 'orgaoJulgador.codigo': VARA_CODIGO } },
-      aggs: { por_classe: { terms: { field: 'classeProcessual.nome.keyword', size: 20 } } },
-      size: 0,
-    };
-    const r = await datajudPost('/api_trt3/_search', body);
+    const body = { query: q, size: 0, aggs: { por_classe: { terms: { field: 'classe.nome.keyword', size: 20 } } } };
+    const r = await datajudPost(IDX, body);
     if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
-    const buckets = r.body.aggregations?.por_classe?.buckets ?? [];
-    res.json({
-      classes: buckets.map(b => ({ nome: b.key, total: b.doc_count })),
-      mock:    false,
-    });
-  } catch (e) {
-    console.error('[pje/classes]', e.message);
-    res.status(502).json({ error: e.message });
-  }
+    res.json({ classes: (r.body.aggregations?.por_classe?.buckets ?? []).map(b => ({ nome: b.key, total: b.doc_count })), mock: false });
+  } catch (e) { console.error('[pje/classes]', e.message); res.status(502).json({ error: e.message }); }
 });
 
 // ── API: volume mensal ────────────────────────────────────────────────────────
 app.get('/api/pje/volume-mensal', async (req, res) => {
-  if (!DATAJUD_KEY || !VARA_CODIGO) return res.json({ por_mes: MOCK_POR_MES, mock: true });
+  const q = varaQuery(req);
+  if (!q) return res.json({ por_mes: MOCK_POR_MES, mock: true });
   try {
-    const body = {
-      query: { term: { 'orgaoJulgador.codigo': VARA_CODIGO } },
-      aggs: {
-        por_mes: {
-          date_histogram: { field: 'dataAjuizamento', calendar_interval: 'month', format: 'MM/yy' },
-        },
-      },
-      size: 0,
-    };
-    const r = await datajudPost('/api_trt3/_search', body);
+    const body = { query: q, size: 0, aggs: { por_mes: { date_histogram: { field: 'dataAjuizamento', calendar_interval: 'month', format: 'MM/yy' } } } };
+    const r = await datajudPost(IDX, body);
     if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
-    const buckets = r.body.aggregations?.por_mes?.buckets ?? [];
-    const last12  = buckets.slice(-12);
-    res.json({
-      por_mes: last12.map(b => ({ mes: b.key_as_string, total: b.doc_count })),
-      mock:    false,
-    });
-  } catch (e) {
-    console.error('[pje/volume-mensal]', e.message);
-    res.status(502).json({ error: e.message });
-  }
+    res.json({ por_mes: (r.body.aggregations?.por_mes?.buckets ?? []).slice(-24).map(b => ({ mes: b.key_as_string, total: b.doc_count })), mock: false });
+  } catch (e) { console.error('[pje/volume-mensal]', e.message); res.status(502).json({ error: e.message }); }
 });
 
 // ── API: assuntos ─────────────────────────────────────────────────────────────
 app.get('/api/pje/assuntos', async (req, res) => {
-  if (!DATAJUD_KEY || !VARA_CODIGO) return res.json({ assuntos: MOCK_ASSUNTOS, mock: true });
+  const q = varaQuery(req);
+  if (!q) return res.json({ assuntos: MOCK_ASSUNTOS, mock: true });
   try {
-    const body = {
-      query: { term: { 'orgaoJulgador.codigo': VARA_CODIGO } },
-      aggs: { por_assunto: { terms: { field: 'assuntos.nome.keyword', size: 10 } } },
-      size: 0,
-    };
-    const r = await datajudPost('/api_trt3/_search', body);
+    const body = { query: q, size: 0, aggs: { por_assunto: { terms: { field: 'assuntos.nome.keyword', size: 15 } } } };
+    const r = await datajudPost(IDX, body);
     if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
-    const buckets = r.body.aggregations?.por_assunto?.buckets ?? [];
-    res.json({
-      assuntos: buckets.map(b => ({ nome: b.key, total: b.doc_count })),
-      mock:     false,
-    });
-  } catch (e) {
-    console.error('[pje/assuntos]', e.message);
-    res.status(502).json({ error: e.message });
-  }
+    res.json({ assuntos: (r.body.aggregations?.por_assunto?.buckets ?? []).map(b => ({ nome: b.key, total: b.doc_count })), mock: false });
+  } catch (e) { console.error('[pje/assuntos]', e.message); res.status(502).json({ error: e.message }); }
 });
 
-// ── API: tempos de tramitação (sempre mock por ora — cálculo exige pipeline) ──
+// ── API: tempos (mock — requer pipeline de movimentos) ────────────────────────
 app.get('/api/pje/tempos', async (req, res) => {
   res.json({ tempos: MOCK_TEMPOS, mock: true });
 });
 
 // ── API: processos recentes ───────────────────────────────────────────────────
 app.get('/api/pje/processos', async (req, res) => {
-  if (!DATAJUD_KEY || !VARA_CODIGO) return res.json({ processos: MOCK_PROCESSOS, mock: true });
+  const q = varaQuery(req);
+  if (!q) return res.json({ processos: MOCK_PROCESSOS, mock: true });
   try {
-    const body = {
-      query: { term: { 'orgaoJulgador.codigo': VARA_CODIGO } },
-      sort:  [{ dataAjuizamento: { order: 'desc' } }],
-      _source: ['numeroProcesso', 'dataAjuizamento', 'classeProcessual.nome', 'situacao'],
-      size: 20,
-    };
-    const r = await datajudPost('/api_trt3/_search', body);
+    const body = { query: q, sort: [{ dataAjuizamento: { order: 'desc' } }],
+                   _source: ['numeroProcesso', 'dataAjuizamento', 'classe', 'grau'], size: 30 };
+    const r = await datajudPost(IDX, body);
     if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
-    const hits = r.body.hits?.hits ?? [];
-    res.json({
-      processos: hits.map(h => ({
-        numero:      h._source.numeroProcesso,
-        classe:      h._source.classeProcessual?.nome ?? '—',
-        ajuizamento: h._source.dataAjuizamento?.slice(0, 10) ?? '—',
-        fase:        '—',
-        status:      h._source.situacao ?? '—',
-      })),
-      mock: false,
-    });
-  } catch (e) {
-    console.error('[pje/processos]', e.message);
-    res.status(502).json({ error: e.message });
-  }
+    res.json({ processos: (r.body.hits?.hits ?? []).map(h => ({
+      numero:      h._source.numeroProcesso,
+      classe:      h._source.classe?.nome ?? '—',
+      ajuizamento: String(h._source.dataAjuizamento || '').replace(/(\d{4})(\d{2})(\d{2}).*/, '$3/$2/$1'),
+      grau:        h._source.grau ?? '—',
+    })), mock: false });
+  } catch (e) { console.error('[pje/processos]', e.message); res.status(502).json({ error: e.message }); }
 });
 
 // ── Dashboard (protected) ─────────────────────────────────────────────────────
