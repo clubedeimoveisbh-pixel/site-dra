@@ -3,245 +3,244 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ferramentas Jurídicas — Dra. Ana Paula Oliveira</title>
-  <meta name="description" content="Ferramentas jurídicas gratuitas: calculadora de prescrição trabalhista (Lei 14.010/2020), calculadora de aviso prévio proporcional e tabela de reflexos salariais.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
+  <title>Ferramentas — Dra. Ana Paula Oliveira</title>
+  <meta name="description" content="Calculadoras gratuitas de prescrição trabalhista e aviso prévio proporcional.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9878;</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
 <div id="nav-placeholder"></div>
 
 <section class="page-hero">
   <div class="container page-hero-inner">
     <div class="breadcrumb">
-      <a href="index.html">Início</a>
-      <span>/</span>
-      <span>Ferramentas</span>
+      <a href="index.html">In&iacute;cio</a><span>/</span><span>Ferramentas</span>
     </div>
-    <span class="section-label">100% Gratuito</span>
-    <h1>Ferramentas Jurídicas</h1>
+    <span class="section-label">Ferramentas Gratuitas</span>
+    <h1>Calculadoras Jur&iacute;dicas</h1>
     <div class="gold-divider"></div>
-    <p>Calculadoras e tabelas de referência para o dia a dia do advogado e assistente jurídico trabalhista. Sem cadastro, sem custo.</p>
+    <p>Ferramentas pr&aacute;ticas e gratuitas baseadas na legisla&ccedil;&atilde;o vigente. Calcule com precis&atilde;o, decida com seguran&ccedil;a.</p>
   </div>
 </section>
 
 <section class="section tools-section">
   <div class="container">
 
-    <!-- ── CALCULADORA 1: PRESCRIÇÃO ── -->
+    <!-- Ferramenta 1: Prescrição -->
     <div class="tool-block" id="prescricao">
       <div class="tool-header">
-        <div class="tool-header-icon">⏳</div>
+        <div class="tool-header-icon">&#x23F3;</div>
         <div class="tool-header-text">
-          <h3>Calculadora de Prescrição Trabalhista</h3>
-          <p>Inclui a suspensão de 141 dias da Lei 14.010/2020 (pandemia)</p>
+          <h3>Calculadora de Prescri&ccedil;&atilde;o — Lei 14.010/2020</h3>
+          <p>Insira a data e calcule automaticamente o ajuste de 141 dias da suspens&atilde;o pand&ecirc;mica</p>
         </div>
       </div>
       <div class="tool-body">
-        <p style="margin-bottom:2rem;padding:1rem 1.25rem;background:rgba(200,167,91,0.07);border:1px solid var(--border);border-radius:var(--radius);font-size:0.88rem;line-height:1.65">
-          <strong style="color:var(--navy-mid)">Como funciona:</strong>
-          Informe a data da rescisão ou do fato gerador (lesão de direito).
-          A ferramenta calcula a data-limite para ajuizamento da ação trabalhista,
-          acrescendo automaticamente os <strong>141 dias de suspensão pandêmica</strong>
-          (12/06/2020 a 30/10/2020, conforme Lei 14.010/2020), quando aplicável ao caso.
-          O prazo ordinário de referência é de <strong>2 anos</strong> (art. 7º, XXIX, CF/88).
-        </p>
         <div class="form-group">
-          <label for="data-prescricao">Data da rescisão ou fato gerador</label>
-          <input type="date" id="data-prescricao" max="2099-12-31">
+          <label for="data-prescricao">Data original da prescri&ccedil;&atilde;o</label>
+          <input type="date" id="data-prescricao" max="2030-12-31">
         </div>
-        <button class="btn btn-primary" id="btn-calcular-prescricao">
-          Calcular prescrição
-        </button>
-        <div class="tool-result" id="result-prescricao"></div>
+        <button class="btn btn-primary" onclick="calcPrescricao()">Calcular</button>
+
+        <div class="tool-result" id="result-prescricao">
+          <div class="result-label">Data com suspens&atilde;o aplicada</div>
+          <div class="result-value" id="prescricao-valor">—</div>
+          <div class="result-detail">
+            <div class="result-detail-item">
+              <div class="rd-label">Data original</div>
+              <div class="rd-value" id="prescricao-original">—</div>
+            </div>
+            <div class="result-detail-item">
+              <div class="rd-label">Dias adicionados</div>
+              <div class="rd-value">141 dias</div>
+            </div>
+            <div class="result-detail-item">
+              <div class="rd-label">Per&iacute;odo suspenso</div>
+              <div class="rd-value">20/03 a 07/08/2020</div>
+            </div>
+          </div>
+          <div class="result-note">
+            <p>&#9432;&nbsp; A Lei 14.010/2020 (LGDP) suspendeu os prazos prescricionais por 141 dias durante a emerg&ecirc;ncia sanit&aacute;ria da Covid-19 (per&iacute;odo: 20/03/2020 a 07/08/2020). A prescri&ccedil;&atilde;o s&oacute; voltou a correr ap&oacute;s esse per&iacute;odo, devendo-se acrescentar 141 dias ao prazo original.</p>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- ── CALCULADORA 2: AVISO PRÉVIO ── -->
+    <!-- Ferramenta 2: Aviso Prévio -->
     <div class="tool-block" id="aviso-previo">
       <div class="tool-header">
-        <div class="tool-header-icon">📅</div>
+        <div class="tool-header-icon">&#x1F4C5;</div>
         <div class="tool-header-text">
-          <h3>Calculadora de Aviso Prévio Proporcional</h3>
-          <p>Cálculo conforme Lei 12.506/2011 — base 30 dias + 3 por ano</p>
+          <h3>Calculadora de Aviso Pr&eacute;vio Proporcional</h3>
+          <p>C&aacute;lculo conforme a Lei 12.506/2011 — at&eacute; 90 dias proporcionais ao tempo de servi&ccedil;o</p>
         </div>
       </div>
       <div class="tool-body">
-        <p style="margin-bottom:2rem;padding:1rem 1.25rem;background:rgba(200,167,91,0.07);border:1px solid var(--border);border-radius:var(--radius);font-size:0.88rem;line-height:1.65">
-          <strong style="color:var(--navy-mid)">Como funciona:</strong>
-          Informe as datas de admissão e dispensa. A ferramenta calcula o aviso prévio
-          proporcional ao tempo de serviço conforme a <strong>Lei 12.506/2011</strong>:
-          base de <strong>30 dias + 3 dias por ano completo</strong> a partir do 2º ano.
-          O máximo é de <strong>90 dias</strong>. A projeção indica a data-limite do aviso.
-        </p>
         <div class="form-row">
           <div class="form-group">
-            <label for="data-admissao">Data de admissão</label>
-            <input type="date" id="data-admissao" max="2099-12-31">
+            <label for="data-admissao">Data de Admiss&atilde;o</label>
+            <input type="date" id="data-admissao" max="2030-12-31">
           </div>
           <div class="form-group">
-            <label for="data-dispensa">Data de dispensa</label>
-            <input type="date" id="data-dispensa" max="2099-12-31">
+            <label for="data-dispensa">Data de Dispensa</label>
+            <input type="date" id="data-dispensa" max="2030-12-31">
           </div>
         </div>
-        <button class="btn btn-primary" id="btn-calcular-aviso">
-          Calcular aviso prévio
-        </button>
-        <div class="tool-result" id="result-aviso"></div>
+        <button class="btn btn-primary" onclick="calcAvisoPrevio()">Calcular</button>
+
+        <div class="tool-result" id="result-aviso">
+          <div class="result-label">Dura&ccedil;&atilde;o do Aviso Pr&eacute;vio</div>
+          <div class="result-value" id="aviso-total">—</div>
+          <div class="result-detail">
+            <div class="result-detail-item">
+              <div class="rd-label">Tempo de servi&ccedil;o</div>
+              <div class="rd-value" id="aviso-tempo">—</div>
+            </div>
+            <div class="result-detail-item">
+              <div class="rd-label">Anos completos</div>
+              <div class="rd-value" id="aviso-anos">—</div>
+            </div>
+            <div class="result-detail-item">
+              <div class="rd-label">Base (legal)</div>
+              <div class="rd-value">30 dias</div>
+            </div>
+            <div class="result-detail-item">
+              <div class="rd-label">Dias adicionais</div>
+              <div class="rd-value" id="aviso-adicionais">—</div>
+            </div>
+            <div class="result-detail-item">
+              <div class="rd-label">Proje&ccedil;&atilde;o do aviso</div>
+              <div class="rd-value" id="aviso-projecao">—</div>
+            </div>
+          </div>
+          <div class="result-note">
+            <p>&#9432;&nbsp; Lei 12.506/2011: aviso pr&eacute;vio de 30 dias + 3 dias por ano de servi&ccedil;o completo al&eacute;m do primeiro, at&eacute; o limite de 60 dias adicionais (total m&aacute;ximo: 90 dias). Exemplo: 8 anos de servi&ccedil;o &rarr; 30 + 24 = 54 dias.</p>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- ── TABELA 3: REFLEXOS ── -->
+    <!-- Ferramenta 3: Tabela de Reflexos -->
     <div class="tool-block" id="reflexos">
       <div class="tool-header">
-        <div class="tool-header-icon">💰</div>
+        <div class="tool-header-icon">&#x1F4B0;</div>
         <div class="tool-header-text">
-          <h3>Tabela de Reflexos — Salarial vs. Indenizatório</h3>
-          <p>Verbas que integram (ou não) a base de cálculo de FGTS, férias, 13º e INSS</p>
+          <h3>Tabela de Natureza Salarial vs. Indenizat&oacute;ria</h3>
+          <p>Verbas que refletem em FGTS, f&eacute;rias e 13&ordm; sal&aacute;rio versus as que n&atilde;o refletem</p>
         </div>
       </div>
       <div class="tool-body">
-        <p style="margin-bottom:1.75rem;padding:1rem 1.25rem;background:rgba(200,167,91,0.07);border:1px solid var(--border);border-radius:var(--radius);font-size:0.88rem;line-height:1.65">
-          <strong style="color:var(--navy-mid)">Referência:</strong>
-          As <strong>verbas salariais</strong> integram a base de cálculo do FGTS, férias,
-          13º salário e INSS. As <strong>verbas indenizatórias</strong> não integram essa base.
-          A distinção é fundamental para calcular corretamente as parcelas em processos de rescisão.
-        </p>
+        <p style="margin-bottom:1rem;font-size:0.9rem">A natureza jur&iacute;dica das verbas trabalhistas determina quais parcelas integram a remunera&ccedil;&atilde;o para c&aacute;lculo de FGTS, f&eacute;rias, 13&ordm; sal&aacute;rio, aviso pr&eacute;vio e contribui&ccedil;&otilde;es previdenci&aacute;rias.</p>
 
-        <div style="overflow-x:auto">
-          <table class="reflexos-table">
-            <thead>
-              <tr>
-                <th style="width:30%">Verba</th>
-                <th style="width:18%">Natureza</th>
-                <th style="width:52%">Fundamento Legal / Observação</th>
-              </tr>
-            </thead>
-            <tbody>
-
-              <!-- VERBAS SALARIAIS -->
-              <tr>
-                <td><strong>Salário base</strong></td>
-                <td><span class="badge-salarial">Salarial</span></td>
-                <td class="legal-ref">Art. 457, caput, CLT — Remunera a prestação de serviços; integra todos os reflexos.</td>
-              </tr>
-              <tr>
-                <td><strong>Horas extras</strong></td>
-                <td><span class="badge-salarial">Salarial</span></td>
-                <td class="legal-ref">Art. 7º, XVI, CF/88 c/c art. 59, CLT — Súm. 264, TST (reflexos no RSR, férias, 13º e FGTS).</td>
-              </tr>
-              <tr>
-                <td><strong>Adicional noturno</strong></td>
-                <td><span class="badge-salarial">Salarial</span></td>
-                <td class="legal-ref">Art. 73, CLT — Súm. 60, TST: integra o cálculo de férias, 13º, RSR e FGTS.</td>
-              </tr>
-              <tr>
-                <td><strong>Adicional de periculosidade</strong></td>
-                <td><span class="badge-salarial">Salarial</span></td>
-                <td class="legal-ref">Art. 193, §1º, CLT — 30% sobre o salário base; integra todos os reflexos. Súm. 132, TST.</td>
-              </tr>
-              <tr>
-                <td><strong>Adicional de insalubridade</strong></td>
-                <td><span class="badge-salarial">Salarial</span></td>
-                <td class="legal-ref">Art. 192, CLT — Sobre o salário mínimo (regra geral). Integra férias, 13º e FGTS.</td>
-              </tr>
-              <tr>
-                <td><strong>Comissões e gorjetas habituais</strong></td>
-                <td><span class="badge-salarial">Salarial</span></td>
-                <td class="legal-ref">Art. 457, §1º, CLT — Integram o salário para todos os efeitos legais. Súm. 354, TST.</td>
-              </tr>
-              <tr>
-                <td><strong>Gratificação habitual</strong></td>
-                <td><span class="badge-salarial">Salarial</span></td>
-                <td class="legal-ref">Art. 457, §2º, CLT — Paga com habitualidade incorpora-se ao contrato. Súm. 241, TST.</td>
-              </tr>
-              <tr>
-                <td><strong>PLR habitual (desvio de finalidade)</strong></td>
-                <td><span class="badge-salarial">Salarial</span></td>
-                <td class="legal-ref">Art. 7º, XI, CF/88 — Se paga com habitualidade e sem negociação coletiva, perde a natureza indenizatória. OJ 390, TST.</td>
-              </tr>
-              <tr>
-                <td><strong>Prêmios habituais</strong></td>
-                <td><span class="badge-salarial">Salarial</span></td>
-                <td class="legal-ref">Art. 457, §2º, CLT (redação anterior à Reforma) — Quando pagos com habitualidade e vinculados à produção. Verificar Reforma 2017.</td>
-              </tr>
-              <tr>
-                <td><strong>Diárias de viagem (acima de 50% do salário)</strong></td>
-                <td><span class="badge-salarial">Salarial</span></td>
-                <td class="legal-ref">Art. 457, §2º, CLT — Quando excedentes a 50% do salário, integram a remuneração. Súm. 101, TST.</td>
-              </tr>
-
-              <!-- VERBAS INDENIZATÓRIAS -->
-              <tr>
-                <td><strong>Férias indenizadas + 1/3</strong></td>
-                <td><span class="badge-indenizatorio">Indenizatório</span></td>
-                <td class="legal-ref">Art. 146, parágrafo único, CLT — Férias não gozadas pagas na rescisão têm natureza indenizatória. Não incidem INSS e FGTS.</td>
-              </tr>
-              <tr>
-                <td><strong>Aviso prévio indenizado</strong></td>
-                <td><span class="badge-indenizatorio">Indenizatório</span></td>
-                <td class="legal-ref">Art. 487, §1º, CLT — Quando o empregador opta pela indenização, não incide FGTS. Súm. 305, TST.</td>
-              </tr>
-              <tr>
-                <td><strong>FGTS + multa de 40%</strong></td>
-                <td><span class="badge-indenizatorio">Indenizatório</span></td>
-                <td class="legal-ref">Art. 18, Lei 8.036/90 — A multa rescisória tem natureza indenizatória. Não incide IRPF nem INSS.</td>
-              </tr>
-              <tr>
-                <td><strong>Indenização por dano moral</strong></td>
-                <td><span class="badge-indenizatorio">Indenizatório</span></td>
-                <td class="legal-ref">Art. 5º, X, CF/88 c/c art. 223-A, CLT — Reparação de natureza civil; não integra qualquer base de cálculo trabalhista.</td>
-              </tr>
-              <tr>
-                <td><strong>Ajuda de custo</strong></td>
-                <td><span class="badge-indenizatorio">Indenizatório</span></td>
-                <td class="legal-ref">Art. 457, §2º, CLT — Não integra o salário; paga para ressarcir despesas do trabalhador.</td>
-              </tr>
-              <tr>
-                <td><strong>Diárias de viagem (até 50% do salário)</strong></td>
-                <td><span class="badge-indenizatorio">Indenizatório</span></td>
-                <td class="legal-ref">Art. 457, §2º, CLT — Até 50% do salário, têm natureza indenizatória. Súm. 101, TST.</td>
-              </tr>
-              <tr>
-                <td><strong>Vale-transporte</strong></td>
-                <td><span class="badge-indenizatorio">Indenizatório</span></td>
-                <td class="legal-ref">Lei 7.418/85 c/c Decreto 95.247/87 — Natureza indenizatória por expressa disposição legal. Não integra o salário.</td>
-              </tr>
-              <tr>
-                <td><strong>Vale-refeição / alimentação (PAT)</strong></td>
-                <td><span class="badge-indenizatorio">Indenizatório</span></td>
-                <td class="legal-ref">Lei 6.321/76 — Quando fornecido nos termos do PAT, não integra o salário. Súm. 241, TST (a contrario sensu).</td>
-              </tr>
-              <tr>
-                <td><strong>PLR nos termos legais</strong></td>
-                <td><span class="badge-indenizatorio">Indenizatório</span></td>
-                <td class="legal-ref">Art. 7º, XI, CF/88 c/c Lei 10.101/2000 — Quando paga com negociação coletiva e sem habitualidade, não integra o salário.</td>
-              </tr>
-              <tr>
-                <td><strong>Prêmios eventuais (Reforma 2017)</strong></td>
-                <td><span class="badge-indenizatorio">Indenizatório</span></td>
-                <td class="legal-ref">Art. 457, §4º, CLT (Lei 13.467/2017) — Prêmios pagos até 2x por ano não integram o salário após a Reforma.</td>
-              </tr>
-              <tr>
-                <td><strong>Auxílio-doença (período de afastamento)</strong></td>
-                <td><span class="badge-indenizatorio">Indenizatório</span></td>
-                <td class="legal-ref">Art. 59 e ss., Lei 8.213/91 — Benefício previdenciário pago pelo INSS; não é salário para fins de reflexos trabalhistas.</td>
-              </tr>
-
-            </tbody>
-          </table>
-        </div>
-
-        <p style="font-size:0.78rem;color:var(--text-light);margin-top:1.25rem;line-height:1.6">
-          <strong>Nota:</strong> Esta tabela tem finalidade meramente informativa e de referência rápida.
-          A natureza jurídica de cada verba pode variar conforme as circunstâncias do caso concreto,
-          cláusulas do contrato de trabalho, convenções coletivas e a jurisprudência atualizada do TST.
-          Consulte um advogado especializado para análise do seu caso.
-        </p>
+        <table class="reflexos-table">
+          <thead>
+            <tr>
+              <th>Verba</th>
+              <th>Natureza</th>
+              <th>Fundamento Legal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Sal&aacute;rio-base</strong></td>
+              <td><span class="badge-salarial">Salarial</span></td>
+              <td class="legal-ref">Art. 457, caput, CLT</td>
+            </tr>
+            <tr>
+              <td><strong>Horas extras</strong></td>
+              <td><span class="badge-salarial">Salarial</span></td>
+              <td class="legal-ref">Art. 7&ordm;, XVI, CF; Sm. 376, TST</td>
+            </tr>
+            <tr>
+              <td><strong>Adicional noturno</strong></td>
+              <td><span class="badge-salarial">Salarial</span></td>
+              <td class="legal-ref">Art. 73, CLT; Sm. 60, TST</td>
+            </tr>
+            <tr>
+              <td><strong>Adicional de insalubridade</strong></td>
+              <td><span class="badge-salarial">Salarial</span></td>
+              <td class="legal-ref">Art. 192, CLT; OJ 103, SDI-1</td>
+            </tr>
+            <tr>
+              <td><strong>Adicional de periculosidade</strong></td>
+              <td><span class="badge-salarial">Salarial</span></td>
+              <td class="legal-ref">Art. 193, &sect;1&ordm;, CLT; Sm. 132, TST</td>
+            </tr>
+            <tr>
+              <td><strong>Comiss&otilde;es e percentagens</strong></td>
+              <td><span class="badge-salarial">Salarial</span></td>
+              <td class="legal-ref">Art. 457, &sect;1&ordm;, CLT</td>
+            </tr>
+            <tr>
+              <td><strong>Gorjetas</strong></td>
+              <td><span class="badge-salarial">Salarial</span></td>
+              <td class="legal-ref">Art. 457, &sect;3&ordm;, CLT; Sm. 354, TST</td>
+            </tr>
+            <tr>
+              <td><strong>Gratifica&ccedil;&atilde;o habitual</strong></td>
+              <td><span class="badge-salarial">Salarial</span></td>
+              <td class="legal-ref">Art. 457, &sect;1&ordm;, CLT; Sm. 209, TST</td>
+            </tr>
+            <tr>
+              <td><strong>Di&aacute;rias acima de 50% do sal&aacute;rio</strong></td>
+              <td><span class="badge-salarial">Salarial</span></td>
+              <td class="legal-ref">Art. 457, &sect;2&ordm;, CLT; Sm. 101, TST</td>
+            </tr>
+            <tr>
+              <td><strong>F&eacute;rias indenizadas + 1/3</strong></td>
+              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
+              <td class="legal-ref">Art. 144 e 148, CLT; Sm. 328, TST</td>
+            </tr>
+            <tr>
+              <td><strong>Aviso pr&eacute;vio indenizado</strong></td>
+              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
+              <td class="legal-ref">Art. 487, &sect;1&ordm;, CLT; OJ 195, SDI-1</td>
+            </tr>
+            <tr>
+              <td><strong>FGTS + multa de 40%</strong></td>
+              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
+              <td class="legal-ref">Art. 18, &sect;1&ordm;, Lei 8.036/1990</td>
+            </tr>
+            <tr>
+              <td><strong>Indeniza&ccedil;&atilde;o por dano moral</strong></td>
+              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
+              <td class="legal-ref">Art. 5&ordm;, X, CF; Art. 223-A, CLT</td>
+            </tr>
+            <tr>
+              <td><strong>Ajuda de custo</strong></td>
+              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
+              <td class="legal-ref">Art. 457, &sect;2&ordm;, CLT</td>
+            </tr>
+            <tr>
+              <td><strong>Vale-transporte</strong></td>
+              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
+              <td class="legal-ref">Art. 2&ordm;, &sect;2&ordm;, Lei 7.418/1985</td>
+            </tr>
+            <tr>
+              <td><strong>Vale-refei&ccedil;&atilde;o / alimenta&ccedil;&atilde;o (PAT)</strong></td>
+              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
+              <td class="legal-ref">Art. 457, &sect;2&ordm;, CLT; OJ 133, SDI-1</td>
+            </tr>
+            <tr>
+              <td><strong>Di&aacute;rias at&eacute; 50% do sal&aacute;rio</strong></td>
+              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
+              <td class="legal-ref">Art. 457, &sect;2&ordm;, CLT; Sm. 101, TST</td>
+            </tr>
+            <tr>
+              <td><strong>PLR — Participa&ccedil;&atilde;o nos Lucros</strong></td>
+              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
+              <td class="legal-ref">Art. 7&ordm;, XI, CF; Sm. 451, TST</td>
+            </tr>
+            <tr>
+              <td><strong>Aux&iacute;lio-doen&ccedil;a (INSS)</strong></td>
+              <td><span class="badge-indenizatorio">Indenizat&oacute;rio</span></td>
+              <td class="legal-ref">Art. 476, CLT; Sm. 46, TST</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 

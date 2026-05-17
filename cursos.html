@@ -4,107 +4,84 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cursos — Dra. Ana Paula Oliveira</title>
-  <meta name="description" content="Cursos sobre IA aplicada ao direito do trabalho e prescrição trabalhista — elaborados por Dra. Ana Paula Oliveira.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
+  <meta name="description" content="Cursos sobre IA no direito do trabalho e prescrição trabalhista com Dra. Ana Paula Oliveira.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9878;</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
 <div id="nav-placeholder"></div>
 
 <section class="page-hero">
   <div class="container page-hero-inner">
     <div class="breadcrumb">
-      <a href="index.html">Início</a>
-      <span>/</span>
-      <span>Cursos</span>
+      <a href="index.html">In&iacute;cio</a><span>/</span><span>Cursos</span>
     </div>
-    <span class="section-label">Formação Especializada</span>
-    <h1>Cursos</h1>
+    <span class="section-label">Forma&ccedil;&atilde;o</span>
+    <h1>Cursos &amp; Treinamentos</h1>
     <div class="gold-divider"></div>
-    <p>Cursos com profundidade técnica e linguagem acessível, para advogados, assistentes jurídicos e estudantes que buscam dominar temas estratégicos do direito do trabalho.</p>
+    <p>Forma&ccedil;&atilde;o aprofundada sobre os temas que mais importam para quem atua no direito do trabalho contempor&acirc;neo.</p>
   </div>
 </section>
 
 <section class="section" style="background:var(--cream)">
   <div class="container">
+
     <div class="cursos-grid">
 
-      <!-- Curso 1 -->
       <div class="curso-card fade-up">
         <div class="curso-thumb">
-          <div class="curso-thumb-icon">🤖</div>
+          <div class="curso-thumb-icon">&#x1F916;</div>
           <span class="curso-status-badge soon">Em breve</span>
         </div>
         <div class="curso-body">
-          <div class="curso-category">IA &amp; Tecnologia Jurídica</div>
-          <h3>Inteligência Artificial para Advogados Trabalhistas</h3>
-          <p>
-            Curso prático e teórico sobre uso de IA generativa no dia a dia do advogado trabalhista.
-            Da elaboração de petições e pesquisa jurisprudencial ao uso crítico e ético dessas
-            ferramentas. Inclui análise das principais plataformas disponíveis no mercado
-            jurídico brasileiro e módulo especial sobre limites éticos e responsabilidade profissional.
-          </p>
+          <div class="curso-category">IA &amp; Direito</div>
+          <h3>IA no Direito do Trabalho: da teoria &agrave; pr&aacute;tica forense</h3>
+          <p>Do ChatGPT ao Copilot: aprenda a usar intelig&ecirc;ncia artificial generativa na elabora&ccedil;&atilde;o de pe&ccedil;as, pesquisa de jurisprud&ecirc;ncia e triagem de processos, com seguran&ccedil;a e fundamenta&ccedil;&atilde;o &eacute;tica. Inclui m&oacute;dulo sobre os riscos de alucina&ccedil;&otilde;es jur&iacute;dicas e como mitig&aacute;-los.</p>
           <div class="curso-meta">
-            <div class="curso-meta-item">
-              <span>⏱</span>
-              <strong>8 horas</strong>
-            </div>
-            <div class="curso-meta-item">
-              <span>📚</span>
-              <strong>12 módulos</strong>
-            </div>
-            <div class="curso-meta-item">
-              <span>🎓</span>
-              <strong>Certificado</strong>
-            </div>
+            <div class="curso-meta-item">&#x1F4D6;&nbsp;<strong>8 m&oacute;dulos</strong></div>
+            <div class="curso-meta-item">&#x23F1;&#xFE0F;&nbsp;<strong>12h de conte&uacute;do</strong></div>
+            <div class="curso-meta-item">&#x1F4BB;&nbsp;<strong>Online</strong></div>
           </div>
-          <div style="display:flex;gap:0.75rem;align-items:center">
-            <button class="btn btn-outline" onclick="alert('Este curso estará disponível em breve. Deixe seu e-mail nas redes sociais para ser avisado!')">
-              Avise-me quando abrir
-            </button>
-          </div>
+          <form class="curso-interesse-form" onsubmit="registrarInteresse(event,'curso-ia')">
+            <div class="form-group">
+              <label for="email-ia">Me avise quando lan&ccedil;ar</label>
+              <input type="email" id="email-ia" placeholder="seu@email.com.br" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%">Quero ser avisado(a)</button>
+            <div class="curso-success" id="success-curso-ia" style="display:none;margin-top:1rem;padding:1rem;background:rgba(34,139,100,0.10);border:1px solid rgba(34,139,100,0.30);border-radius:6px;color:#2a8b64;font-size:0.875rem">
+              &#x2713;&nbsp;Perfeito! Voc&ecirc; ser&aacute; avisado(a) assim que o curso for lan&ccedil;ado.
+            </div>
+          </form>
         </div>
       </div>
 
-      <!-- Curso 2 -->
       <div class="curso-card fade-up">
         <div class="curso-thumb">
-          <div class="curso-thumb-icon">⏳</div>
-          <span class="curso-status-badge available">Disponível</span>
+          <div class="curso-thumb-icon">&#x23F3;</div>
+          <span class="curso-status-badge soon">Em breve</span>
         </div>
         <div class="curso-body">
           <div class="curso-category">Processo do Trabalho</div>
-          <h3>Prescrição Trabalhista: Teoria Completa e Cálculos Práticos</h3>
-          <p>
-            Curso completo sobre prescrição no processo do trabalho: prazos bienal e quinquenal,
-            prescrição intercorrente (art. 11-A, CLT), causas de interrupção e suspensão — com
-            análise especial da Lei 14.010/2020 e os 141 dias pandêmicos. Inclui exercícios
-            práticos de cálculo e estudo de casos reais anonimizados.
-          </p>
+          <h3>Prescri&ccedil;&atilde;o Trabalhista na Pr&aacute;tica</h3>
+          <p>Domine todos os aspectos da prescri&ccedil;&atilde;o no processo do trabalho: bienal, quinquenal, intercorrente e as particularidades p&oacute;s-pandemia. M&oacute;dulo especial sobre a Lei 14.010/2020 e os 141 dias de suspens&atilde;o, com casos pr&aacute;ticos extraidos de acord&atilde;os reais do TST e TRTs.</p>
           <div class="curso-meta">
-            <div class="curso-meta-item">
-              <span>⏱</span>
-              <strong>5 horas</strong>
-            </div>
-            <div class="curso-meta-item">
-              <span>📚</span>
-              <strong>8 módulos</strong>
-            </div>
-            <div class="curso-meta-item">
-              <span>🎓</span>
-              <strong>Certificado</strong>
-            </div>
+            <div class="curso-meta-item">&#x1F4D6;&nbsp;<strong>5 m&oacute;dulos</strong></div>
+            <div class="curso-meta-item">&#x23F1;&#xFE0F;&nbsp;<strong>6h de conte&uacute;do</strong></div>
+            <div class="curso-meta-item">&#x1F4BB;&nbsp;<strong>Online</strong></div>
           </div>
-          <div style="display:flex;gap:0.75rem;align-items:center">
-            <a href="#" class="btn btn-primary" onclick="alert('Redirecionando para a plataforma do curso...'); return false;">
-              Acessar curso
-            </a>
-            <span style="font-size:0.85rem;color:var(--text-light)">Acesso vitalício</span>
-          </div>
+          <form class="curso-interesse-form" onsubmit="registrarInteresse(event,'curso-prescricao')">
+            <div class="form-group">
+              <label for="email-prescricao">Me avise quando lan&ccedil;ar</label>
+              <input type="email" id="email-prescricao" placeholder="seu@email.com.br" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%">Quero ser avisado(a)</button>
+            <div class="curso-success" id="success-curso-prescricao" style="display:none;margin-top:1rem;padding:1rem;background:rgba(34,139,100,0.10);border:1px solid rgba(34,139,100,0.30);border-radius:6px;color:#2a8b64;font-size:0.875rem">
+              &#x2713;&nbsp;Perfeito! Voc&ecirc; ser&aacute; avisado(a) assim que o curso for lan&ccedil;ado.
+            </div>
+          </form>
         </div>
       </div>
 
@@ -112,58 +89,34 @@
   </div>
 </section>
 
-<!-- Por que estudar comigo -->
-<section class="section" style="background:var(--white)">
-  <div class="container">
-    <div style="text-align:center;margin-bottom:3rem">
-      <span class="section-label">Metodologia</span>
-      <h2 class="section-title">Por que estudar com quem está no tribunal</h2>
-      <div class="gold-divider centered"></div>
-    </div>
-    <div class="intro-grid">
-      <div class="intro-item fade-up">
-        <div class="intro-icon">🏛️</div>
-        <div>
-          <h4>Visão de Dentro</h4>
-          <p>Como assistente de juiz do trabalho, vejo diariamente o que funciona e o que não funciona nas peças que chegam ao tribunal. Esse olhar é a base de cada curso.</p>
-        </div>
-      </div>
-      <div class="intro-item fade-up">
-        <div class="intro-icon">📊</div>
-        <div>
-          <h4>Fundamentação Rigorosa</h4>
-          <p>Cada afirmação dos cursos tem amparo em legislação, súmulas do TST ou doutrina especializada. Nenhum achismo, nenhuma simplificação equivocada.</p>
-        </div>
-      </div>
-      <div class="intro-item fade-up">
-        <div class="intro-icon">🎯</div>
-        <div>
-          <h4>Aplicação Imediata</h4>
-          <p>Todos os módulos foram desenhados para que o conhecimento seja aplicável ao trabalho do dia seguinte — não apenas ao estudo teórico.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- CTA -->
 <section class="cta-section">
   <div class="container">
-    <span class="section-label">Fique por dentro</span>
-    <h2 style="color:var(--white);margin-bottom:1rem">Novos cursos chegando em 2025</h2>
+    <span class="section-label">Enquanto os cursos n&atilde;o chegam</span>
+    <h2 style="color:var(--white);margin-bottom:1rem">Explore o conte&uacute;do gratuito</h2>
     <div class="gold-divider centered"></div>
     <p class="section-subtitle" style="margin:0 auto 2.5rem;color:rgba(255,255,255,0.6)">
-      Siga nas redes sociais para ser avisado sobre lançamentos, bônus de pré-venda
-      e conteúdo gratuito relacionado aos cursos.
+      Artigos, calculadoras e modelos j&aacute; dispon&iacute;veis gratuitamente enquanto os cursos s&atilde;o preparados.
     </p>
     <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
-      <a href="#" class="btn btn-primary">Instagram</a>
-      <a href="#" class="btn btn-outline">LinkedIn</a>
+      <a href="artigos.html" class="btn btn-primary">Ler artigos</a>
+      <a href="ferramentas.html" class="btn btn-outline">Ferramentas gratuitas</a>
     </div>
   </div>
 </section>
 
 <div id="footer-placeholder"></div>
 <script src="js/nav.js"></script>
+<script>
+function registrarInteresse(e, cursoId) {
+  e.preventDefault();
+  var btn = e.target.querySelector('button[type="submit"]');
+  btn.disabled = true;
+  btn.textContent = 'Registrando...';
+  setTimeout(function() {
+    document.getElementById('success-' + cursoId).style.display = 'block';
+    btn.style.display = 'none';
+  }, 600);
+}
+</script>
 </body>
 </html>
