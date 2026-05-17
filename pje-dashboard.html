@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard da Vara — PJe / DataJud</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+/* ── Reset & tokens ─────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:    #0a1628;
+  --navy-m:  #1a2f5e;
+  --navy-l:  #243a70;
+  --gold:    #C8A75B;
+  --gold-b:  #d4af37;
+  --gold-p:  rgba(200,167,91,.12);
+  --border:  rgba(200,167,91,.18);
+  --text:    #e8e6e0;
+  --muted:   rgba(232,230,224,.55);
+  --card:    rgba(26,47,94,.45);
+  --card2:   rgba(26,47,94,.25);
+  --green:   #22c55e;
+  --red:     #ef4444;
+  --r:       8px;
+  --r-lg:    14px;
+  --trans:   0.3s ease;
+}
+html{font-size:15px;scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--navy);
+  color:var(--text);
+  min-height:100vh;
+  line-height:1.6;
+}
+a{color:var(--gold);text-decoration:none}
+button{cursor:pointer;font-family:inherit;border:none;background:none}
+/* ── Layout ─────────────────────────────────────────────────── */
+.page{max-width:1300px;margin:0 auto;padding:0 1.5rem 4rem}
+/* ── Header ─────────────────────────────────────────────────── */
+.dash-header{
+  background:linear-gradient(160deg,#0d1f3c 0%,#1a2f5e 100%);
+  border-bottom:1px solid var(--border);
+  padding:0;
+  position:sticky;top:0;z-index:100;
+  backdrop-filter:blur(12px);
+}
+.dash-header-inner{
+  max-width:1300px;margin:0 auto;
+  padding:.85rem 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  flex-wrap:wrap;
+}
+.dash-logo{display:flex;flex-direction:column;line-height:1.2}
+.dash-logo-name{font-size:1.05rem;font-weight:700;color:var(--text);letter-spacing:.01em}
+.dash-logo-sub{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.header-right{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.status-badge{
+  display:inline-flex;align-items:center;gap:.4rem;
+  font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  padding:.3rem .85rem;border-radius:100px;
+  border:1px solid;
+}
+.status-badge.live{
+  background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.3);color:#4ade80;
+}
+.status-badge.mock{
+  background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.3);color:#fbbf24;
+}
+.status-badge::before{
+  content:'';width:6px;height:6px;border-radius:50%;background:currentColor;
+  animation:blink 2s infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.btn-refresh{
+  display:inline-flex;align-items:center;gap:.4rem;
+  background:linear-gradient(135deg,var(--gold),var(--gold-b));
+  color:var(--navy);font-weight:700;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;
+  padding:.45rem 1.2rem;border-radius:6px;transition:var(--trans);
+}
+.btn-refresh:hover{opacity:.88;transform:translateY(-1px)}
+.btn-refresh svg{width:14px;height:14px;flex-shrink:0}
+.btn-refresh.loading{opacity:.6;pointer-events:none}
+.update-time{font-size:.72rem;color:var(--muted)}
+/* ── Section labels ──────────────────────────────────────────── */
+.section-label{
+  font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--gold);display:block;margin-bottom:.5rem;
+}
+/* ── Hero metrics strip ──────────────────────────────────────── */
+.metrics-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1rem;margin:1.75rem 0;
+}
+.metric-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  padding:1.5rem 1.5rem 1.25rem;
+  position:relative;overflow:hidden;
+  transition:transform var(--trans),box-shadow var(--trans);
+}
+.metric-card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.metric-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--gold),var(--gold-b));
+}
+.metric-icon{
+  width:40px;height:40px;border-radius:8px;
+  background:var(--gold-p);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;margin-bottom:1rem;
+}
+.metric-val{
+  font-size:2.2rem;font-weight:700;color:var(--gold-b);line-height:1;
+  margin-bottom:.25rem;font-variant-numeric:tabular-nums;
+}
+.metric-label{font-size:.78rem;color:var(--muted);font-weight:500;letter-spacing:.04em}
+.metric-sub{font-size:.7rem;color:var(--muted);margin-top:.4rem}
+/* ── Charts grid ─────────────────────────────────────────────── */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem}
+.charts-grid.triple{grid-template-columns:1fr 1fr 1fr}
+.chart-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:1.5rem;
+}
+.chart-card.wide{grid-column:span 2}
+.chart-title{
+  font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:1.25rem;
+  display:flex;align-items:center;gap:.5rem;
+}
+.chart-title svg{width:16px;height:16px;color:var(--gold)}
+.chart-wrap{position:relative;height:240px}
+.chart-wrap.tall{height:300px}
+/* ── Horizontal bars (classes / assuntos) ─────────────────────── */
+.hbar-list{display:flex;flex-direction:column;gap:.6rem}
+.hbar-row{display:flex;flex-direction:column;gap:.25rem}
+.hbar-label{display:flex;justify-content:space-between;align-items:baseline;font-size:.78rem}
+.hbar-name{color:var(--text);font-weight:500;max-width:75%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hbar-pct{color:var(--gold);font-weight:700;font-size:.75rem}
+.hbar-track{height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
+.hbar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold),var(--gold-b));transition:width .6s ease}
+/* ── Table ────────────────────────────────────────────────────── */
+.table-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);
+  overflow:hidden;margin-bottom:1.25rem;
+}
+.table-header{
+  padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+}
+.table-title{font-size:.88rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:.5rem}
+.table-count{font-size:.72rem;color:var(--muted)}
+table{width:100%;border-collapse:collapse}
+th{
+  background:rgba(26,47,94,.6);color:var(--gold);font-size:.68rem;
+  font-weight:700;letter-spacing:.10em;text-transform:uppercase;
+  padding:.85rem 1.25rem;text-align:left;border-bottom:1px solid var(--border);
+}
+td{
+  padding:.8rem 1.25rem;font-size:.82rem;color:rgba(232,230,224,.85);
+  border-bottom:1px solid rgba(200,167,91,.06);vertical-align:middle;
+}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(200,167,91,.04)}
+.num-mono{font-family:'Courier New',monospace;font-size:.78rem;color:var(--muted)}
+.fase-badge{
+  display:inline-block;padding:.2rem .65rem;border-radius:100px;
+  font-size:.68rem;font-weight:600;letter-spacing:.06em;
+  background:rgba(200,167,91,.12);border:1px solid rgba(200,167,91,.25);color:var(--gold);
+}
+.status-ativo{color:#4ade80}
+.status-suspenso{color:#fbbf24}
+.status-arquivado{color:var(--muted)}
+.status-concluso{color:#60a5fa}
+/* ── Config / connection card ─────────────────────────────────── */
+.config-card{
+  background:var(--card2);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:1.5rem;margin-top:1.25rem;
+}
+.config-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem}
+.config-row{display:flex;flex-direction:column;gap:.35rem}
+.config-label{font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.config-val{font-size:.88rem;color:var(--text)}
+.config-val.ok{color:#4ade80}
+.config-val.warn{color:#fbbf24}
+.config-val.err{color:var(--red)}
+/* ── Loading skeleton ─────────────────────────────────────────── */
+.skeleton{background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:4px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* ── Alert banner ─────────────────────────────────────────────── */
+.alert-banner{
+  display:none;padding:.75rem 1.25rem;border-radius:var(--r);margin:1rem 0;
+  font-size:.82rem;align-items:center;gap:.5rem;
+}
+.alert-banner.show{display:flex}
+.alert-banner.warn{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:#fbbf24}
+.alert-banner.err{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);color:#f87171}
+/* ── Divider ──────────────────────────────────────────────────── */
+.gold-line{height:1px;background:linear-gradient(90deg,var(--gold),transparent);margin:2rem 0;opacity:.3}
+/* ── Responsive ───────────────────────────────────────────────── */
+@media(max-width:1024px){
+  .metrics-grid{grid-template-columns:repeat(2,1fr)}
+  .charts-grid.triple{grid-template-columns:1fr 1fr}
+}
+@media(max-width:720px){
+  .metrics-grid{grid-template-columns:1fr 1fr}
+  .charts-grid,.charts-grid.triple{grid-template-columns:1fr}
+  .chart-card.wide{grid-column:span 1}
+  .config-grid{grid-template-columns:1fr}
+  th,td{padding:.7rem .9rem}
+  .num-mono{display:none}
+  .metric-val{font-size:1.8rem}
+}
+@media(max-width:480px){
+  .metrics-grid{grid-template-columns:1fr}
+  .dash-header-inner{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="dash-header">
+  <div class="dash-header-inner">
+    <div class="dash-logo">
+      <span class="dash-logo-name">Dashboard da Vara — PJe</span>
+      <span class="dash-logo-sub">Marina Trabalhista · TRT-3</span>
+    </div>
+    <div class="header-right">
+      <span id="update-time" class="update-time">Carregando...</span>
+      <span id="api-badge" class="status-badge mock">Simulado (sem API key)</span>
+      <button class="btn-refresh" id="btn-refresh" onclick="loadAll()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M23 4v6h-6M1 20v-6h6"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        Atualizar
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="page">
+
+  <!-- Alert banner -->
+  <div class="alert-banner warn" id="alert-mock">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    Exibindo dados <strong>simulados</strong>. Configure <code>DATAJUD_API_KEY</code> e <code>VARA_CODIGO</code> no Railway para dados reais.
+  </div>
+  <div class="alert-banner err" id="alert-err"></div>
+
+  <!-- METRIC CARDS -->
+  <span class="section-label">Acervo da Vara</span>
+  <div class="metrics-grid" id="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-icon">⚖️</div>
+      <div class="metric-val" id="m-acervo">—</div>
+      <div class="metric-label">Processos no Acervo</div>
+      <div class="metric-sub">Total ativo</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">📥</div>
+      <div class="metric-val" id="m-distribuidos">—</div>
+      <div class="metric-label">Distribuídos no Mês</div>
+      <div class="metric-sub">Ajuizados no mês atual</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">✅</div>
+      <div class="metric-val" id="m-concluidos">—</div>
+      <div class="metric-label">Concluídos no Mês</div>
+      <div class="metric-sub">Sentença / arquivamento</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">🤝</div>
+      <div class="metric-val" id="m-acordo">—</div>
+      <div class="metric-label">Taxa de Acordo</div>
+      <div class="metric-sub">Conciliação / total</div>
+    </div>
+  </div>
+
+  <div class="gold-line"></div>
+
+  <!-- ROW 1: Classes + Volume Mensal -->
+  <div class="charts-grid" style="margin-bottom:1.25rem">
+
+    <!-- Classes processuais (hbar) -->
+    <div class="chart-card">
+      <div class="chart-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Distribuição por Classe Processual
+      </div>
+      <div id="classes-hbar" class="hbar-list">
+        <div class="skeleton" style="height:60px"></div>
+        <div class="skeleton" style="height:60px;margin-top:.5rem"></div>
+        <div class="skeleton" style="height:60px;margin-top:.5rem"></div>
+      </div>
+    </div>
+
+    <!-- Volume mensal (line chart) -->
+    <div class="chart-card">
+      <div class="chart-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Volume Mensal de Distribuição (12 meses)
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chart-volume"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ROW 2: Tempos + Assuntos -->
+  <div class="charts-grid" style="margin-bottom:1.25rem">
+
+    <!-- Tempos de tramitação (doughnut) -->
+    <div class="chart-card">
+      <div class="chart-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Tempos de Tramitação
+      </div>
+      <div class="chart-wrap" style="height:270px">
+        <canvas id="chart-tempos"></canvas>
+      </div>
+      <div id="tempo-medio" style="text-align:center;margin-top:.75rem;font-size:.82rem;color:var(--muted)">
+        Tempo médio: <strong style="color:var(--gold)">—</strong>
+      </div>
+    </div>
+
+    <!-- Top assuntos (hbar) -->
+    <div class="chart-card">
+      <div class="chart-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Top 10 Assuntos da Vara
+      </div>
+      <div id="assuntos-hbar" class="hbar-list" style="max-height:320px;overflow-y:auto">
+        <div class="skeleton" style="height:40px"></div>
+        <div class="skeleton" style="height:40px;margin-top:.4rem"></div>
+        <div class="skeleton" style="height:40px;margin-top:.4rem"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TABELA: Processos recentes -->
+  <div class="table-card">
+    <div class="table-header">
+      <div class="table-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Processos Recentes
+      </div>
+      <span class="table-count" id="table-count"></span>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Classe</th>
+            <th>Ajuizamento</th>
+            <th>Fase</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-processos">
+          <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CONFIGURAÇÃO -->
+  <div class="gold-line"></div>
+  <span class="section-label">Configuração</span>
+  <div class="config-card">
+    <div style="font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:.25rem">Conexão com DataJud / CNJ</div>
+    <div style="font-size:.78rem;color:var(--muted)">Configure as variáveis de ambiente no Railway para ativar dados reais.</div>
+    <div class="config-grid" id="config-grid">
+      <div class="config-row">
+        <span class="config-label">API Key (DATAJUD_API_KEY)</span>
+        <span class="config-val" id="cfg-key">Verificando...</span>
+      </div>
+      <div class="config-row">
+        <span class="config-label">Código da Vara (VARA_CODIGO)</span>
+        <span class="config-val" id="cfg-vara">Verificando...</span>
+      </div>
+      <div class="config-row">
+        <span class="config-label">Fonte dos dados</span>
+        <span class="config-val" id="cfg-fonte">—</span>
+      </div>
+      <div class="config-row">
+        <span class="config-label">Última atualização</span>
+        <span class="config-val" id="cfg-update">—</span>
+      </div>
+    </div>
+    <div style="margin-top:1.25rem;padding:1rem 1.25rem;background:rgba(200,167,91,.07);border-left:3px solid var(--gold);border-radius:0 6px 6px 0">
+      <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.35rem">Como configurar no Railway</div>
+      <div style="font-size:.8rem;color:var(--muted);line-height:1.7">
+        Acesse <strong style="color:var(--text)">railway.app → seu projeto → Variables</strong> e adicione:<br>
+        <code style="color:var(--gold)">DATAJUD_API_KEY</code> — solicite em
+        <a href="https://datajud-wiki.cnj.jus.br/api-publica/acesso" target="_blank">datajud-wiki.cnj.jus.br/api-publica/acesso</a><br>
+        <code style="color:var(--gold)">VARA_CODIGO</code> — código da vara no PJe (ex: MG-TRT-VT-01-0001)<br>
+        <code style="color:var(--gold)">DASHBOARD_PASSWORD</code> — senha de acesso ao dashboard (padrão: pje)
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:2rem 0;font-size:.72rem;color:rgba(232,230,224,.25);letter-spacing:.06em">
+    DASHBOARD INTERNO · MARINA TRABALHISTA · TRT-3ª REGIÃO
+  </div>
+
+</main>
+
+<script>
+// ── Chart instances ──────────────────────────────────────────────────────────
+let chartVolume = null;
+let chartTempos = null;
+
+const GOLD   = '#C8A75B';
+const GOLDB  = '#d4af37';
+const NAVY   = '#0a1628';
+const NAVYM  = '#1a2f5e';
+
+Chart.defaults.color          = 'rgba(232,230,224,.6)';
+Chart.defaults.borderColor    = 'rgba(200,167,91,.12)';
+Chart.defaults.font.family    = "'Inter', system-ui, sans-serif";
+Chart.defaults.font.size      = 11;
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function fmt(n) {
+  if (n === null || n === undefined) return '—';
+  return Number(n).toLocaleString('pt-BR');
+}
+function fmtPct(n) {
+  if (n === null || n === undefined) return '—';
+  return n + '%';
+}
+function fmtDias(d) {
+  if (!d) return '—';
+  const m = Math.round(d / 30);
+  return `${m} meses`;
+}
+function setEl(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+async function fetchJSON(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+
+// ── Status badge ─────────────────────────────────────────────────────────────
+function setApiStatus(isMock) {
+  const badge = document.getElementById('api-badge');
+  if (isMock) {
+    badge.className = 'status-badge mock';
+    badge.textContent = 'Simulado (sem API key)';
+    document.getElementById('alert-mock').classList.add('show');
+  } else {
+    badge.className = 'status-badge live';
+    badge.textContent = 'DataJud — dados reais';
+    document.getElementById('alert-mock').classList.remove('show');
+  }
+}
+
+// ── Horizontal bar builder ───────────────────────────────────────────────────
+function buildHBar(containerId, items, nameKey, totalKey) {
+  const el  = document.getElementById(containerId);
+  const max = Math.max(...items.map(i => i[totalKey]), 1);
+  const sum = items.reduce((a, i) => a + i[totalKey], 0);
+  el.innerHTML = items.map(item => {
+    const pct  = ((item[totalKey] / sum) * 100).toFixed(1);
+    const fill = ((item[totalKey] / max) * 100).toFixed(1);
+    return `
+      <div class="hbar-row">
+        <div class="hbar-label">
+          <span class="hbar-name" title="${item[nameKey]}">${item[nameKey]}</span>
+          <span class="hbar-pct">${pct}% &nbsp;<span style="color:rgba(232,230,224,.4);font-weight:400">(${fmt(item[totalKey])})</span></span>
+        </div>
+        <div class="hbar-track"><div class="hbar-fill" style="width:${fill}%"></div></div>
+      </div>`;
+  }).join('');
+}
+
+// ── Volume mensal chart ───────────────────────────────────────────────────────
+function buildVolumeChart(porMes) {
+  const labels = porMes.map(m => m.mes);
+  const data   = porMes.map(m => m.total);
+  if (chartVolume) { chartVolume.destroy(); }
+  const ctx = document.getElementById('chart-volume').getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, 0, 240);
+  grad.addColorStop(0,   'rgba(200,167,91,.35)');
+  grad.addColorStop(1,   'rgba(200,167,91,.01)');
+  chartVolume = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Processos',
+        data,
+        borderColor:     GOLD,
+        backgroundColor: grad,
+        borderWidth:     2,
+        pointBackgroundColor: GOLDB,
+        pointRadius:     3,
+        pointHoverRadius:5,
+        fill:            true,
+        tension:         0.4,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: {
+        label: ctx => ` ${ctx.parsed.y} processos`
+      }}},
+      scales: {
+        x: { grid: { color: 'rgba(200,167,91,.07)' }, ticks: { color: 'rgba(232,230,224,.45)' } },
+        y: { grid: { color: 'rgba(200,167,91,.07)' }, ticks: { color: 'rgba(232,230,224,.45)', stepSize: 5 }, beginAtZero: true },
+      },
+    },
+  });
+}
+
+// ── Tempos chart ──────────────────────────────────────────────────────────────
+function buildTemposChart(tempos) {
+  if (chartTempos) { chartTempos.destroy(); }
+  const ctx = document.getElementById('chart-tempos').getContext('2d');
+  const colors = ['#4ade80', '#C8A75B', '#f97316', '#ef4444'];
+  chartTempos = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: tempos.map(t => t.faixa),
+      datasets: [{
+        data:            tempos.map(t => t.total),
+        backgroundColor: colors.map(c => c + 'cc'),
+        borderColor:     colors,
+        borderWidth:     2,
+        hoverOffset:     6,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '60%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { padding: 14, font: { size: 11 }, color: 'rgba(232,230,224,.65)', boxWidth: 12, boxHeight: 12 },
+        },
+        tooltip: { callbacks: {
+          label: ctx => {
+            const total = ctx.dataset.data.reduce((a,b) => a+b, 0);
+            const pct   = ((ctx.parsed / total) * 100).toFixed(1);
+            return ` ${fmt(ctx.parsed)} processos (${pct}%)`;
+          }
+        }},
+      },
+    },
+  });
+}
+
+// ── Table ─────────────────────────────────────────────────────────────────────
+function buildTable(processos) {
+  const tbody = document.getElementById('tbody-processos');
+  setEl('table-count', `${processos.length} processos`);
+  const statusClass = s => {
+    const m = { 'Ativo': 'status-ativo', 'Suspenso': 'status-suspenso', 'Arquivado': 'status-arquivado', 'Concluso': 'status-concluso' };
+    return m[s] || '';
+  };
+  tbody.innerHTML = processos.map(p => `
+    <tr>
+      <td><span class="num-mono">${p.numero}</span></td>
+      <td>${p.classe}</td>
+      <td>${p.ajuizamento}</td>
+      <td><span class="fase-badge">${p.fase}</span></td>
+      <td><span class="${statusClass(p.status)}">${p.status}</span></td>
+    </tr>
+  `).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem">Nenhum processo encontrado.</td></tr>`;
+}
+
+// ── Config panel ───────────────────────────────────────────────────────────────
+function updateConfig(anyStats) {
+  const isMock = anyStats.mock;
+  document.getElementById('cfg-key').innerHTML   = isMock
+    ? '<span class="warn">Não configurada</span>'
+    : '<span class="ok">Configurada</span>';
+  document.getElementById('cfg-vara').innerHTML  = isMock
+    ? '<span class="warn">Não configurado</span>'
+    : '<span class="ok">Configurado</span>';
+  document.getElementById('cfg-fonte').textContent = isMock ? 'Dados simulados (mock)' : 'DataJud — CNJ (real)';
+  const upd = anyStats.ultima_atualizacao
+    ? new Date(anyStats.ultima_atualizacao).toLocaleString('pt-BR')
+    : '—';
+  document.getElementById('cfg-update').textContent = upd;
+}
+
+// ── Error handling ─────────────────────────────────────────────────────────────
+function showError(msg) {
+  const el = document.getElementById('alert-err');
+  el.textContent = 'Erro ao carregar dados: ' + msg;
+  el.classList.add('show');
+}
+function clearError() {
+  document.getElementById('alert-err').classList.remove('show');
+}
+
+// ── Main load ──────────────────────────────────────────────────────────────────
+async function loadAll() {
+  const btn = document.getElementById('btn-refresh');
+  btn.classList.add('loading');
+  clearError();
+
+  // Keep pw in URL
+  const pw = new URLSearchParams(location.search).get('pw') || '';
+  const qs = pw ? `?pw=${encodeURIComponent(pw)}` : '';
+
+  try {
+    const [stats, classes, volume, assuntos, tempos, processos] = await Promise.all([
+      fetchJSON('/api/pje/stats'),
+      fetchJSON('/api/pje/classes'),
+      fetchJSON('/api/pje/volume-mensal'),
+      fetchJSON('/api/pje/assuntos'),
+      fetchJSON('/api/pje/tempos'),
+      fetchJSON('/api/pje/processos'),
+    ]);
+
+    // Metrics
+    setEl('m-acervo',      fmt(stats.acervo));
+    setEl('m-distribuidos',fmt(stats.distribuidos_mes));
+    setEl('m-concluidos',  stats.concluidos_mes !== null ? fmt(stats.concluidos_mes) : '—');
+    setEl('m-acordo',      stats.taxa_acordo    !== null ? fmtPct(stats.taxa_acordo) : '—');
+
+    // Status
+    setApiStatus(stats.mock);
+    updateConfig(stats);
+
+    // Update time
+    const upd = stats.ultima_atualizacao
+      ? new Date(stats.ultima_atualizacao).toLocaleString('pt-BR', { dateStyle:'short', timeStyle:'short' })
+      : '—';
+    setEl('update-time', `Atualizado: ${upd}`);
+
+    // Tempo médio
+    if (stats.tempo_medio_dias) {
+      document.getElementById('tempo-medio').innerHTML =
+        `Tempo médio até sentença: <strong style="color:var(--gold)">${fmtDias(stats.tempo_medio_dias)}</strong>`;
+    }
+
+    // Charts & tables
+    buildHBar('classes-hbar', classes.classes, 'nome', 'total');
+    buildVolumeChart(volume.por_mes);
+    buildTemposChart(tempos.tempos);
+    buildHBar('assuntos-hbar', assuntos.assuntos, 'nome', 'total');
+    buildTable(processos.processos);
+
+  } catch (e) {
+    showError(e.message);
+    console.error(e);
+  } finally {
+    btn.classList.remove('loading');
+  }
+}
+
+// ── Boot ───────────────────────────────────────────────────────────────────────
+loadAll();
+</script>
+</body>
+</html>
