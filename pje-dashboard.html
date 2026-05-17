@@ -245,46 +245,74 @@ tr:hover td{background:rgba(200,167,91,.04)}
 .sidebar-mode-btn.active{background:linear-gradient(135deg,var(--gold),var(--gold-b));color:var(--navy)}
 
 /* ── Process detail ─────────────────────────────────────────── */
-.proc-detail-wrap{animation:fadeIn .25s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.proc-number{font-family:'Courier New',monospace;font-size:.85rem;color:var(--gold);letter-spacing:.02em;margin-bottom:.3rem}
-.proc-class-row{display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap}
-.proc-class-badge{display:inline-block;padding:.3rem .85rem;background:rgba(200,167,91,.1);border:1px solid var(--border);border-radius:100px;font-size:.8rem;font-weight:600;color:var(--text)}
-.proc-info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1rem}
-.proc-info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:.85rem 1rem}
-.proc-info-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:.3rem}
-.proc-info-val{font-size:.85rem;font-weight:600;color:var(--text);line-height:1.3}
-.proc-section{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.25rem 1.5rem;margin-bottom:1rem}
-.proc-section-title{font-size:.67rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:.85rem;display:flex;align-items:center;justify-content:space-between}
-.proc-assuntos{display:flex;flex-wrap:wrap;gap:.5rem}
-.proc-assunto-tag{display:inline-block;padding:.28rem .8rem;background:rgba(200,167,91,.08);border:1px solid rgba(200,167,91,.2);border-radius:100px;font-size:.78rem;color:var(--text)}
-.proc-timeline{display:flex;flex-direction:column}
-.proc-mov{display:grid;grid-template-columns:145px 1fr;gap:.75rem;padding:.6rem 0;border-bottom:1px solid rgba(200,167,91,.06);align-items:start}
-.proc-mov:last-child{border-bottom:none}
-.proc-mov-date{font-size:.71rem;color:rgba(232,230,224,.45);font-family:'Courier New',monospace;padding-top:.07rem}
-.proc-mov-name{font-size:.81rem;color:var(--text)}
-.proc-mov-code{font-size:.67rem;color:rgba(232,230,224,.3);margin-top:.1rem}
-.proc-search-main{display:flex;gap:.5rem;margin-bottom:1.5rem}
-.proc-search-main input{flex:1;padding:.65rem 1rem;background:rgba(255,255,255,.04);border:1.5px solid var(--border);border-radius:var(--r);color:var(--text);font-size:.875rem;outline:none;font-family:inherit}
-.proc-search-main input:focus{border-color:var(--gold)}
-.proc-search-main button{padding:.65rem 1.25rem;background:linear-gradient(135deg,var(--gold),var(--gold-b));color:var(--navy);font-weight:700;font-size:.82rem;border-radius:var(--r);cursor:pointer;white-space:nowrap}
-.proc-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:45vh;gap:.85rem;text-align:center}
-.proc-empty svg{opacity:.15;width:40px;height:40px}
-.proc-empty h3{color:var(--text);font-size:.95rem;font-weight:600}
-.proc-empty p{color:var(--muted);font-size:.82rem;max-width:300px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.proc-detail-wrap{animation:fadeIn .3s ease}
+.btn-voltar{width:100%;padding:.55rem .75rem;text-align:left;background:rgba(200,167,91,.08);border:1px solid rgba(200,167,91,.2);border-radius:var(--r);color:var(--gold);font-size:.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.4rem;transition:background .2s}
+.btn-voltar:hover{background:rgba(200,167,91,.18)}
 .proc-not-found{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);border-radius:var(--r);padding:1rem 1.25rem;color:#f87171;font-size:.84rem}
-.btn-voltar{
-  width:100%;padding:.55rem .75rem;text-align:left;
-  background:rgba(200,167,91,.08);border:1px solid rgba(200,167,91,.2);border-radius:var(--r);
-  color:var(--gold);font-size:.78rem;font-weight:600;cursor:pointer;
-  display:flex;align-items:center;gap:.4rem;transition:background .2s;
-}
-.btn-voltar:hover{background:rgba(200,167,91,.15)}
-.proc-view-header{margin-bottom:1.5rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap}
-.proc-view-header-left{flex:1}
-.proc-loading{display:flex;align-items:center;gap:.75rem;color:var(--muted);padding:3rem 0;font-size:.85rem}
-.proc-error{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);border-radius:var(--r-lg);padding:1.5rem;color:#f87171;font-size:.875rem;margin-top:1rem}
-.proc-source-note{font-size:.7rem;color:rgba(232,230,224,.25);text-align:center;padding:1.5rem 0;letter-spacing:.05em}
+/* Hero */
+.proc-hero{background:linear-gradient(135deg,rgba(26,47,94,.9) 0%,rgba(15,28,54,.98) 100%);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.75rem 2rem 1.25rem;margin-bottom:1.25rem;position:relative;overflow:hidden}
+.proc-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-b),transparent)}
+.proc-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1.25rem}
+.proc-hero-num-row{display:flex;align-items:center;gap:.65rem;margin-bottom:.6rem;flex-wrap:wrap}
+.proc-hero-num{font-family:'Courier New',monospace;font-size:1.05rem;font-weight:700;color:var(--gold);letter-spacing:.03em}
+.proc-copy-btn{padding:.2rem .55rem;background:rgba(200,167,91,.1);border:1px solid var(--border);border-radius:5px;color:var(--muted);font-size:.68rem;cursor:pointer;transition:all .2s}
+.proc-copy-btn:hover{background:rgba(200,167,91,.2);color:var(--gold)}
+.proc-badges{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.proc-class-badge{display:inline-block;padding:.3rem .9rem;background:rgba(200,167,91,.1);border:1px solid var(--border);border-radius:100px;font-size:.79rem;font-weight:600;color:var(--text)}
+.proc-status-pill{display:inline-flex;align-items:center;gap:.35rem;padding:.25rem .75rem;border-radius:100px;font-size:.72rem;font-weight:700;letter-spacing:.05em}
+.proc-status-pill::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.status-ativo{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:#4ade80}
+.status-moderado{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);color:#fbbf24}
+.status-lento{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.3);color:#f97316}
+.status-paralisado{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171}
+/* Quick stats */
+.proc-qs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid rgba(200,167,91,.1);padding-top:1rem}
+.proc-qs-item{padding:.25rem 1rem .25rem 0;border-right:1px solid rgba(200,167,91,.1)}
+.proc-qs-item:last-child{border-right:none}
+.proc-qs-val{font-size:1.1rem;font-weight:700;color:var(--text);line-height:1}
+.proc-qs-label{font-size:.65rem;color:var(--muted);margin-top:.25rem;text-transform:uppercase;letter-spacing:.06em}
+/* Body 2-col */
+.proc-body{display:grid;grid-template-columns:1fr 1.2fr;gap:1.25rem;align-items:start}
+.proc-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.75rem}
+.proc-info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:.75rem .9rem}
+.proc-info-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:.3rem}
+.proc-info-val{font-size:.82rem;font-weight:600;color:var(--text);line-height:1.3}
+.proc-assuntos-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:1rem 1.25rem}
+.proc-sec-title{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:.7rem}
+.proc-assuntos{display:flex;flex-wrap:wrap;gap:.4rem}
+.proc-assunto-tag{display:inline-block;padding:.25rem .75rem;background:rgba(200,167,91,.07);border:1px solid rgba(200,167,91,.18);border-radius:100px;font-size:.76rem;color:var(--text)}
+/* Timeline */
+.proc-tl-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.25rem 1.5rem;max-height:70vh;overflow-y:auto}
+.proc-tl-wrap::-webkit-scrollbar{width:3px}
+.proc-tl-wrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.proc-tl-month{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(200,167,91,.5);margin:1rem 0 .5rem;padding-left:1.5rem;position:relative}
+.proc-tl-month::before{content:'';position:absolute;left:.5rem;top:50%;transform:translateY(-50%);width:12px;height:1px;background:rgba(200,167,91,.3)}
+.proc-tl-item{display:flex;gap:.75rem;padding:.4rem 0;position:relative}
+.proc-tl-left{display:flex;flex-direction:column;align-items:center;width:16px;flex-shrink:0;padding-top:.35rem}
+.proc-tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:2px solid;transition:transform .15s}
+.proc-tl-item:hover .proc-tl-dot{transform:scale(1.3)}
+.proc-tl-line{width:2px;flex:1;min-height:12px;opacity:.2;margin-top:2px}
+.proc-tl-content{flex:1;padding-bottom:.4rem;border-bottom:1px solid rgba(200,167,91,.05)}
+.proc-tl-item:last-child .proc-tl-content{border-bottom:none}
+.proc-tl-name{font-size:.81rem;color:var(--text);line-height:1.35;margin-bottom:.2rem}
+.proc-tl-meta{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.proc-tl-date{font-size:.68rem;color:rgba(232,230,224,.4);font-family:'Courier New',monospace}
+.proc-tl-rel{font-size:.67rem;color:rgba(232,230,224,.35)}
+.proc-tl-tipo{font-size:.62rem;font-weight:700;letter-spacing:.05em;padding:.12rem .5rem;border-radius:3px;text-transform:uppercase}
+.proc-source-note{font-size:.67rem;color:rgba(232,230,224,.2);text-align:center;padding:1.25rem 0;letter-spacing:.05em}
+/* tipo colors */
+.tipo-audiencia{color:#60a5fa;background:rgba(96,165,250,.1);border-color:rgba(96,165,250,.3)}
+.tipo-decisao{color:var(--gold);background:rgba(200,167,91,.1);border-color:rgba(200,167,91,.3)}
+.tipo-recurso{color:#a78bfa;background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.3)}
+.tipo-execucao{color:#f97316;background:rgba(249,115,22,.1);border-color:rgba(249,115,22,.3)}
+.tipo-arquivo{color:#9ca3af;background:rgba(156,163,175,.1);border-color:rgba(156,163,175,.3)}
+.tipo-citacao{color:#34d399;background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.3)}
+.tipo-peticao{color:#4ade80;background:rgba(74,222,128,.1);border-color:rgba(74,222,128,.3)}
+.tipo-tramite{color:#94a3b8;background:rgba(148,163,184,.1);border-color:rgba(148,163,184,.3)}
+.tipo-outros{color:rgba(200,167,91,.6);background:rgba(200,167,91,.06);border-color:rgba(200,167,91,.15)}
+@media(max-width:1100px){.proc-body{grid-template-columns:1fr}.proc-qs-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:860px){.proc-info-grid{grid-template-columns:1fr}}
 
 /* ── Period toggle ──────────────────────────────────────────── */
 .period-toggle{display:flex;gap:.3rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r);padding:.25rem;margin-bottom:.5rem}
@@ -1368,93 +1396,199 @@ function mostrarProcesso(proc) {
 }
 
 function renderProcessoDetail(proc) {
-  const fmtData = s => {
-    const raw = String(s || '');
-    if (raw.length >= 8 && /^\d+$/.test(raw.replace(/\D/g,''))) {
-      const d = raw.replace(/\D/g,'');
-      return `${d.slice(6,8)}/${d.slice(4,6)}/${d.slice(0,4)}`;
-    }
-    return raw.slice(0,10).replace(/(\d{4})-(\d{2})-(\d{2})/, '$3/$2/$1') || '—';
+  // ── helpers ──────────────────────────────────────────────────
+  const fmtRaw = s => {
+    const d = String(s||'').replace(/\D/g,'');
+    if (d.length >= 8) return `${d.slice(6,8)}/${d.slice(4,6)}/${d.slice(0,4)}`;
+    return String(s||'').slice(0,10).replace(/(\d{4})-(\d{2})-(\d{2})/, '$3/$2/$1') || '—';
   };
+  const fmtISO = s => {
+    if (!s) return '—';
+    const m = String(s).match(/(\d{4})-(\d{2})-(\d{2})/);
+    return m ? `${m[3]}/${m[2]}/${m[1]}` : fmtRaw(s);
+  };
+  const relativo = s => {
+    if (!s) return '';
+    const d = new Date(s); if (isNaN(d)) return '';
+    const dias = Math.floor((Date.now()-d)/86400000);
+    if (dias===0) return 'hoje';
+    if (dias===1) return 'ontem';
+    if (dias<30)  return `há ${dias} dias`;
+    const m = Math.floor(dias/30);
+    if (m<12) return `há ${m} ${m===1?'mês':'meses'}`;
+    const a = Math.floor(m/12);
+    return `há ${a} ${a===1?'ano':'anos'}`;
+  };
+  const idadeProc = raw => {
+    const d = String(raw||'').replace(/\D/g,'');
+    if (d.length<8) return null;
+    const dt = new Date(+d.slice(0,4), +d.slice(4,6)-1, +d.slice(6,8));
+    const anos = (Date.now()-dt)/(365.25*86400000);
+    if (anos<0) return null;
+    if (anos<1) return `${Math.floor(anos*12)} meses`;
+    return `${anos.toFixed(1).replace('.',',')} anos`;
+  };
+  const classTipo = nome => {
+    const n=(nome||'').toLowerCase();
+    if (/audiên|redesignação|pauta/.test(n))                             return 'audiencia';
+    if (/senten|acórdão|decisão|julgamento|despacho|homologação/.test(n)) return 'decisao';
+    if (/recurso|agravo|embarg|apelação/.test(n))                         return 'recurso';
+    if (/execuç|penhora|leilão|hasta|arrest/.test(n))                     return 'execucao';
+    if (/arquivamento|baixa|extinção/.test(n))                            return 'arquivo';
+    if (/citaç|intimaç|notificaç|mandado/.test(n))                        return 'citacao';
+    if (/petição|juntada|protocolo/.test(n))                              return 'peticao';
+    if (/conclus|remessa|distribuiç|encaminh/.test(n))                    return 'tramite';
+    return 'outros';
+  };
+  const tipoLabel = { audiencia:'Audiência', decisao:'Decisão', recurso:'Recurso',
+    execucao:'Execução', arquivo:'Arquivo', citacao:'Citação', peticao:'Petição',
+    tramite:'Trâmite', outros:'Outros' };
+  const dotColor = { audiencia:'#60a5fa', decisao:'#C8A75B', recurso:'#a78bfa',
+    execucao:'#f97316', arquivo:'#9ca3af', citacao:'#34d399', peticao:'#4ade80',
+    tramite:'#94a3b8', outros:'rgba(200,167,91,.5)' };
 
-  const grauLabel = { G1: '1º Grau', G2: '2º Grau', JE: 'Juizado Especial' };
-  const sigilo = proc.nivelSigilo != null
-    ? (proc.nivelSigilo === 0 ? 'Público' : `Sigiloso (nível ${proc.nivelSigilo})`)
-    : '—';
+  // ── dados ────────────────────────────────────────────────────
+  const grauLabel = { G1:'1º Grau', G2:'2º Grau', JE:'Juizado Especial' };
+  const sigilo    = proc.nivelSigilo!=null
+    ? (proc.nivelSigilo===0 ? 'Público' : `Sigiloso (nível ${proc.nivelSigilo})`) : '—';
+  const assuntos  = proc.assuntos||[];
+  const movs      = (proc.movimentos||[]).sort((a,b)=>(b.dataHora||'').localeCompare(a.dataHora||''));
+  const ultimoMov = movs[0];
+  const idade     = idadeProc(proc.dataAjuizamento);
 
-  const assuntos = (proc.assuntos || []);
-  const movs     = (proc.movimentos || [])
-    .sort((a,b) => (b.dataHora||'').localeCompare(a.dataHora||''));
+  // status de atividade
+  let statusCls='status-paralisado', statusLabel='Paralisado';
+  if (ultimoMov?.dataHora) {
+    const d = Math.floor((Date.now()-new Date(ultimoMov.dataHora))/86400000);
+    if (d<=30)       { statusCls='status-ativo';      statusLabel='Ativo'; }
+    else if (d<=90)  { statusCls='status-moderado';   statusLabel='Moderado'; }
+    else if (d<=365) { statusCls='status-lento';      statusLabel='Mov. lento'; }
+  }
 
-  const assuntosHtml = assuntos.length
-    ? `<div class="proc-section">
-        <div class="proc-section-title">Assuntos <span style="font-weight:400;color:var(--muted)">${assuntos.length}</span></div>
-        <div class="proc-assuntos">${assuntos.map(a => `<span class="proc-assunto-tag">${esc(a.nome||a)}</span>`).join('')}</div>
-       </div>`
-    : '';
-
-  const movsHtml = movs.length
-    ? movs.map(m => `
-        <div class="proc-mov">
-          <div class="proc-mov-date">${fmtData(m.dataHora)}</div>
-          <div>
-            <div class="proc-mov-name">${esc(m.nome||'—')}</div>
-            ${m.codigo ? `<div class="proc-mov-code">cód. ${m.codigo}</div>` : ''}
+  // ── timeline agrupada por mês ─────────────────────────────────
+  const grupos = {};
+  movs.forEach(m => {
+    const key = m.dataHora ? m.dataHora.slice(0,7) : 'desconhecido';
+    (grupos[key] = grupos[key]||[]).push(m);
+  });
+  const timelineHtml = Object.entries(grupos).map(([key, items]) => {
+    const [ano,mes] = key.split('-');
+    const meses = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const header = key==='desconhecido' ? 'Data desconhecida' : `${meses[+mes]||mes} ${ano}`;
+    const itens = items.map(m => {
+      const tipo  = classTipo(m.nome);
+      const cor   = dotColor[tipo];
+      return `<div class="proc-tl-item">
+        <div class="proc-tl-left">
+          <div class="proc-tl-dot" style="background:${cor};border-color:${cor}"></div>
+          <div class="proc-tl-line" style="background:${cor}"></div>
+        </div>
+        <div class="proc-tl-content">
+          <div class="proc-tl-name">${esc(m.nome||'—')}</div>
+          <div class="proc-tl-meta">
+            <span class="proc-tl-date">${fmtISO(m.dataHora)}</span>
+            ${m.dataHora ? `<span class="proc-tl-rel">· ${relativo(m.dataHora)}</span>` : ''}
+            <span class="proc-tl-tipo tipo-${tipo}">${tipoLabel[tipo]}</span>
+            ${m.codigo ? `<span style="font-size:.62rem;color:rgba(232,230,224,.25)">cód.${m.codigo}</span>` : ''}
           </div>
-        </div>`).join('')
-    : '<div style="color:var(--muted);font-size:.82rem;padding:.5rem 0">Sem movimentos registrados.</div>';
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="proc-tl-month">${esc(header)}</div>${itens}`;
+  }).join('') || '<div style="color:var(--muted);font-size:.82rem;padding:1rem 0">Sem movimentos registrados.</div>';
 
+  // ── render ────────────────────────────────────────────────────
   document.getElementById('processo-detail-content').innerHTML = `
-    <div class="proc-detail-wrap">
-      <div class="proc-view-header">
-        <div class="proc-view-header-left">
-          <div class="proc-number">${esc(proc.numeroProcesso||'—')}</div>
-          <div class="proc-class-row">
+  <div class="proc-detail-wrap">
+
+    <!-- Hero -->
+    <div class="proc-hero">
+      <div class="proc-hero-top">
+        <div>
+          <div class="proc-hero-num-row">
+            <span class="proc-hero-num">${esc(proc.numeroProcesso||'—')}</span>
+            <button class="proc-copy-btn" onclick="navigator.clipboard.writeText('${esc(proc.numeroProcesso||'')}').then(()=>{this.textContent='✓ copiado';setTimeout(()=>this.textContent='📋 copiar',1500})">📋 copiar</button>
+          </div>
+          <div class="proc-badges">
             <span class="proc-class-badge">${esc(proc.classe?.nome||'Classe não informada')}</span>
-            ${proc.grau ? `<span class="tag ${proc.grau==='G2'?'tag-g2':proc.grau==='JE'?'tag-je':'tag-g1'}">${grauLabel[proc.grau]||proc.grau}</span>` : ''}
+            ${proc.grau?`<span class="tag ${proc.grau==='G2'?'tag-g2':proc.grau==='JE'?'tag-je':'tag-g1'}">${grauLabel[proc.grau]||proc.grau}</span>`:''}
+            <span class="proc-status-pill ${statusCls}">${statusLabel}</span>
           </div>
         </div>
       </div>
+      <div class="proc-qs-grid">
+        <div class="proc-qs-item">
+          <div class="proc-qs-val">${idade||'—'}</div>
+          <div class="proc-qs-label">em tramitação</div>
+        </div>
+        <div class="proc-qs-item">
+          <div class="proc-qs-val">${movs.length}</div>
+          <div class="proc-qs-label">movimentações</div>
+        </div>
+        <div class="proc-qs-item">
+          <div class="proc-qs-val">${fmtRaw(proc.dataAjuizamento)}</div>
+          <div class="proc-qs-label">ajuizamento</div>
+        </div>
+        <div class="proc-qs-item">
+          <div class="proc-qs-val">${ultimoMov?.dataHora ? relativo(ultimoMov.dataHora) : '—'}</div>
+          <div class="proc-qs-label">última atividade</div>
+        </div>
+      </div>
+    </div>
 
-      <div class="proc-info-grid">
-        <div class="proc-info-card">
-          <div class="proc-info-label">Ajuizamento</div>
-          <div class="proc-info-val">${fmtData(proc.dataAjuizamento)}</div>
+    <!-- Body 2 colunas -->
+    <div class="proc-body">
+
+      <!-- Coluna esquerda: info + assuntos -->
+      <div>
+        <div class="proc-info-grid">
+          <div class="proc-info-card">
+            <div class="proc-info-label">Vara / Órgão</div>
+            <div class="proc-info-val" style="font-size:.76rem">${esc(proc.orgaoJulgador?.nome||'—')}</div>
+          </div>
+          <div class="proc-info-card">
+            <div class="proc-info-label">Tribunal</div>
+            <div class="proc-info-val">${esc(proc.tribunal||'—')}</div>
+          </div>
+          <div class="proc-info-card">
+            <div class="proc-info-label">Sistema</div>
+            <div class="proc-info-val">${esc(proc.sistema?.nome||'—')}</div>
+          </div>
+          <div class="proc-info-card">
+            <div class="proc-info-label">Formato</div>
+            <div class="proc-info-val">${esc(proc.formato?.nome||'—')}</div>
+          </div>
+          <div class="proc-info-card">
+            <div class="proc-info-label">Sigilo</div>
+            <div class="proc-info-val">${sigilo}</div>
+          </div>
+          <div class="proc-info-card">
+            <div class="proc-info-label">Última movimentação</div>
+            <div class="proc-info-val" style="font-size:.76rem">${ultimoMov ? fmtISO(ultimoMov.dataHora) : '—'}</div>
+          </div>
         </div>
-        <div class="proc-info-card">
-          <div class="proc-info-label">Vara / Órgão</div>
-          <div class="proc-info-val" style="font-size:.78rem;line-height:1.35">${esc(proc.orgaoJulgador?.nome||'—')}</div>
-        </div>
-        <div class="proc-info-card">
-          <div class="proc-info-label">Tribunal</div>
-          <div class="proc-info-val">${esc(proc.tribunal||'—')}</div>
-        </div>
-        <div class="proc-info-card">
-          <div class="proc-info-label">Sistema</div>
-          <div class="proc-info-val">${esc(proc.sistema?.nome||'—')}</div>
-        </div>
-        <div class="proc-info-card">
-          <div class="proc-info-label">Formato</div>
-          <div class="proc-info-val">${esc(proc.formato?.nome||'—')}</div>
-        </div>
-        <div class="proc-info-card">
-          <div class="proc-info-label">Sigilo</div>
-          <div class="proc-info-val">${sigilo}</div>
+
+        ${assuntos.length ? `<div class="proc-assuntos-wrap">
+          <div class="proc-sec-title">Assuntos (${assuntos.length})</div>
+          <div class="proc-assuntos">${assuntos.map(a=>`<span class="proc-assunto-tag">${esc(a.nome||a)}</span>`).join('')}</div>
+        </div>` : ''}
+      </div>
+
+      <!-- Coluna direita: timeline -->
+      <div>
+        <div class="proc-tl-wrap">
+          <div class="proc-sec-title" style="margin-bottom:.85rem">
+            Histórico de Movimentações
+            <span style="font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0"> — ${movs.length} registros</span>
+          </div>
+          ${timelineHtml}
         </div>
       </div>
 
-      ${assuntosHtml}
+    </div>
 
-      <div class="proc-section">
-        <div class="proc-section-title">
-          Movimentações
-          <span style="font-weight:400;color:var(--muted);font-size:.72rem;text-transform:none;letter-spacing:0">${movs.length} registros</span>
-        </div>
-        <div class="proc-timeline">${movsHtml}</div>
-      </div>
-
-      <div class="proc-source-note">DADOS: DATAJUD / CNJ · ${esc(proc.numeroProcesso||'')}</div>
-    </div>`;
+    <div class="proc-source-note">DATAJUD · CNJ · TRT-3ª REGIÃO · ${esc(proc.numeroProcesso||'')}</div>
+  </div>`;
 }
 
 // ── Busca processo ────────────────────────────────────────────────────────────
