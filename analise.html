@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Auditoria — Site Marina Trabalhista</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cormorant+Garamond:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0f1117;
+  --surface:  #161b22;
+  --surface2: #1c2128;
+  --border:   #30363d;
+  --border2:  #21262d;
+  --gold:     #C8A75B;
+  --gold-dim: #8a6f32;
+  --gold-bg:  rgba(200,167,91,.08);
+  --text:     #e8e6e0;
+  --muted:    #9d9b96;
+  --muted2:   #6e7681;
+  --green:    #56d364;
+  --blue:     #79b8ff;
+  --orange:   #f0a826;
+  --purple:   #d2a8ff;
+  --red:      #ff7b7b;
+  --yellow:   #e3c770;
+  --code-bg:  #010409;
+  --radius:   10px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+/* ── HEADER ── */
+.header {
+  background: linear-gradient(180deg, #11161d 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 44px 32px 36px;
+  text-align: center;
+}
+.logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 30px; font-weight: 600;
+  color: var(--gold); letter-spacing: .1em;
+}
+.header-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; color: var(--text); margin: 8px 0 6px;
+}
+.header-meta { font-size: 12px; color: var(--muted2); letter-spacing: .04em; }
+.header-note {
+  font-size: 13px; color: var(--muted); margin-top: 14px;
+  max-width: 680px; margin-left: auto; margin-right: auto; line-height: 1.75;
+}
+
+/* ── BADGES ── */
+.badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 12px; border-radius: 100px;
+  font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+  border: 1px solid;
+}
+.badge-ux    { background: rgba(121,184,255,.10); border-color: rgba(121,184,255,.30); color: var(--blue); }
+.badge-jur   { background: rgba(200,167,91,.10);  border-color: rgba(200,167,91,.30);  color: var(--gold); }
+.badge-trt   { background: rgba(86,211,100,.10);  border-color: rgba(86,211,100,.30);  color: var(--green); }
+.badge-rec   { background: rgba(210,168,255,.10); border-color: rgba(210,168,255,.30); color: var(--purple); }
+.badge-emp   { background: rgba(240,168,38,.10);  border-color: rgba(240,168,38,.30);  color: var(--orange); }
+
+/* ── LAYOUT ── */
+.main { display: grid; grid-template-columns: 220px 1fr; gap: 0; max-width: 1200px; margin: 0 auto; }
+.sidebar {
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  border-right: 1px solid var(--border);
+  padding: 32px 0 48px;
+}
+.sidebar-title {
+  font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--muted2); padding: 0 20px; margin-bottom: 12px;
+}
+.sidebar a {
+  display: block; padding: 7px 20px; font-size: 12px; color: var(--muted);
+  text-decoration: none; border-left: 2px solid transparent; transition: all .15s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sidebar a:hover { color: var(--text); border-left-color: var(--gold); background: var(--gold-bg); }
+.sidebar-group { margin-bottom: 6px; }
+.sidebar-group-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--gold-dim); padding: 10px 20px 4px;
+}
+.content { padding: 40px 36px 80px; }
+
+/* ── SECTIONS ── */
+.section { margin-bottom: 52px; }
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 21px; font-weight: 600; color: var(--gold);
+  padding-bottom: 12px; border-bottom: 1px solid var(--border);
+  margin-bottom: 22px; display: flex; align-items: center; gap: 10px;
+}
+.section-title .icon { font-size: 18px; }
+.sub-title {
+  font-size: 13px; font-weight: 700; color: var(--text);
+  margin: 20px 0 10px; text-transform: uppercase; letter-spacing: .08em;
+}
+
+/* ── SCORES ── */
+.scores-row { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; margin-bottom: 28px; }
+.score-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 14px; text-align: center;
+}
+.score-num { font-size: 32px; font-weight: 700; line-height: 1; }
+.score-label { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+.score-high  { color: var(--green); }
+.score-mid   { color: var(--yellow); }
+.score-low   { color: var(--red); }
+
+/* ── FINDINGS ── */
+.finding {
+  display: flex; gap: 12px; padding: 12px 14px;
+  border-radius: 8px; margin-bottom: 8px;
+  font-size: 13px; color: var(--muted); line-height: 1.6;
+  border: 1px solid;
+}
+.finding strong { color: var(--text); }
+.finding-ok   { background: rgba(86,211,100,.06);  border-color: rgba(86,211,100,.18); }
+.finding-bad  { background: rgba(255,123,123,.06); border-color: rgba(255,123,123,.18); }
+.finding-tip  { background: rgba(200,167,91,.06);  border-color: rgba(200,167,91,.18); }
+.finding-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+
+/* ── PRIORITY TABLE ── */
+.prio-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 8px; }
+.prio-table th {
+  background: var(--surface2); border-bottom: 1px solid var(--border);
+  padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 700;
+  letter-spacing: .10em; text-transform: uppercase; color: var(--muted2);
+}
+.prio-table th:first-child { border-radius: 8px 0 0 0; }
+.prio-table th:last-child  { border-radius: 0 8px 0 0; }
+.prio-table td {
+  padding: 10px 12px; font-size: 12.5px; color: var(--muted);
+  border-bottom: 1px solid var(--border2); vertical-align: top; line-height: 1.5;
+}
+.prio-table td strong { color: var(--text); }
+.prio-table tr:last-child td { border-bottom: none; }
+.prio-table tr:hover td { background: var(--gold-bg); }
+.prio-pill {
+  display: inline-block; padding: 2px 8px; border-radius: 100px;
+  font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+}
+.prio-alto   { background: rgba(255,123,123,.15); color: var(--red); border: 1px solid rgba(255,123,123,.30); }
+.prio-medio  { background: rgba(240,168,38,.12);  color: var(--orange); border: 1px solid rgba(240,168,38,.28); }
+.prio-baixo  { background: rgba(86,211,100,.10);  color: var(--green); border: 1px solid rgba(86,211,100,.25); }
+.prio-esf-alto  { background: rgba(121,184,255,.10); color: var(--blue);   border: 1px solid rgba(121,184,255,.28); }
+.prio-esf-med   { background: rgba(200,167,91,.10);  color: var(--yellow); border: 1px solid rgba(200,167,91,.28); }
+.prio-esf-baixo { background: rgba(86,211,100,.10);  color: var(--green);  border: 1px solid rgba(86,211,100,.25); }
+
+/* ── NEXT STEPS ── */
+.steps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.step-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--gold-dim);
+  border-radius: var(--radius); padding: 16px 18px;
+}
+.step-num {
+  font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--gold-dim); margin-bottom: 4px;
+}
+.step-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.step-desc  { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+/* ── CODE / QUOTE ── */
+pre {
+  background: var(--code-bg); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 14px 18px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  color: #79c0ff; overflow-x: auto; margin: 10px 0; line-height: 1.6;
+}
+code {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 4px; padding: 1px 6px; color: var(--blue);
+}
+blockquote {
+  border-left: 3px solid var(--gold-dim); padding: 10px 16px;
+  background: var(--gold-bg); border-radius: 0 8px 8px 0;
+  font-size: 13px; color: var(--muted); margin: 12px 0;
+}
+
+/* ── DIVIDER ── */
+.divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+/* ── MOBILE ── */
+@media (max-width: 900px) {
+  .main { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+  .scores-row { grid-template-columns: repeat(3,1fr); }
+  .steps-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ────────────────────────────────────────────── -->
+<div class="header">
+  <div class="logo">Marina Trabalhista</div>
+  <div class="header-title">Auditoria Completa do Site</div>
+  <div class="header-meta">Gerado em 17 de maio de 2026 &nbsp;|&nbsp; 5 perspectivas &nbsp;|&nbsp; 12 páginas analisadas</div>
+  <div class="header-note">
+    Análise técnica, jurídica e estratégica do site <strong>marinatrabalhista.com.br</strong> —
+    avaliando frontend/UX, precisão legal das calculadoras, utilidade para gabinete de TRT,
+    e perspectivas do advogado do reclamante e do reclamado.
+  </div>
+  <div class="badges">
+    <span class="badge badge-ux">Frontend / UX</span>
+    <span class="badge badge-jur">Direito do Trabalho</span>
+    <span class="badge badge-trt">Servidor TRT</span>
+    <span class="badge badge-rec">Advogado do Reclamante</span>
+    <span class="badge badge-emp">Advogado do Reclamado</span>
+  </div>
+</div>
+
+<!-- ── MAIN LAYOUT ────────────────────────────────────────── -->
+<div class="main">
+
+  <!-- SIDEBAR / SUMÁRIO -->
+  <aside class="sidebar">
+    <div class="sidebar-title">Sumário</div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Visão Geral</div>
+      <a href="#scores">Scores por Categoria</a>
+      <a href="#inventario">Inventário de Páginas</a>
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Perspectivas</div>
+      <a href="#ux">Frontend / UX</a>
+      <a href="#juridico">Direito do Trabalho</a>
+      <a href="#trt">Servidor TRT</a>
+      <a href="#reclamante">Advogado Reclamante</a>
+      <a href="#reclamado">Advogado Reclamado</a>
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Síntese</div>
+      <a href="#prioridades">Tabela de Prioridades</a>
+      <a href="#proximos">Próximos Passos</a>
+    </div>
+  </aside>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- ── SCORES ─────────────────────────────────────────── -->
+    <section class="section" id="scores">
+      <div class="section-title"><span class="icon">📊</span> Scores por Categoria (0–10)</div>
+
+      <div class="scores-row">
+        <div class="score-card">
+          <div class="score-num score-high">8.5</div>
+          <div class="score-label">Design Visual e Identidade</div>
+        </div>
+        <div class="score-card">
+          <div class="score-num score-mid">6.0</div>
+          <div class="score-label">Acessibilidade e Semântica</div>
+        </div>
+        <div class="score-card">
+          <div class="score-num score-mid">7.5</div>
+          <div class="score-label">Precisão Jurídica</div>
+        </div>
+        <div class="score-card">
+          <div class="score-num score-mid">7.0</div>
+          <div class="score-label">Utilidade Prática (TRT)</div>
+        </div>
+        <div class="score-card">
+          <div class="score-num score-low">4.5</div>
+          <div class="score-label">Conteúdo Publicado (volume)</div>
+        </div>
+      </div>
+
+      <div class="scores-row">
+        <div class="score-card">
+          <div class="score-num score-mid">6.5</div>
+          <div class="score-label">Utilidade para Reclamante</div>
+        </div>
+        <div class="score-card">
+          <div class="score-num score-low">3.0</div>
+          <div class="score-label">Utilidade para Reclamado</div>
+        </div>
+        <div class="score-card">
+          <div class="score-num score-high">9.0</div>
+          <div class="score-label">Performance (sem backend)</div>
+        </div>
+        <div class="score-card">
+          <div class="score-num score-mid">7.0</div>
+          <div class="score-label">Responsividade Mobile</div>
+        </div>
+        <div class="score-card">
+          <div class="score-num score-mid">6.0</div>
+          <div class="score-label">Estratégia de Crescimento</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── INVENTÁRIO ──────────────────────────────────────── -->
+    <section class="section" id="inventario">
+      <div class="section-title"><span class="icon">📂</span> Inventário de Páginas Analisadas</div>
+
+      <table class="prio-table">
+        <thead>
+          <tr>
+            <th>Página</th>
+            <th>Status</th>
+            <th>Observação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>index.html</strong></td><td><span class="prio-pill prio-baixo">OK</span></td><td>Hero sólido, artigos estáticos linkados para artigo-template.html (placeholder)</td></tr>
+          <tr><td><strong>quem-sou-eu.html</strong></td><td><span class="prio-pill prio-baixo">OK</span></td><td>Foto placeholder (iniciais "MT"), texto forte e bio completa</td></tr>
+          <tr><td><strong>publicacoes.html</strong></td><td><span class="prio-pill prio-baixo">OK</span></td><td>4 publicações reais com PDFs e citações ABNT — melhor página do site</td></tr>
+          <tr><td><strong>artigos.html</strong></td><td><span class="prio-pill prio-medio">ATENÇÃO</span></td><td>Todos os 6 artigos têm link href="#" — nenhum leva a conteúdo real</td></tr>
+          <tr><td><strong>ferramentas.html</strong></td><td><span class="prio-pill prio-baixo">OK</span></td><td>Hub limpo das 5 ferramentas</td></tr>
+          <tr><td><strong>modelos.html</strong></td><td><span class="prio-pill prio-alto">CRÍTICO</span></td><td>4 botões "Baixar Modelo" com href="#" — não baixam nada</td></tr>
+          <tr><td><strong>cursos.html</strong></td><td><span class="prio-pill prio-baixo">OK</span></td><td>Página "Em breve" adequada, não causa frustração</td></tr>
+          <tr><td><strong>ferramentas/prescricao.html</strong></td><td><span class="prio-pill prio-baixo">OK</span></td><td>Lógica correta, UI excelente, nota legal adequada</td></tr>
+          <tr><td><strong>ferramentas/aviso-previo.html</strong></td><td><span class="prio-pill prio-medio">ATENÇÃO</span></td><td>Fórmula com controvérsia jurídica — ver seção jurídica</td></tr>
+          <tr><td><strong>ferramentas/avos.html</strong></td><td><span class="prio-pill prio-medio">ATENÇÃO</span></td><td>Lógica de avos OK, mas Art. 133 "global" ignora casos individuais por período</td></tr>
+          <tr><td><strong>ferramentas/reflexos.html</strong></td><td><span class="prio-pill prio-medio">ATENÇÃO</span></td><td>28 verbas — boa base, mas faltam verbas comuns e há controvérsia em 2 itens</td></tr>
+          <tr><td><strong>ferramentas/remover-espacos.html</strong></td><td><span class="prio-pill prio-baixo">OK</span></td><td>Ferramenta mais simples e mais imediatamente útil do conjunto</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <hr class="divider">
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- PERSPECTIVA 1 — FRONTEND / UX                         -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <section class="section" id="ux">
+      <div class="section-title"><span class="icon">🎨</span> Perspectiva 1 — Especialista em Frontend / UX</div>
+
+      <div class="sub-title">Pontos positivos</div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Sistema de design coeso e sofisticado.</strong> Paleta azul marinho + dourado com variáveis CSS bem definidas (<code>--navy-deep</code>, <code>--gold</code>, <code>--gold-bright</code>). Tipografia em três camadas (Playfair Display, Cormorant Garamond, Inter) funciona bem para autoridade jurídica sem parecer entediante.</div></div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Hero page impressionante.</strong> Gradiente, textura grid dourada, avatar animado com anéis giratórios, fade-up com IntersectionObserver — qualidade acima da média para sites jurídicos brasileiros.</div></div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Nav injetada via JS com estado ativo inteligente.</strong> A lógica em <code>nav.js</code> marca "Ferramentas" como ativo em qualquer subpágina <code>/ferramentas/*</code>. Dropdown hover funcional com arrow CSS.</div></div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Calculadoras com UI de alta qualidade.</strong> Barras visuais animadas, timeline da prescrição, slider de anos no aviso prévio, slider de faltas nos avos — muito acima do padrão de sites jurídicos.</div></div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Responsive mobile coberto.</strong> Breakpoints em 768px e 480px colapsam grids, ativam hambúrguer, ajustam padding. Mobile menu bem construído com fechamento automático ao clicar link.</div></div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Performance excelente por design.</strong> Zero requests de backend, todo processamento no navegador. Único custo é 3 fontes Google (preconnect configurado corretamente). Nenhuma dependência npm carregada no frontend.</div></div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Print CSS na tabela de reflexos.</strong> <code>@media print</code> esconde nav, hero, controles e exibe só a tabela — pensado para uso real em gabinete.</div></div>
+
+      <div class="sub-title">Problemas encontrados</div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Links quebrados críticos em artigos.html.</strong> Todos os 6 cards têm <code>href="#"</code>. Usuário clica "Ler artigo →" e vai para o topo da página. Na index.html os artigos linkam para <code>artigo-template.html</code> (que não existe no inventário de arquivos lido). Isso é o maior bug de UX do site.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Modelos com downloads inexistentes.</strong> Os 4 botões "Baixar Modelo" em modelos.html têm <code>href="#"</code>. Criar expectativa de download e não cumprir destrói confiança. Deveria exibir um aviso "em breve" como cursos.html faz.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Sem foto real nos placeholders.</strong> Hero usa iniciais "APO" (estranho — biografia diz "Marina Trabalhista", mas as iniciais parecem ser outras), about-photo exibe "MT". Uma foto real é essencial para credibilidade pessoal. O avatar com animação de anéis fica vazio sem a imagem.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Social buttons no footer apontam para "#".</strong> Instagram, LinkedIn e YouTube no footer são <code>href="#"</code>. Na página quem-sou-eu.html o Instagram (<code>https://instagram.com/marinatrabalhista</code>) está correto — inconsistência.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Links de Política de Privacidade e Termos de Uso inexistentes.</strong> Footer inclui links legais com <code>href="#"</code>. Com LGPD, um site que coleta nada precisa ao menos de uma página simples dizendo isso.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Acessibilidade insuficiente.</strong> (1) Nenhum atributo <code>aria-label</code> nos botões de filtro de categoria em artigos.html. (2) Os cards da tabela de reflexos não têm role semântico. (3) Inputs de data não têm <code>aria-describedby</code> vinculando à nota legal. (4) O contraste de texto em <code>rgba(255,255,255,0.45)</code> (breadcrumbs, nav inativa) está abaixo do mínimo WCAG AA de 4.5:1 em fundos escuros.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Nav.js usa caminhos absolutos com "/".</strong> <code>href="/index.html"</code>, <code>href="/quem-sou-eu.html"</code> etc. Isso funciona num servidor mas quebra quando o site é aberto localmente via <code>file://</code>. Para desenvolvimento local (que parece ser o caso — sem servidor), as páginas de ferramentas ficam com nav quebrada.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Fontes importadas duas vezes.</strong> O CSS (<code>style.css</code>) importa Google Fonts via <code>@import</code> E todas as páginas HTML também linkam o mesmo Google Fonts via <code>&lt;link&gt;</code>. Dupla requisição para as mesmas fontes — ineficiente.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Email de contato genérico no footer.</strong> <code>mailto:contato@exemplo.com.br</code> — isso é um placeholder óbvio que ficou no template.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Hero stats strip com apenas 1 estatística.</strong> O componente <code>.hero-stats</code> foi claramente projetado para múltiplas métricas (gap, border-top), mas tem só "10+ anos de atuação". Parece incompleto.</div></div>
+
+      <div class="sub-title">Sugestões</div>
+
+      <div class="finding finding-tip"><div class="finding-icon">💡</div><div><strong>Criar artigos reais como HTML.</strong> O sistema já tem <code>article-full-inner</code>, <code>article-body</code> e todos os estilos para artigo completo definidos no CSS. Só falta criar os arquivos. Começar com 2–3 artigos reais publicados.</div></div>
+
+      <div class="finding finding-tip"><div class="finding-icon">💡</div><div><strong>Adicionar Open Graph e Twitter Card.</strong> Nenhuma página tem <code>&lt;meta property="og:..."&gt;</code>. Quando alguém compartilha no WhatsApp ou Instagram, não aparece thumbnail. Para um site de conteúdo jurídico, SEO social é gratuito e impactante.</div></div>
+
+      <div class="finding finding-tip"><div class="finding-icon">💡</div><div><strong>Adicionar âncoras de seção nas calculadoras.</strong> Prescrição e aviso prévio poderiam ter links diretos na URL (ex: <code>/ferramentas/prescricao.html#resultado</code>) para compartilhar um resultado específico com cliente.</div></div>
+
+      <div class="finding finding-tip"><div class="finding-icon">💡</div><div><strong>Completar hero stats.</strong> Adicionar "4 publicações em revistas jurídicas" e "5 ferramentas gratuitas" ao componente stats do hero — ele foi claramente projetado para isso.</div></div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- PERSPECTIVA 2 — JURÍDICO                              -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <section class="section" id="juridico">
+      <div class="section-title"><span class="icon">⚖️</span> Perspectiva 2 — Especialista em Direito do Trabalho</div>
+
+      <div class="sub-title">Pontos positivos</div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Calculadora de prescrição: logicamente correta.</strong> A fórmula está certa: ajuizamento − 5 anos = prescrição quinquenal (Art. 7º, XXIX, CF). A suspensão da Lei 14.010/2020 é aplicada corretamente: subtrai 141 dias da prescrição quinquenal quando o período de 5 anos engloba a janela 12/06/2020–30/10/2020. A condição <code>prescQ &lt; SUSP_FIM &amp;&amp; ajuiz &gt; SUSP_INI</code> está semanticamente correta.</div></div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Tabela de reflexos com fundamentos legais.</strong> Cada verba cita o dispositivo legal específico (Art. 457, Art. 192, Súmulas TST, OJs da SDI-1). Isso é o padrão correto — não só diz sim/não, mas fundamenta.</div></div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Distinção salarial/remuneratório/indenizatório.</strong> A tabela usa três categorias — incluindo "remuneratório" para gorjetas (Art. 457, §3º), que tecnicamente não são salário mas integram a remuneração. Distinção juridicamente precisa e rara em ferramentas similares.</div></div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Art. 130 CLT (faltas) implementado fielmente.</strong> A escala 0–5 faltas → 30 dias, 6–14 → 24, 15–23 → 18, 24–32 → 12, 33+ → 0 está exatamente conforme o texto do Art. 130, I–IV e §2º da CLT.</div></div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Aviso prévio nota a controvérsia de interpretação.</strong> A nota legal no rodapé da calculadora menciona que "o texto da lei é interpretado de formas distintas em alguns tribunais" — isso é honesto e correto.</div></div>
+
+      <div class="sub-title">Problemas / Imprecisões Jurídicas</div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Aviso prévio: o acréscimo de 3 dias começa no 2º ou no 1º ano completo?</strong> A calculadora implementa: "a partir do 2º ano completo, cada ano adiciona 3 dias" (<code>anosAcrescimo = Math.max(0, anos - 1)</code>), ou seja, 1 ano → 30 dias, 2 anos → 33, etc. A Lei 12.506/2011, Art. 1º diz "acrescido de 3 dias por ano de serviço prestado na mesma empresa, até o máximo de 60 dias". A questão controversa é: "por ano" significa a partir do 1º ou do 2º? O TST, na OJ 369 da SDI-1 (anterior à lei) e na interpretação dominante, entende que o 1º ano já conta — portanto o empregado com exatamente 1 ano teria 30+3=33 dias. Vários TRTs e o STF (ARE 1.121.633) têm posições divergentes. A calculadora adota a posição mais conservadora (favorável ao empregador) sem deixar isso explícito para o usuário.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Aviso prévio: o limite máximo de 90 dias está correto mas a fórmula interna limita os "adicionais" a 60 e não o total a 90.</strong> O código: <code>diasAcrescimo = Math.min(anosAcrescimo * 3, 60)</code>. Como 30 (base) + 60 (máx adicional) = 90, o resultado final está correto. Mas a UI exibe "Limite máximo: 90 dias" quando na verdade a lei fala em "máximo de 60 dias" para a parte proporcional. Isso é correto no resultado mas a redação do alerta pode confundir.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Tabela de reflexos: aviso prévio indenizado integra FGTS mas não é base de cálculo de férias e 13º.</strong> A tabela está correta nisso (FGTS=S, Férias=N, 13º=N). Porém falta a nota que o aviso prévio indenizado integra o tempo de serviço para FGTS (OJ 195, SDI-1) mas há controvérsia sobre integrar o cômputo do período aquisitivo de férias — o TST ainda tem Súmulas pendentes de uniformização.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Tabela de reflexos: PLR não reflete na FGTS — mas há controvérsia.</strong> A tabela marca PLR com FGTS=N, corretamente baseada na Súmula 451 do TST. No entanto, o STJ e alguns TRTs têm posições sobre PLR paga em dobro ou com habitualidade que afastam a isenção. A tabela poderia ter uma nota de alerta neste item.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Calculadora de avos: Art. 133 aplicado globalmente quando deveria ser por período.</strong> O código marca todos os períodos aquisitivos como perdidos se qualquer hipótese do Art. 133 estiver marcada. Na prática, as hipóteses do Art. 133 afetam apenas o período aquisitivo em curso no momento em que ocorrem. Um trabalhador com 3 anos de vínculo que sofreu afastamento no 2º ano perde apenas o 2º período aquisitivo, não o 1º nem o 3º. A nota na tela menciona isso ("Para cenários mistos, consulte um advogado"), mas a UI checklist induz o usuário a marcar e ver todos os períodos como perdidos, o que é juridicamente errado para o caso geral.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Verbas ausentes da tabela de reflexos que são frequentes na prática.</strong> Faltam: (1) Adicional de sobreaviso (Súm. 428, TST — salarial), (2) Intervalo intrajornada não concedido após Reforma Trabalhista (Art. 71, §4º — indenizatório pós-2017, salarial pré-2017), (3) Horas in itinere (OJ 36 SDI-1 / extintas pela Reforma, mas ações anteriores a 2017 ainda tramitam), (4) DSR sobre horas extras (Súm. 172, TST), (5) Alimentação cesta básica sem PAT.</div></div>
+
+      <div class="sub-title">Sugestões</div>
+
+      <div class="finding finding-tip"><div class="finding-icon">💡</div><div><strong>Adicionar calculadora de prescrição bienal.</strong> Art. 7º, XXIX, CF: além dos 5 anos de profundidade, há o prazo bienal de extinção do contrato para ajuizar. Muitos advogados confundem os dois prazos. Mostrar ambos na mesma tela seria uma funcionalidade única no mercado.</div></div>
+
+      <div class="finding finding-tip"><div class="finding-icon">💡</div><div><strong>Calculadora de FGTS + multa.</strong> Dado o saldo do FGTS e o tempo de serviço, calcular a multa rescisória de 40% (dispensa sem justa causa) ou 20% (acordo individual — Art. 484-A). Ferramenta simples com altíssima demanda.</div></div>
+
+      <div class="finding finding-tip"><div class="finding-icon">💡</div><div><strong>Adicionar coluna "Pós-Reforma 2017" na tabela de reflexos.</strong> A Reforma Trabalhista (Lei 13.467/2017) mudou a natureza de algumas verbas (intervalo intrajornada, por exemplo). Uma coluna "Pré-2017" vs "Pós-2017" tornaria a tabela indispensável para processos que abrangem os dois períodos.</div></div>
+
+      <div class="finding finding-tip"><div class="finding-icon">💡</div><div><strong>Adicionar flag de controvérsia na tabela de reflexos.</strong> Para verbas com posicionamentos divergentes entre TST e STF ou entre câmaras de TRTs, exibir um ícone de alerta com tooltip explicativo.</div></div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- PERSPECTIVA 3 — SERVIDOR TRT                          -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <section class="section" id="trt">
+      <div class="section-title"><span class="icon">🏛️</span> Perspectiva 3 — Servidor Público do TRT (Gabinete)</div>
+
+      <div class="sub-title">O que funciona bem para uso em gabinete</div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Remover Espaços é a ferramenta mais usada no dia a dia.</strong> Copiar texto de PDF de petição e limpar os espaços duplos / quebras de linha é tarefa diária de qualquer assessor. O modo "Compacto" e "Linha única" são exatamente o que se precisa. Esta ferramenta por si só justifica o bookmarking do site.</div></div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Tabela de reflexos com busca e filtro.</strong> Em gabinete, é frequente precisar verificar rapidamente "essa verba reflete em FGTS?". A busca em tempo real e o filtro por natureza são funcionais. O Print/PDF funciona para incluir em relatório de sentença.</div></div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Calculadora de prescrição útil para triagem de processos.</strong> Ao examinar uma petição inicial, o assistente verifica rapidamente se há prescrição quinquenal a reconhecer de ofício. A timeline visual facilita identificar quais parcelas estão prescritas.</div></div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Calculadora de avos com períodos aquisitivos múltiplos.</strong> Para trabalhadores com vínculo longo, a lista de períodos aquisitivos completos com status (em período concessivo / vencidas) é útil para fundamentar decisão sobre adicional de 1/3 ou férias em dobro.</div></div>
+
+      <div class="sub-title">O que falta para uso profissional em gabinete</div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Não há calculadora de TRCT (Termo de Rescisão).</strong> A principal conferência que um assessor faz é verificar se os valores do TRCT estão corretos. Uma calculadora que receba salário, data admissão/demissão, modalidade de rescisão e retorne o valor esperado de cada verba seria a ferramenta mais usada do site.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Sem ferramenta de consulta de Súmulas e OJs do TST.</strong> O dia a dia em gabinete envolve buscar a redação exata de súmulas. Uma página com as súmulas mais invocadas (Sm. 85, 132, 228, 331, 372, 437, etc.) com texto atualizado e buscável seria de uso diário.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Calculadora de aviso prévio não tem projeção do contrato.</strong> Para assessor de gabinete, interessa calcular a data final do contrato considerando o aviso prévio cumprido ou indenizado — especialmente quando o aviso é indenizado e projeta direitos sobre FGTS e férias. A calculadora mostra a data mas não indica as verbas decorrentes.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Sem ferramenta de verificação de tempestividade recursal.</strong> Verificar prazo de recurso (8 dias úteis para recurso ordinário, Art. 895 CLT) considerando feriados é tarefa recorrente. Uma calculadora de prazo processual trabalhista completaria o conjunto.</div></div>
+
+      <div class="sub-title">Sugestões voltadas ao servidor TRT</div>
+
+      <div class="finding finding-tip"><div class="finding-icon">💡</div><div><strong>Calculadora de horas extras com reflexos.</strong> Entrada: salário, horas semanais contratuais, adicional aplicável (50% ou 100%), horas extras por período. Saída: valor das horas + reflexos em DSR (Súm. 172), férias, 13º e FGTS. Isso automatiza o que assistentes fazem manualmente.</div></div>
+
+      <div class="finding finding-tip"><div class="finding-icon">💡</div><div><strong>Conversor de dias úteis para calendário.</strong> Contagem de prazo em dias úteis (Art. 775, CLT, pós-Reforma) é rotineira em gabinete. Uma calculadora que some dias úteis partindo de uma data (com opção de excluir feriados nacionais) seria muito útil.</div></div>
+
+      <div class="finding finding-tip"><div class="finding-icon">💡</div><div><strong>Galeria de frases de fundamentação de sentença.</strong> Textos-padrão para fundamentação de litigância de má-fé, honorários advocatícios (Art. 791-A CLT), prescrição de ofício — uma biblioteca de trechos copiáveis reduziria o tempo de elaboração de sentenças.</div></div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- PERSPECTIVA 4 — ADVOGADO DO RECLAMANTE               -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <section class="section" id="reclamante">
+      <div class="section-title"><span class="icon">👔</span> Perspectiva 4 — Advogado do Reclamante</div>
+
+      <div class="sub-title">O que agrega valor para o advogado do trabalhador</div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Calculadora de prescrição com suspensão pandêmica resolve um problema real.</strong> Advogados ainda erram o prazo da Lei 14.010/2020. Ter uma calculadora que aponta o prazo correto e pode ser mostrada ao cliente ("olha, temos até essa data") é um diferencial imediato.</div></div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Tabela de reflexos como ferramenta de quantificação.</strong> Ao elaborar a liquidação de uma reclamação, o advogado precisa saber quais verbas integram o cálculo das outras. A tabela com fundamento legal permite usar diretamente na petição: "nos termos da Súmula 376 do TST, as horas extras integram o cálculo de..."</div></div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Calculadora de avos útil para quantificar o pedido inicial.</strong> Informar ao cliente o valor estimado de férias proporcionais e 13º é parte do primeiro atendimento. A calculadora com slider de faltas mostra o impacto de faltas injustificadas no valor das férias — algo que muitos advogados simplificam errado.</div></div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Artigos sobre prescrição intercorrente e terceirização.</strong> Os títulos listados (mesmo sem conteúdo ainda) são temas de alto impacto para a estratégia de defesa do reclamante. Quando publicados, tendem a ser referenciados em petições.</div></div>
+
+      <div class="sub-title">Lacunas críticas para o advogado do reclamante</div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Artigos existem apenas como títulos — nenhum tem conteúdo.</strong> O maior valor de um site de especialista é o conteúdo. Com artigos só em títulos e excertos, o site é uma vitrine vazia. O advogado entra, acha o título interessante, clica e... nada. Taxa de rejeição altíssima.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Modelos de petições prometidos mas inexistentes.</strong> "Recurso Ordinário — Reclamante" é exatamente o modelo que um advogado iniciante buscaria. O botão "Baixar Modelo" que não faz nada é pior do que não ter o botão — cria frustração e desconfiança.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Não há calculadora de valor da causa ou estimativa de condenação.</strong> O advogado do reclamante precisa estimar o valor do pedido para fins de honorários e preparo do reclamado. Uma calculadora que receba as verbas e quantifique o total seria ferramenta de uso diário.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Sem conteúdo sobre vínculo empregatício e pejotização.</strong> Um dos temas mais recorrentes em reclamações trabalhistas contemporâneas. O site poderia ter uma ferramenta de diagnóstico: "verifique se há indícios de vínculo empregatício" com checklist dos requisitos do Art. 3º da CLT.</div></div>
+
+      <div class="sub-title">Sugestões para o advogado do reclamante</div>
+
+      <div class="finding finding-tip"><div class="finding-icon">💡</div><div><strong>Publicar ao menos 2 artigos completos imediatamente.</strong> Os artigos sobre prescrição trabalhista e aviso prévio proporcional já têm tudo para ser escritos por quem domina o tema. Eles já existem como borrões de excertos no site. Prioridade máxima.</div></div>
+
+      <div class="finding finding-tip"><div class="finding-icon">💡</div><div><strong>Checklist de documentos para o primeiro atendimento.</strong> Lista dos documentos que o trabalhador deve levar ao escritório (carteira de trabalho, contracheques, ponto, extrato FGTS). Um PDF para download gratuito com o logo do site é marketing de conteúdo eficaz e zero custo.</div></div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- PERSPECTIVA 5 — ADVOGADO DO RECLAMADO                -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <section class="section" id="reclamado">
+      <div class="section-title"><span class="icon">🏢</span> Perspectiva 5 — Advogado do Reclamado / Empresas</div>
+
+      <div class="sub-title">O que pode ser usado pelo advogado do reclamado</div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Tabela de reflexos é igualmente útil para contestação.</strong> Na contestação, o advogado da empresa frequentemente precisa impugnar os reflexos pretendidos na inicial. A tabela com fundamento legal serve para verificar se o reclamante está pretendendo reflexos sobre verbas indenizatórias (ex: PLR, vale-transporte) — o que é juridicamente indevido.</div></div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Calculadora de aviso prévio para verificar pagamento da rescisão.</strong> O RH da empresa frequentemente comete erros no aviso prévio proporcional. O advogado pode verificar se o TRCT foi calculado corretamente antes da audiência.</div></div>
+
+      <div class="finding finding-ok"><div class="finding-icon">✅</div><div><strong>Calculadora de prescrição para verificar parcelas prescritas.</strong> O advogado da defesa pode usar a calculadora para verificar quais parcelas do pedido estão prescritas e fundamentar a arguição de prescrição quinquenal na contestação.</div></div>
+
+      <div class="sub-title">Lacunas graves para o advogado do reclamado</div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Nenhum conteúdo sobre compliance ou prevenção trabalhista.</strong> O advogado que atende empresas precisa orientar sobre: contratos de experiência, banco de horas, teletrabalho, limites de jornada. O site não tem uma linha sobre isso. A perspectiva do site é quase integralmente do trabalhador.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Sem estimativa de passivo trabalhista.</strong> O maior valor para o advogado do reclamado é quantificar o risco antes da audiência de conciliação. Uma calculadora de passivo trabalhista estimado (recebendo as verbas alegadas e calculando o máximo de condenação possível) seria uma ferramenta diferenciada — e inexistente no mercado de forma gratuita.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Artigo sobre terceirização irrestrita existe como título mas sem conteúdo.</strong> Esse é um dos temas mais relevantes para empresas contratantes de terceirizados e seus advogados. É justamente o tipo de artigo que um advogado de empresa leria e poderia indicar o site a colegas.</div></div>
+
+      <div class="finding finding-bad"><div class="finding-icon">❌</div><div><strong>Sem menção à modalidade de acordo Art. 484-A CLT.</strong> O acordo individual de rescisão (multa de 20% em vez de 40%) é uma opção usada por empresas para reduzir passivo. Não há calculadora ou artigo sobre isso.</div></div>
+
+      <div class="sub-title">Sugestões para ampliar a utilidade para o reclamado</div>
+
+      <div class="finding finding-tip"><div class="finding-icon">💡</div><div><strong>Calculadora de passivo máximo de condenação.</strong> Entrada: salário, tempo de serviço, verbas alegadas na inicial. Saída: estimativa máxima de condenação com base nas verbas salariais e reflexos. Útil para empresas na hora de decidir entre contestar ou propor acordo.</div></div>
+
+      <div class="finding finding-tip"><div class="finding-icon">💡</div><div><strong>Artigo "O que as empresas erram mais no TRCT".</strong> Um artigo prático sobre os erros mais comuns em rescisões (aviso prévio proporcional mal calculado, saldo de salário errado, FGTS descontado indevidamente) atrai não só advogados mas RHs e contadores. Potencial de viralização alta.</div></div>
+
+      <div class="finding finding-tip"><div class="finding-icon">💡</div><div><strong>Seção de compliance preventivo.</strong> Um mini-guia sobre: "Checklist para contratos de trabalho à distância (teletrabalho)", "Limites do banco de horas", "Quando usar contrato de experiência" — conteúdo de baixo esforço para quem tem o conhecimento e de alto valor para empresas de médio porte.</div></div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- ── PRIORIDADES ──────────────────────────────────────── -->
+    <section class="section" id="prioridades">
+      <div class="section-title"><span class="icon">🎯</span> Tabela de Prioridades — O que fazer primeiro</div>
+
+      <table class="prio-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Item</th>
+            <th>Impacto</th>
+            <th>Esforço</th>
+            <th>Perspectiva</th>
+            <th>Detalhes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><strong>Publicar artigos completos</strong></td>
+            <td><span class="prio-pill prio-alto">Alto</span></td>
+            <td><span class="prio-pill prio-esf-alto">Alto</span></td>
+            <td><span class="badge badge-rec" style="font-size:10px">Reclamante</span> <span class="badge badge-emp" style="font-size:10px">Reclamado</span></td>
+            <td>6 títulos sem conteúdo. Começar pelos 2 artigos mais fáceis (prescrição + aviso prévio)</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><strong>Corrigir links #</strong> (artigos e modelos)</td>
+            <td><span class="prio-pill prio-alto">Alto</span></td>
+            <td><span class="prio-pill prio-esf-baixo">Baixo</span></td>
+            <td><span class="badge badge-ux" style="font-size:10px">UX</span></td>
+            <td>artigos.html: todos os "Ler artigo" quebrados. modelos.html: botões de download sem arquivo. Converter para "Em breve" enquanto o conteúdo não existe.</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><strong>Adicionar foto real</strong></td>
+            <td><span class="prio-pill prio-alto">Alto</span></td>
+            <td><span class="prio-pill prio-esf-baixo">Baixo</span></td>
+            <td><span class="badge badge-ux" style="font-size:10px">UX</span></td>
+            <td>Placeholder "APO" no hero e "MT" no quem-sou-eu. Uma foto profissional aumenta significativamente conversão e credibilidade.</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><strong>Corrigir social buttons no footer</strong></td>
+            <td><span class="prio-pill prio-medio">Médio</span></td>
+            <td><span class="prio-pill prio-esf-baixo">Baixo</span></td>
+            <td><span class="badge badge-ux" style="font-size:10px">UX</span></td>
+            <td>Instagram real já está no quem-sou-eu. Replicar para o footer. LinkedIn e YouTube: colocar URL real ou remover.</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><strong>Adicionar aviso de controvérsia no aviso prévio</strong></td>
+            <td><span class="prio-pill prio-medio">Médio</span></td>
+            <td><span class="prio-pill prio-esf-baixo">Baixo</span></td>
+            <td><span class="badge badge-jur" style="font-size:10px">Jurídico</span></td>
+            <td>Explicitar que a calculadora usa a interpretação "acréscimo a partir do 2º ano" e que há divergência jurisprudencial. Adicionar toggle para o usuário escolher a interpretação.</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td><strong>Corrigir Art. 133 na calculadora de avos</strong></td>
+            <td><span class="prio-pill prio-medio">Médio</span></td>
+            <td><span class="prio-pill prio-esf-med">Médio</span></td>
+            <td><span class="badge badge-jur" style="font-size:10px">Jurídico</span> <span class="badge badge-trt" style="font-size:10px">TRT</span></td>
+            <td>Aplicar Art. 133 apenas ao período aquisitivo em curso quando ocorreu o evento, não a todos os períodos. Ou simplificar: desabilitar as checkboxes para períodos já concluídos.</td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td><strong>Completar tabela de reflexos</strong></td>
+            <td><span class="prio-pill prio-medio">Médio</span></td>
+            <td><span class="prio-pill prio-esf-med">Médio</span></td>
+            <td><span class="badge badge-jur" style="font-size:10px">Jurídico</span> <span class="badge badge-trt" style="font-size:10px">TRT</span></td>
+            <td>Adicionar sobreaviso, intervalo intrajornada (com distinção pré/pós Reforma), DSR sobre horas extras, horas in itinere (processos anteriores a 2017)</td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td><strong>Open Graph / SEO social</strong></td>
+            <td><span class="prio-pill prio-medio">Médio</span></td>
+            <td><span class="prio-pill prio-esf-baixo">Baixo</span></td>
+            <td><span class="badge badge-ux" style="font-size:10px">UX</span></td>
+            <td>Adicionar meta og:title, og:description, og:image em todas as páginas. Impacto direto em compartilhamento no WhatsApp e Instagram.</td>
+          </tr>
+          <tr>
+            <td>9</td>
+            <td><strong>Calculadora de FGTS + multa 40%</strong></td>
+            <td><span class="prio-pill prio-alto">Alto</span></td>
+            <td><span class="prio-pill prio-esf-med">Médio</span></td>
+            <td><span class="badge badge-rec" style="font-size:10px">Reclamante</span> <span class="badge badge-emp" style="font-size:10px">Reclamado</span></td>
+            <td>Entrada: saldo FGTS + tempo de serviço. Saída: multa 40% (sem justa causa) ou 20% (acordo Art. 484-A). Alta demanda, baixa oferta gratuita no mercado.</td>
+          </tr>
+          <tr>
+            <td>10</td>
+            <td><strong>Remover import duplo de fontes</strong></td>
+            <td><span class="prio-pill prio-baixo">Baixo</span></td>
+            <td><span class="prio-pill prio-esf-baixo">Baixo</span></td>
+            <td><span class="badge badge-ux" style="font-size:10px">UX</span></td>
+            <td>Remover o <code>@import</code> do style.css — as fontes já são carregadas via <code>&lt;link&gt;</code> nas páginas HTML. Elimina uma requisição duplicada.</td>
+          </tr>
+          <tr>
+            <td>11</td>
+            <td><strong>Email de contato real no footer</strong></td>
+            <td><span class="prio-pill prio-alto">Alto</span></td>
+            <td><span class="prio-pill prio-esf-baixo">Baixo</span></td>
+            <td><span class="badge badge-ux" style="font-size:10px">UX</span></td>
+            <td>Substituir <code>contato@exemplo.com.br</code> no nav.js pelo e-mail real. Um site de especialista com email falso no footer perde credibilidade instantaneamente.</td>
+          </tr>
+          <tr>
+            <td>12</td>
+            <td><strong>Melhorar acessibilidade</strong></td>
+            <td><span class="prio-pill prio-medio">Médio</span></td>
+            <td><span class="prio-pill prio-esf-med">Médio</span></td>
+            <td><span class="badge badge-ux" style="font-size:10px">UX</span></td>
+            <td>Adicionar aria-labels nos filtros, melhorar contraste dos textos em rgba baixo, vincular labels a inputs com aria-describedby.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ── PRÓXIMOS PASSOS ─────────────────────────────────── -->
+    <section class="section" id="proximos">
+      <div class="section-title"><span class="icon">🚀</span> Próximos Passos Concretos</div>
+
+      <div class="steps-grid">
+
+        <div class="step-card">
+          <div class="step-num">Passo 1 — Esta semana</div>
+          <div class="step-title">Corrigir os "buracos" visíveis</div>
+          <div class="step-desc">
+            (1) Em artigos.html, trocar os <code>href="#"</code> por um texto "<em>Em breve</em>" ou desabilitar os botões.
+            Em modelos.html, idem para os downloads.
+            (2) Atualizar o email no nav.js para o e-mail real.
+            (3) Conectar os ícones sociais do footer ao perfil real do Instagram.
+            Tempo estimado: 30 minutos.
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">Passo 2 — Esta semana</div>
+          <div class="step-title">Adicionar foto profissional</div>
+          <div class="step-desc">
+            Substituir os avatares placeholder por uma foto real.
+            No hero (index.html): trocar <code>.avatar-initials</code> por <code>&lt;img&gt;</code> dentro de <code>.hero-avatar</code>.
+            No quem-sou-eu: trocar <code>.about-photo-initials</code> por <code>&lt;img&gt;</code>.
+            O CSS já está preparado para imagem — é só inserir o arquivo.
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">Passo 3 — Próximas 2 semanas</div>
+          <div class="step-title">Publicar os 2 primeiros artigos completos</div>
+          <div class="step-desc">
+            Começar pelos artigos de prescrição trabalhista e aviso prévio proporcional.
+            O CSS de <code>.article-full-inner</code> e <code>.article-body</code> já está completo em style.css.
+            Criar os arquivos HTML seguindo o mesmo padrão de breadcrumb e page-hero.
+            Vincular os cards em artigos.html às páginas novas.
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">Passo 4 — Próximo mês</div>
+          <div class="step-title">Calculadora de FGTS + multa rescisória</div>
+          <div class="step-desc">
+            Criar <code>ferramentas/fgts.html</code> com: (1) campo de saldo FGTS, (2) tempo de serviço, (3) modalidade de rescisão (sem justa causa / acordo Art. 484-A).
+            Calcular: multa 40% ou 20% sobre o saldo + depósitos do aviso indenizado.
+            É a calculadora com maior demanda de mercado e menor concorrência gratuita.
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">Passo 5 — Próximo mês</div>
+          <div class="step-title">Open Graph + SEO social em todas as páginas</div>
+          <div class="step-desc">
+            Adicionar em cada HTML: <code>og:title</code>, <code>og:description</code>, <code>og:image</code> (uma imagem 1200×630 com o logo e o título da página), <code>og:url</code>, <code>twitter:card</code>.
+            Impacto direto: cada compartilhamento no WhatsApp mostrará uma prévia profissional do conteúdo.
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">Passo 6 — Médio prazo</div>
+          <div class="step-title">Corrigir imprecisão jurídica do aviso prévio</div>
+          <div class="step-desc">
+            Adicionar na calculadora de aviso prévio um toggle: "Interpretação A: acréscimo a partir do 2º ano (posição mais conservadora) / Interpretação B: acréscimo a partir do 1º ano".
+            Mostrar ambos os valores e explicar a controvérsia. Isso transforma a ferramenta em referência pedagógica.
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">Passo 7 — Médio prazo</div>
+          <div class="step-title">Completar a tabela de reflexos</div>
+          <div class="step-desc">
+            Adicionar ao array <code>VERBAS</code> em reflexos.html: sobreaviso (Súm. 428), intervalo intrajornada (com flag pré/pós 2017), DSR sobre horas extras (Súm. 172), horas in itinere, alimentação cesta básica fora do PAT.
+            Considerar adicionar coluna "Pré-Reforma / Pós-Reforma" para verbas que mudaram de natureza em 2017.
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">Passo 8 — Médio prazo</div>
+          <div class="step-title">Ferramenta de prazo processual</div>
+          <div class="step-desc">
+            Criar <code>ferramentas/prazos.html</code> com calculadora de dias úteis (Art. 775 CLT pós-Reforma) e dias corridos, com exclusão de feriados nacionais e opção de feriados locais.
+            Esta ferramenta tem demanda tanto de advogados quanto de servidores de TRT para controle de prazos em gabinete.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>
