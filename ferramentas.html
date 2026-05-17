@@ -244,6 +244,183 @@
       </div>
     </div>
 
+    <!-- Ferramenta 4: Remover Espaços em Branco -->
+    <div class="tool-block" id="remover-espacos">
+      <div class="tool-header">
+        <div class="tool-header-icon">&#x2702;</div>
+        <div class="tool-header-text">
+          <h3>Remover Espa&ccedil;os em Branco</h3>
+          <p>Limpe, normalize ou compacte textos — ideal para peças e documentos copiados de PDFs</p>
+        </div>
+      </div>
+      <div class="tool-body">
+
+        <div class="form-group" style="position:relative">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+            <label for="espacos-input" style="margin-bottom:0">Texto de entrada</label>
+            <span id="espacos-contador" style="font-size:0.72rem;color:var(--text-light);letter-spacing:0.04em">Caract: 0 | Palavras: 0 | Linhas: 0 | Espa&ccedil;os: 0</span>
+          </div>
+          <textarea id="espacos-input" placeholder="Cole ou digite seu texto aqui..." rows="8" style="width:100%;padding:0.85rem 1.1rem;border:1.5px solid rgba(200,167,91,0.25);border-radius:6px;font-family:inherit;font-size:0.95rem;color:var(--text-dark);background:var(--cream);resize:vertical;outline:none;transition:border-color 0.2s,box-shadow 0.2s;line-height:1.6" onfocus="this.style.borderColor='var(--gold)';this.style.boxShadow='0 0 0 3px rgba(200,167,91,0.12)';this.style.background='var(--white)'" onblur="this.style.borderColor='rgba(200,167,91,0.25)';this.style.boxShadow='none';this.style.background='var(--cream)'"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label style="display:block;margin-bottom:0.75rem">Modo de opera&ccedil;&atilde;o</label>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0.6rem">
+
+            <label class="espacos-modo-card" style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.85rem 1rem;border:1.5px solid rgba(200,167,91,0.22);border-radius:6px;cursor:pointer;transition:border-color 0.2s,background 0.2s">
+              <input type="radio" name="espacos-modo" value="normalizar" checked style="margin-top:0.15rem;accent-color:var(--gold)">
+              <div>
+                <div style="font-size:0.83rem;font-weight:600;color:var(--navy-deep)">Normalizar espa&ccedil;os</div>
+                <div style="font-size:0.75rem;color:var(--text-light);line-height:1.4">Substitui m&uacute;ltiplos espa&ccedil;os por um &uacute;nico</div>
+              </div>
+            </label>
+
+            <label class="espacos-modo-card" style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.85rem 1rem;border:1.5px solid rgba(200,167,91,0.22);border-radius:6px;cursor:pointer;transition:border-color 0.2s,background 0.2s">
+              <input type="radio" name="espacos-modo" value="remover-todos" style="margin-top:0.15rem;accent-color:var(--gold)">
+              <div>
+                <div style="font-size:0.83rem;font-weight:600;color:var(--navy-deep)">Remover todos os espa&ccedil;os</div>
+                <div style="font-size:0.75rem;color:var(--text-light);line-height:1.4">Exclui todos os caracteres de espa&ccedil;o</div>
+              </div>
+            </label>
+
+            <label class="espacos-modo-card" style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.85rem 1rem;border:1.5px solid rgba(200,167,91,0.22);border-radius:6px;cursor:pointer;transition:border-color 0.2s,background 0.2s">
+              <input type="radio" name="espacos-modo" value="cortar-linhas" style="margin-top:0.15rem;accent-color:var(--gold)">
+              <div>
+                <div style="font-size:0.83rem;font-weight:600;color:var(--navy-deep)">Cortar linhas</div>
+                <div style="font-size:0.75rem;color:var(--text-light);line-height:1.4">Remove espa&ccedil;os no in&iacute;cio/fim de cada linha</div>
+              </div>
+            </label>
+
+            <label class="espacos-modo-card" style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.85rem 1rem;border:1.5px solid rgba(200,167,91,0.22);border-radius:6px;cursor:pointer;transition:border-color 0.2s,background 0.2s">
+              <input type="radio" name="espacos-modo" value="remover-vazias" style="margin-top:0.15rem;accent-color:var(--gold)">
+              <div>
+                <div style="font-size:0.83rem;font-weight:600;color:var(--navy-deep)">Remover linhas em branco</div>
+                <div style="font-size:0.75rem;color:var(--text-light);line-height:1.4">Mant&eacute;m o texto, remove linhas vazias</div>
+              </div>
+            </label>
+
+            <label class="espacos-modo-card" style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.85rem 1rem;border:1.5px solid rgba(200,167,91,0.22);border-radius:6px;cursor:pointer;transition:border-color 0.2s,background 0.2s">
+              <input type="radio" name="espacos-modo" value="compacto" style="margin-top:0.15rem;accent-color:var(--gold)">
+              <div>
+                <div style="font-size:0.83rem;font-weight:600;color:var(--navy-deep)">Modo compacto</div>
+                <div style="font-size:0.75rem;color:var(--text-light);line-height:1.4">Cortar linhas + remover vazias + normalizar</div>
+              </div>
+            </label>
+
+            <label class="espacos-modo-card" style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.85rem 1rem;border:1.5px solid rgba(200,167,91,0.22);border-radius:6px;cursor:pointer;transition:border-color 0.2s,background 0.2s">
+              <input type="radio" name="espacos-modo" value="linha-unica" style="margin-top:0.15rem;accent-color:var(--gold)">
+              <div>
+                <div style="font-size:0.83rem;font-weight:600;color:var(--navy-deep)">Linha &uacute;nica</div>
+                <div style="font-size:0.75rem;color:var(--text-light);line-height:1.4">Converte todo o texto em uma &uacute;nica linha</div>
+              </div>
+            </label>
+
+            <label class="espacos-modo-card" style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.85rem 1rem;border:1.5px solid rgba(200,167,91,0.22);border-radius:6px;cursor:pointer;transition:border-color 0.2s,background 0.2s">
+              <input type="radio" name="espacos-modo" value="remover-tudo" style="margin-top:0.15rem;accent-color:var(--gold)">
+              <div>
+                <div style="font-size:0.83rem;font-weight:600;color:var(--navy-deep)">Remover tudo</div>
+                <div style="font-size:0.75rem;color:var(--text-light);line-height:1.4">Remove espa&ccedil;os, abas e quebras de linha</div>
+              </div>
+            </label>
+
+          </div>
+        </div>
+
+        <div class="form-group" style="display:flex;gap:1.5rem;flex-wrap:wrap;margin-bottom:1.5rem">
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.85rem;color:var(--text-mid);text-transform:none;letter-spacing:normal;font-weight:400">
+            <input type="checkbox" id="espacos-preservar" checked style="accent-color:var(--gold)">
+            Preservar quebras de linha
+          </label>
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.85rem;color:var(--text-mid);text-transform:none;letter-spacing:normal;font-weight:400">
+            <input type="checkbox" id="espacos-cortar" style="accent-color:var(--gold)">
+            Cortar espa&ccedil;os no in&iacute;cio/fim do texto
+          </label>
+        </div>
+
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+          <button class="btn btn-navy" onclick="executarRemocaoEspacos()">Remover espa&ccedil;os</button>
+          <button class="btn btn-outline btn-sm" onclick="limparRemocaoEspacos()" style="padding:0.9rem 2.1rem">Limpar</button>
+        </div>
+
+        <div id="espacos-result-wrap" style="display:none;margin-top:1.75rem">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+            <label style="font-size:0.82rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--navy-mid)">Resultado</label>
+            <button id="espacos-copiar-btn" class="btn btn-outline btn-sm" onclick="copiarEspacosOutput()" style="padding:0.4rem 1.1rem;font-size:0.78rem">Copiar</button>
+          </div>
+          <textarea id="espacos-output" rows="8" readonly style="width:100%;padding:0.85rem 1.1rem;border:1.5px solid rgba(200,167,91,0.30);border-radius:6px;font-family:inherit;font-size:0.95rem;color:var(--text-dark);background:var(--cream-dark);resize:vertical;outline:none;line-height:1.6"></textarea>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Ferramenta 5: Calculadora de Avos -->
+    <div class="tool-block" id="calc-avos">
+      <div class="tool-header">
+        <div class="tool-header-icon">&#x1F4C6;</div>
+        <div class="tool-header-text">
+          <h3>Calculadora de Avos — F&eacute;rias e 13&ordm;</h3>
+          <p>Per&iacute;odos aquisitivos, concessivos, f&eacute;rias proporcionais e 13&ordm; proporcional (Art. 130 e 142 CLT)</p>
+        </div>
+      </div>
+      <div class="tool-body">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="avos-admissao">Data de admiss&atilde;o</label>
+            <input type="date" id="avos-admissao" max="2099-12-31">
+          </div>
+          <div class="form-group">
+            <label for="avos-saida" style="display:flex;justify-content:space-between;align-items:center">
+              <span>Data de sa&iacute;da</span>
+              <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.78rem;font-weight:400;letter-spacing:normal;text-transform:none;cursor:pointer;color:var(--gold-muted)">
+                <input type="checkbox" id="avos-ainda-contratado" style="accent-color:var(--gold)">
+                Ainda contratado
+              </label>
+            </label>
+            <input type="date" id="avos-saida" max="2099-12-31">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="avos-faltas">N&uacute;mero de faltas injustificadas</label>
+          <input type="number" id="avos-faltas" value="0" min="0" max="999" placeholder="0">
+        </div>
+
+        <div class="form-group">
+          <label style="display:block;margin-bottom:0.75rem">Hip&oacute;teses do Art. 133 da CLT — perda do per&iacute;odo aquisitivo</label>
+          <div style="display:flex;flex-direction:column;gap:0.6rem;padding:1.25rem;background:rgba(200,167,91,0.04);border:1px solid rgba(200,167,91,0.18);border-radius:6px">
+            <label style="display:flex;align-items:flex-start;gap:0.6rem;cursor:pointer;font-size:0.85rem;color:var(--text-mid);text-transform:none;letter-spacing:normal;font-weight:400">
+              <input type="checkbox" id="art133-1" style="accent-color:var(--gold);margin-top:0.15rem">
+              <span>Licen&ccedil;a remunerada por mais de 30 dias (inc. I)</span>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:0.6rem;cursor:pointer;font-size:0.85rem;color:var(--text-mid);text-transform:none;letter-spacing:normal;font-weight:400">
+              <input type="checkbox" id="art133-2" style="accent-color:var(--gold);margin-top:0.15rem">
+              <span>Licen&ccedil;a por acidente ou doen&ccedil;a por mais de 6 meses (inc. II)</span>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:0.6rem;cursor:pointer;font-size:0.85rem;color:var(--text-mid);text-transform:none;letter-spacing:normal;font-weight:400">
+              <input type="checkbox" id="art133-3" style="accent-color:var(--gold);margin-top:0.15rem">
+              <span>Recebimento de presta&ccedil;&otilde;es de acidente do trabalho (inc. III)</span>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:0.6rem;cursor:pointer;font-size:0.85rem;color:var(--text-mid);text-transform:none;letter-spacing:normal;font-weight:400">
+              <input type="checkbox" id="art133-4" style="accent-color:var(--gold);margin-top:0.15rem">
+              <span>Aposentadoria por invalidez provis&oacute;ria (inc. IV)</span>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:0.6rem;cursor:pointer;font-size:0.85rem;color:var(--text-mid);text-transform:none;letter-spacing:normal;font-weight:400">
+              <input type="checkbox" id="art133-5" style="accent-color:var(--gold);margin-top:0.15rem">
+              <span>Paralisa&ccedil;&atilde;o parcial ou total do servi&ccedil;o por mais de 3 meses (inc. V)</span>
+            </label>
+          </div>
+          <p style="font-size:0.78rem;color:var(--text-light);margin-top:0.5rem;line-height:1.5">Se alguma hip&oacute;tese estiver marcada, todos os per&iacute;odos aquisitivos completos ser&atilde;o tratados como perdidos. Para cen&aacute;rios mistos, consulte um advogado.</p>
+        </div>
+
+        <button class="btn btn-primary" onclick="calcAvos()">Calcular avos</button>
+
+        <div class="tool-result" id="result-avos" style="padding:2rem">
+        </div>
+
+      </div>
+    </div>
+
   </div>
 </section>
 

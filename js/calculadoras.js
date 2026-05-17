@@ -224,6 +224,345 @@ function calcAvisoPrevio() {
 }
 
 /* ──────────────────────────────────────────────────────────
+   3. REMOVEDOR DE ESPAÇOS
+   ────────────────────────────────────────────────────────── */
+
+function atualizarContadorEspacos() {
+  const ta = document.getElementById('espacos-input');
+  const contador = document.getElementById('espacos-contador');
+  if (!ta || !contador) return;
+  const txt = ta.value;
+  const chars = txt.length;
+  const palavras = txt.trim() === '' ? 0 : txt.trim().split(/\s+/).length;
+  const linhas = txt === '' ? 0 : txt.split('\n').length;
+  const espacos = (txt.match(/ /g) || []).length;
+  contador.textContent = `Caract: ${chars} | Palavras: ${palavras} | Linhas: ${linhas} | Espaços: ${espacos}`;
+}
+
+function removerEspacos(texto, modo, preservarQuebras, cortarBordas) {
+  if (cortarBordas) texto = texto.trim();
+  switch (modo) {
+    case 'normalizar':      return texto.replace(/ {2,}/g, ' ');
+    case 'remover-todos':   return texto.replace(/ /g, '');
+    case 'cortar-linhas':   return texto.split('\n').map(l => l.trim()).join('\n');
+    case 'remover-vazias':  return texto.split('\n').filter(l => l.trim()).join('\n');
+    case 'compacto':        return texto.split('\n').map(l => l.trim()).filter(l => l).join('\n').replace(/ {2,}/g, ' ');
+    case 'linha-unica':     return texto.replace(/\s+/g, ' ').trim();
+    case 'remover-tudo':    return texto.replace(/\s/g, '');
+    default:                return texto;
+  }
+}
+
+function executarRemocaoEspacos() {
+  const input = document.getElementById('espacos-input');
+  const resultBox = document.getElementById('espacos-result-wrap');
+  const resultTa = document.getElementById('espacos-output');
+  if (!input || !resultBox || !resultTa) return;
+
+  const texto = input.value;
+  if (!texto.trim() && texto === '') { alert('Cole ou digite um texto primeiro.'); return; }
+
+  const modo = document.querySelector('input[name="espacos-modo"]:checked')?.value || 'normalizar';
+  const preservar = document.getElementById('espacos-preservar')?.checked ?? true;
+  const cortar = document.getElementById('espacos-cortar')?.checked ?? false;
+
+  const resultado = removerEspacos(texto, modo, preservar, cortar);
+  resultTa.value = resultado;
+  resultBox.style.display = 'block';
+  resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function limparRemocaoEspacos() {
+  const input = document.getElementById('espacos-input');
+  const resultBox = document.getElementById('espacos-result-wrap');
+  const resultTa = document.getElementById('espacos-output');
+  const contador = document.getElementById('espacos-contador');
+  if (input) input.value = '';
+  if (resultTa) resultTa.value = '';
+  if (resultBox) resultBox.style.display = 'none';
+  if (contador) contador.textContent = 'Caract: 0 | Palavras: 0 | Linhas: 0 | Espaços: 0';
+}
+
+function copiarEspacosOutput() {
+  const ta = document.getElementById('espacos-output');
+  if (!ta || !ta.value) return;
+  navigator.clipboard.writeText(ta.value).then(() => {
+    const btn = document.getElementById('espacos-copiar-btn');
+    if (btn) { btn.textContent = 'Copiado!'; setTimeout(() => { btn.textContent = 'Copiar'; }, 1800); }
+  }).catch(() => {
+    ta.select();
+    document.execCommand('copy');
+  });
+}
+
+/* ──────────────────────────────────────────────────────────
+   4. CALCULADORA DE AVOS — FÉRIAS E 13º
+   ────────────────────────────────────────────────────────── */
+
+/**
+ * Calcula quantos avos de férias o empregado tem por período,
+ * e os avos de 13º proporcional no ano civil.
+ *
+ * Regras aplicadas:
+ * - Art. 130 CLT: tabela de faltas → dias de férias
+ * - Art. 133 CLT: hipóteses que reiniciam o período aquisitivo
+ * - Mês conta se trabalhado por mais de 14 dias (Art. 142 §2º)
+ * - Período aquisitivo: 12 meses a partir da admissão
+ * - Período concessivo: 12 meses seguintes ao aquisitivo
+ */
+
+function diasFeriasPorFaltas(faltas) {
+  if (faltas <= 5)  return 30;
+  if (faltas <= 14) return 24;
+  if (faltas <= 23) return 18;
+  if (faltas <= 32) return 12;
+  return 0;
+}
+
+function addMonths(date, months) {
+  const d = new Date(date);
+  d.setMonth(d.getMonth() + months);
+  return d;
+}
+
+function addYears(date, years) {
+  const d = new Date(date);
+  d.setFullYear(d.getFullYear() + years);
+  return d;
+}
+
+function diffDias(from, to) {
+  return Math.round((to - from) / (1000 * 60 * 60 * 24));
+}
+
+// Retorna quantos meses completos ou com >14 dias entre duas datas
+function avosEntre(inicio, fim) {
+  let avos = 0;
+  let cursor = new Date(inicio);
+  while (cursor < fim) {
+    const proxMes = addMonths(cursor, 1);
+    const fimPeriodo = proxMes <= fim ? proxMes : fim;
+    const diasNoMes = diffDias(cursor, fimPeriodo);
+    if (diasNoMes > 14) avos++;
+    cursor = proxMes;
+  }
+  return Math.min(avos, 12);
+}
+
+function statusPeriodoConcessivo(periodoConcessivoFim, hoje) {
+  if (hoje > periodoConcessivoFim) return { label: 'Vencidas', cor: '#f87171' };
+  return { label: 'Em período concessivo', cor: '#fde68a' };
+}
+
+function calcAvos() {
+  const admEl   = document.getElementById('avos-admissao');
+  const saidaEl = document.getElementById('avos-saida');
+  const faltasEl = document.getElementById('avos-faltas');
+  const resultEl = document.getElementById('result-avos');
+  const aindaContratado = document.getElementById('avos-ainda-contratado')?.checked;
+
+  if (!admEl.value) { alert('Informe a data de admissão.'); return; }
+  if (!saidaEl.value) { alert('Informe a data de saída.'); return; }
+
+  const admissao = parseLocalDate(admEl.value);
+  const saida    = parseLocalDate(saidaEl.value);
+  const hoje     = new Date(); hoje.setHours(0,0,0,0);
+  const faltas   = parseInt(faltasEl.value) || 0;
+  const diasFerias = diasFeriasPorFaltas(faltas);
+
+  if (saida < admissao) { alert('A data de saída deve ser posterior à admissão.'); return; }
+
+  // Hipóteses Art. 133 CLT marcadas pelo usuário (os índices correspondem aos checkboxes)
+  const hipoteses133 = [
+    document.getElementById('art133-1')?.checked,
+    document.getElementById('art133-2')?.checked,
+    document.getElementById('art133-3')?.checked,
+    document.getElementById('art133-4')?.checked,
+    document.getElementById('art133-5')?.checked,
+  ];
+  const temHipotese133 = hipoteses133.some(Boolean);
+
+  // ── Períodos Aquisitivos ───────────────────────────────
+  const periodos = [];
+  let inicioAquis = new Date(admissao);
+
+  while (inicioAquis < saida) {
+    const fimAquis = addYears(inicioAquis, 1);
+    const inicioConces = new Date(fimAquis);
+    const fimConces = addYears(fimAquis, 1);
+
+    // Período completo (12 meses)
+    if (fimAquis <= saida) {
+      let status, cor;
+      if (temHipotese133) {
+        status = 'Perdidas (Art. 133 CLT)';
+        cor = '#f87171';
+      } else if (hoje < inicioConces) {
+        status = 'Em período concessivo';
+        cor = '#fde68a';
+      } else if (hoje >= inicioConces && hoje <= fimConces) {
+        const r = statusPeriodoConcessivo(fimConces, hoje);
+        status = r.label; cor = r.cor;
+      } else {
+        status = 'Vencidas';
+        cor = '#f87171';
+      }
+
+      periodos.push({
+        tipo: 'completo',
+        inicioAquis, fimAquis,
+        inicioConces, fimConces,
+        diasFerias: diasFerias,
+        status, cor
+      });
+    } else {
+      // Período incompleto (proporcional)
+      const avos = avosEntre(inicioAquis, saida);
+      const diasProp = parseFloat((avos / 12 * diasFerias).toFixed(2));
+      periodos.push({
+        tipo: 'proporcional',
+        inicioAquis,
+        fimAquis: saida,
+        avos,
+        diasFerias,
+        diasProporcionais: diasProp
+      });
+    }
+
+    inicioAquis = new Date(fimAquis);
+  }
+
+  // ── 13º Proporcional ──────────────────────────────────
+  const anoSaida = saida.getFullYear();
+  const inicioAno = new Date(anoSaida, 0, 1);  // 1º de janeiro do ano da saída
+  const inicioContagem = admissao > inicioAno ? admissao : inicioAno;
+  const avos13 = avosEntre(inicioContagem, saida);
+  const fracao13 = avos13 + '/12';
+
+  // ── Renderização ───────────────────────────────────────
+  let html = '<div style="position:relative;z-index:1">';
+
+  // Título férias completas
+  const periodosCompletos = periodos.filter(p => p.tipo === 'completo');
+  const periodoProporcional = periodos.find(p => p.tipo === 'proporcional');
+
+  if (periodosCompletos.length > 0) {
+    html += `<div class="avos-section-title">F&eacute;rias — Per&iacute;odos Aquisitivos Completos</div>`;
+    periodosCompletos.forEach((p, i) => {
+      html += `
+        <div class="avos-periodo-card">
+          <div class="avos-periodo-header">
+            <span class="avos-periodo-num">${i + 1}º Per&iacute;odo</span>
+            <span class="avos-status-badge" style="color:${p.cor}">${p.status}</span>
+          </div>
+          <div class="avos-row">
+            <div class="avos-col">
+              <div class="avos-label">Per&iacute;odo Aquisitivo</div>
+              <div class="avos-val">${formatDateShort(p.inicioAquis)} – ${formatDateShort(new Date(p.fimAquis.getTime() - 86400000))}</div>
+            </div>
+            <div class="avos-col">
+              <div class="avos-label">Per&iacute;odo Concessivo</div>
+              <div class="avos-val">${formatDateShort(p.inicioConces)} – ${formatDateShort(new Date(p.fimConces.getTime() - 86400000))}</div>
+            </div>
+            <div class="avos-col">
+              <div class="avos-label">Dias de F&eacute;rias (Art. 130)</div>
+              <div class="avos-val avos-gold">${p.diasFerias === 0 ? '0 (perdidas por faltas)' : p.diasFerias + ' dias'}</div>
+            </div>
+          </div>
+        </div>`;
+    });
+  }
+
+  // Férias proporcionais
+  if (periodoProporcional && periodoProporcional.avos > 0) {
+    html += `
+      <div class="avos-section-title">F&eacute;rias Proporcionais</div>
+      <div class="avos-periodo-card">
+        <div class="avos-row">
+          <div class="avos-col">
+            <div class="avos-label">Per&iacute;odo</div>
+            <div class="avos-val">${formatDateShort(periodoProporcional.inicioAquis)} – ${formatDateShort(new Date(periodoProporcional.fimAquis.getTime() - 86400000))}</div>
+          </div>
+          <div class="avos-col">
+            <div class="avos-label">Avos</div>
+            <div class="avos-val avos-gold">${periodoProporcional.avos}/12</div>
+          </div>
+          <div class="avos-col">
+            <div class="avos-label">Dias Proporcionais</div>
+            <div class="avos-val avos-gold">${periodoProporcional.avos}/12 &times; ${periodoProporcional.diasFerias} = <strong>${periodoProporcional.diasProporcionais} dias</strong></div>
+          </div>
+        </div>
+      </div>`;
+  } else if (!periodoProporcional && periodosCompletos.length === 0) {
+    html += `<div class="avos-periodo-card"><p style="color:rgba(255,255,255,0.6);margin:0">Menos de 15 dias trabalhados — sem direito a f&eacute;rias proporcionais.</p></div>`;
+  }
+
+  // 13º Proporcional
+  html += `
+    <div class="avos-section-title">13&ordm; Sal&aacute;rio Proporcional (Art. 7&ordm;, VIII, CF)</div>
+    <div class="avos-periodo-card">
+      <div class="avos-row">
+        <div class="avos-col">
+          <div class="avos-label">Ano de refer&ecirc;ncia</div>
+          <div class="avos-val">${anoSaida}</div>
+        </div>
+        <div class="avos-col">
+          <div class="avos-label">Per&iacute;odo contado</div>
+          <div class="avos-val">${formatDateShort(inicioContagem)} – ${formatDateShort(new Date(saida.getTime() - 86400000))}</div>
+        </div>
+        <div class="avos-col">
+          <div class="avos-label">Avos do 13&ordm;</div>
+          <div class="avos-val avos-gold">${fracao13} do sal&aacute;rio mensal</div>
+        </div>
+      </div>
+      <div class="avos-formula">
+        F&oacute;rmula: sal&aacute;rio &divide; 12 &times; ${avos13} = <strong>${fracao13} do sal&aacute;rio bruto</strong>
+      </div>
+    </div>`;
+
+  // Legenda Art. 130
+  html += `
+    <div class="result-note" style="margin-top:1.5rem">
+      <p><strong style="color:var(--gold)">Tabela Art. 130 CLT — Faltas injustificadas:</strong><br>
+      0–5 faltas: 30 dias &bull; 6–14 faltas: 24 dias &bull; 15–23 faltas: 18 dias &bull; 24–32 faltas: 12 dias &bull; 33+ faltas: 0 dias (perda total)</p>
+    </div>`;
+
+  if (temHipotese133) {
+    html += `
+      <div class="result-note" style="margin-top:0.75rem;border-color:#f87171;background:rgba(248,113,113,0.06)">
+        <p style="color:rgba(255,255,255,0.8)"><strong style="color:#fca5a5">&#9888; Art. 133 CLT aplicado:</strong> As hip&oacute;teses marcadas interrompem o per&iacute;odo aquisitivo, implicando perda do direito &agrave;s f&eacute;rias referentes ao per&iacute;odo em que ocorreram. O ciclo recome&ccedil;a a partir do retorno.</p>
+      </div>`;
+  }
+
+  html += `
+    <div class="result-note" style="margin-top:0.75rem">
+      <p>&#9432;&nbsp; M&ecirc;s conta como avo quando o empregado trabalhou mais de 14 dias naquele m&ecirc;s (Art. 142, &sect;2&ordm;, CLT). Esta calculadora &eacute; meramente informativa; consulte um advogado para casos espec&iacute;ficos.</p>
+    </div>`;
+
+  html += '</div>';
+
+  resultEl.innerHTML = html;
+  resultEl.classList.add('visible');
+  resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function toggleSaidaHoje() {
+  const cb = document.getElementById('avos-ainda-contratado');
+  const saidaEl = document.getElementById('avos-saida');
+  if (!cb || !saidaEl) return;
+  if (cb.checked) {
+    const hoje = new Date();
+    const yyyy = hoje.getFullYear();
+    const mm   = String(hoje.getMonth() + 1).padStart(2, '0');
+    const dd   = String(hoje.getDate()).padStart(2, '0');
+    saidaEl.value = `${yyyy}-${mm}-${dd}`;
+    saidaEl.disabled = true;
+  } else {
+    saidaEl.disabled = false;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────
    BIND DE EVENTOS
    ────────────────────────────────────────────────────────── */
 
@@ -244,4 +583,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const el = document.getElementById(id);
     if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') calcAvisoPrevio(); });
   });
+
+  // Ferramenta remover espaços — contador em tempo real
+  const espacosInput = document.getElementById('espacos-input');
+  if (espacosInput) {
+    espacosInput.addEventListener('input', atualizarContadorEspacos);
+    espacosInput.addEventListener('paste', () => setTimeout(atualizarContadorEspacos, 0));
+  }
+
+  // Avos — checkbox "ainda contratado"
+  const cbContratado = document.getElementById('avos-ainda-contratado');
+  if (cbContratado) cbContratado.addEventListener('change', toggleSaidaHoje);
 });
