@@ -225,9 +225,35 @@ tr:hover td{background:rgba(200,167,91,.04)}
 /* ── Gold divider ───────────────────────────────────────────── */
 .gold-line{height:1px;background:linear-gradient(90deg,var(--gold),transparent);margin:1.5rem 0;opacity:.3}
 
+/* ── Period toggle ──────────────────────────────────────────── */
+.period-toggle{display:flex;gap:.3rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r);padding:.25rem;margin-bottom:.5rem}
+.period-btn{flex:1;padding:.38rem;border-radius:5px;font-size:.74rem;font-weight:600;color:var(--muted);transition:all .2s}
+.period-btn.active{background:linear-gradient(135deg,var(--gold),var(--gold-b));color:var(--navy)}
+.period-active-label{margin-top:.5rem;font-size:.71rem;color:var(--gold);background:rgba(200,167,91,.08);border:1px solid rgba(200,167,91,.2);border-radius:6px;padding:.35rem .65rem;display:none}
+.period-active-label.show{display:block}
+.btn-clear{background:rgba(200,167,91,.08);color:rgba(232,230,224,.55);border:1px solid var(--border);border-radius:var(--r);font-size:.73rem;font-weight:600;padding:.42rem .7rem;flex:1}
+.btn-clear:hover{color:var(--text)}
+
+/* ── View tabs ──────────────────────────────────────────────── */
+.view-tabs{display:none;margin-bottom:1.5rem}
+.view-tabs.show{display:flex;border-bottom:1px solid var(--border)}
+.view-tab{padding:.65rem 1.5rem;font-size:.82rem;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s}
+.view-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* ── Comparative view ───────────────────────────────────────── */
+.comp-header{margin-bottom:1.5rem}
+.comp-header h3{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:.25rem}
+.comp-header p{font-size:.8rem;color:var(--muted)}
+.comp-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem}
+.comp-stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:1rem 1.25rem}
+.comp-stat-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem}
+.comp-stat-val{font-size:1.5rem;font-weight:700;color:var(--gold-b)}
+.comp-stat-sub{font-size:.7rem;color:rgba(232,230,224,.4);margin-top:.2rem}
+
 /* ── Responsive ─────────────────────────────────────────────── */
 @media(max-width:1100px){
   .metrics-grid{grid-template-columns:repeat(2,1fr)}
+  .comp-stat-grid{grid-template-columns:1fr 1fr}
 }
 @media(max-width:860px){
   .charts-grid{grid-template-columns:1fr}
@@ -239,6 +265,7 @@ tr:hover td{background:rgba(200,167,91,.04)}
   .content{padding:1rem}
   .topbar{padding:0 1rem}
   th,td{padding:.65rem .8rem}
+  .comp-stat-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -275,6 +302,29 @@ tr:hover td{background:rgba(200,167,91,.04)}
     </div>
   </div>
 
+  <!-- Período -->
+  <div>
+    <div class="sec-label">Período</div>
+    <div class="period-toggle">
+      <button id="btn-p-mes" class="period-btn active" onclick="setPeriodType('mes')">Mês</button>
+      <button id="btn-p-ano" class="period-btn" onclick="setPeriodType('ano')">Ano</button>
+    </div>
+    <div id="picker-mes">
+      <input type="month" id="mes-input" class="vara-custom-input" style="width:100%"
+             min="2010-01" onkeydown="if(event.key==='Enter')applyPeriod()">
+    </div>
+    <div id="picker-ano" style="display:none">
+      <select id="ano-select" class="vara-custom-input" style="width:100%">
+        <option value="">Selecione o ano</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:.4rem;margin-top:.5rem">
+      <button class="btn-ok" style="flex:1" onclick="applyPeriod()">Aplicar</button>
+      <button class="btn-clear" onclick="clearPeriod()">Limpar</button>
+    </div>
+    <div class="period-active-label" id="period-active-label"></div>
+  </div>
+
   <!-- Busca por número -->
   <div>
     <div class="sec-label">Buscar Processo</div>
@@ -307,6 +357,12 @@ tr:hover td{background:rgba(200,167,91,.04)}
 
   <div class="content" id="content">
 
+    <!-- View tabs -->
+    <div class="view-tabs" id="view-tabs">
+      <button id="tab-metricas" class="view-tab active" onclick="switchTab('metricas')">Métricas</button>
+      <button id="tab-comparativo" class="view-tab" onclick="switchTab('comparativo')">Comparativo</button>
+    </div>
+
     <!-- Empty state -->
     <div class="empty-state" id="empty-state">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
@@ -319,6 +375,7 @@ tr:hover td{background:rgba(200,167,91,.04)}
 
     <!-- Dashboard content (hidden until vara selected) -->
     <div id="dash-content" style="display:none">
+    <div id="metricas-view">
 
       <div class="alert warn" id="alert-mock">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -332,8 +389,8 @@ tr:hover td{background:rgba(200,167,91,.04)}
         <div class="metric-card">
           <div class="metric-icon">⚖️</div>
           <div class="metric-val" id="m-acervo">—</div>
-          <div class="metric-label">Processos no Acervo</div>
-          <div class="metric-sub">Total identificado</div>
+          <div class="metric-label" id="m-acervo-label">Processos no Acervo</div>
+          <div class="metric-sub" id="m-acervo-sub">Total identificado</div>
         </div>
         <div class="metric-card">
           <div class="metric-icon">📥</div>
@@ -434,7 +491,65 @@ tr:hover td{background:rgba(200,167,91,.04)}
       <div style="text-align:center;padding:2rem 0;font-size:.68rem;color:rgba(232,230,224,.2);letter-spacing:.06em">
         DASHBOARD INTERNO · MARINA TRABALHISTA · TRT-3ª REGIÃO · DADOS: DATAJUD/CNJ
       </div>
-    </div>
+    </div><!-- /metricas-view -->
+
+    <!-- Comparativo view -->
+    <div id="comparativo-view" style="display:none">
+      <div class="comp-header">
+        <h3 id="comp-title">Comparativo por Mês</h3>
+        <p id="comp-subtitle">Distribuição de processos ajuizados por período para a vara selecionada.</p>
+      </div>
+
+      <!-- Summary stats -->
+      <div class="comp-stat-grid">
+        <div class="comp-stat">
+          <div class="comp-stat-label">Total no período</div>
+          <div class="comp-stat-val" id="comp-total">—</div>
+          <div class="comp-stat-sub" id="comp-periodos-n">— períodos</div>
+        </div>
+        <div class="comp-stat">
+          <div class="comp-stat-label">Média por período</div>
+          <div class="comp-stat-val" id="comp-media">—</div>
+          <div class="comp-stat-sub">processos/período</div>
+        </div>
+        <div class="comp-stat">
+          <div class="comp-stat-label">Pico máximo</div>
+          <div class="comp-stat-val" id="comp-pico">—</div>
+          <div class="comp-stat-sub" id="comp-pico-label">—</div>
+        </div>
+      </div>
+
+      <!-- Bar chart -->
+      <div class="chart-card" style="margin-bottom:1.25rem">
+        <div class="chart-title" id="comp-chart-title">Volume por período</div>
+        <div class="chart-wrap tall">
+          <canvas id="chart-comp"></canvas>
+        </div>
+      </div>
+
+      <!-- Detail table -->
+      <div class="table-card">
+        <div class="table-header">
+          <div class="table-title">Detalhamento por período</div>
+          <span class="badge mock" id="comp-badge" style="display:none">simulado</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Período</th>
+                <th>Processos</th>
+                <th>% do total</th>
+                <th>Top classe</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-comp"></tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /comparativo-view -->
+
+    </div><!-- /dash-content -->
 
   </div>
 </div><!-- .main -->
@@ -442,11 +557,16 @@ tr:hover td{background:rgba(200,167,91,.04)}
 </div><!-- .shell -->
 <script>
 // ── State ────────────────────────────────────────────────────────────────────
-let currentVara = null;
-let allVaras    = [];
-let chartVol    = null;
-let chartTmp    = null;
-let loadingData = false;
+let currentVara   = null;
+let allVaras      = [];
+let chartVol      = null;
+let chartTmp      = null;
+let chartComp     = null;
+let loadingData   = false;
+let periodType    = 'mes';   // 'mes' | 'ano'
+let selectedMes   = '';      // 'YYYY-MM'
+let selectedAno   = '';      // 'YYYY'
+let currentTab    = 'metricas'; // 'metricas' | 'comparativo'
 
 // ── Chart.js defaults ─────────────────────────────────────────────────────────
 Chart.defaults.color       = 'rgba(232,230,224,.55)';
@@ -464,11 +584,68 @@ const pct = (v,t) => !t ? '0%' : (v/t*100).toFixed(1)+'%';
 const setEl = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-async function apiFetch(endpoint, vara) {
-  const url = vara ? `${endpoint}?vara=${encodeURIComponent(vara)}` : endpoint;
+async function apiFetch(endpoint, vara, extra = {}) {
+  const p = new URLSearchParams();
+  if (vara) p.set('vara', vara);
+  Object.entries(extra).forEach(([k,v]) => { if (v) p.set(k, v); });
+  const url = endpoint + (p.toString() ? '?' + p : '');
   const r = await fetch(url);
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   return r.json();
+}
+
+function periodParams() {
+  if (periodType === 'mes' && selectedMes) return { mes: selectedMes };
+  if (periodType === 'ano' && selectedAno) return { ano: selectedAno };
+  return {};
+}
+
+// ── Period / Tab ──────────────────────────────────────────────────────────────
+function setPeriodType(tipo) {
+  periodType = tipo;
+  document.getElementById('btn-p-mes').classList.toggle('active', tipo === 'mes');
+  document.getElementById('btn-p-ano').classList.toggle('active', tipo === 'ano');
+  document.getElementById('picker-mes').style.display = tipo === 'mes' ? '' : 'none';
+  document.getElementById('picker-ano').style.display = tipo === 'ano' ? '' : 'none';
+  // If in comparativo tab, reload with new type
+  if (currentTab === 'comparativo' && currentVara) loadComparativo(currentVara);
+}
+
+function applyPeriod() {
+  if (periodType === 'mes') {
+    selectedMes = document.getElementById('mes-input').value;
+    selectedAno = '';
+    if (!selectedMes) return;
+  } else {
+    selectedAno = document.getElementById('ano-select').value;
+    selectedMes = '';
+    if (!selectedAno) return;
+  }
+  const label = periodType === 'mes' ? `Mês: ${selectedMes}` : `Ano: ${selectedAno}`;
+  const el = document.getElementById('period-active-label');
+  el.textContent = label;
+  el.classList.add('show');
+  // Switch to métricas tab and reload
+  switchTab('metricas');
+  if (currentVara) loadAll(currentVara);
+}
+
+function clearPeriod() {
+  selectedMes = '';
+  selectedAno = '';
+  document.getElementById('mes-input').value = '';
+  document.getElementById('ano-select').value = '';
+  document.getElementById('period-active-label').classList.remove('show');
+  if (currentVara) loadAll(currentVara);
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-metricas').classList.toggle('active', tab === 'metricas');
+  document.getElementById('tab-comparativo').classList.toggle('active', tab === 'comparativo');
+  document.getElementById('metricas-view').style.display   = tab === 'metricas'    ? '' : 'none';
+  document.getElementById('comparativo-view').style.display = tab === 'comparativo' ? '' : 'none';
+  if (tab === 'comparativo' && currentVara) loadComparativo(currentVara);
 }
 
 // ── Vara list ──────────────────────────────────────────────────────────────────
@@ -517,6 +694,8 @@ function selectVara(nome) {
   });
   document.getElementById('empty-state').style.display = 'none';
   document.getElementById('dash-content').style.display = '';
+  document.getElementById('view-tabs').classList.add('show');
+  switchTab('metricas');
   loadAll(nome);
 }
 
@@ -533,13 +712,14 @@ async function loadAll(vara) {
   document.getElementById('alert-err').classList.remove('show');
 
   try {
+    const pp = periodParams();
     const [stats, classes, volume, assuntos, tempos, processos] = await Promise.all([
-      apiFetch('/api/pje/stats',         vara),
-      apiFetch('/api/pje/classes',        vara),
-      apiFetch('/api/pje/volume-mensal',  vara),
-      apiFetch('/api/pje/assuntos',       vara),
-      apiFetch('/api/pje/tempos',         vara),
-      apiFetch('/api/pje/processos',      vara),
+      apiFetch('/api/pje/stats',         vara, pp),
+      apiFetch('/api/pje/classes',        vara, pp),
+      apiFetch('/api/pje/volume-mensal',  vara, pp),
+      apiFetch('/api/pje/assuntos',       vara, pp),
+      apiFetch('/api/pje/tempos',         vara, pp),
+      apiFetch('/api/pje/processos',      vara, pp),
     ]);
 
     // Badge
@@ -556,8 +736,16 @@ async function loadAll(vara) {
     }
 
     // KPIs
-    setEl('m-acervo',     fmt(stats.acervo));
-    setEl('m-distribuidos', fmt(stats.distribuidos_mes));
+    if (stats.periodo_filtrado) {
+      setEl('m-acervo',       fmt(stats.ajuizados_periodo));
+      setEl('m-acervo-label', 'Ajuizados no Período');
+      setEl('m-acervo-sub',   (selectedMes || selectedAno || 'período filtrado'));
+    } else {
+      setEl('m-acervo',       fmt(stats.acervo));
+      setEl('m-acervo-label', 'Processos no Acervo');
+      setEl('m-acervo-sub',   'Total identificado');
+    }
+    setEl('m-distribuidos', stats.periodo_filtrado ? '—' : fmt(stats.distribuidos_mes));
     setEl('m-classes',    fmt((classes.classes||[]).length));
     setEl('m-assuntos',   fmt((assuntos.assuntos||[]).length));
 
@@ -674,6 +862,90 @@ function buildTable(processos) {
   }).join('');
 }
 
+// ── Comparativo ───────────────────────────────────────────────────────────────
+async function loadComparativo(vara) {
+  const tipo = periodType;
+  document.getElementById('comp-title').textContent =
+    tipo === 'mes' ? 'Comparativo por Mês' : 'Comparativo por Ano';
+  document.getElementById('comp-subtitle').textContent =
+    `Distribuição de ajuizamentos por ${tipo === 'mes' ? 'mês' : 'ano'} para a vara selecionada.`;
+
+  try {
+    const data = await apiFetch('/api/pje/comparativo', vara, { tipo });
+    renderComparativo(data);
+  } catch(e) {
+    console.error('[comparativo]', e);
+  }
+}
+
+function renderComparativo(data) {
+  const periodos = data.periodos || [];
+  const isMock   = data.mock;
+  const mockBadge = document.getElementById('comp-badge');
+  mockBadge.style.display = isMock ? '' : 'none';
+
+  // Summary stats
+  const total = periodos.reduce((s, p) => s + p.total, 0);
+  const media = periodos.length ? Math.round(total / periodos.length) : 0;
+  const pico  = periodos.reduce((best, p) => p.total > (best?.total || 0) ? p : best, null);
+  setEl('comp-total',     fmt(total));
+  setEl('comp-periodos-n', `${periodos.length} períodos`);
+  setEl('comp-media',     fmt(media));
+  setEl('comp-pico',      fmt(pico?.total ?? 0));
+  setEl('comp-pico-label', pico?.label ?? '—');
+  document.getElementById('comp-chart-title').textContent =
+    `Volume de ajuizamentos — ${data.tipo === 'mes' ? 'últimos meses' : 'por ano'}`;
+
+  // Bar chart
+  if (chartComp) { chartComp.destroy(); chartComp = null; }
+  const ctx = document.getElementById('chart-comp');
+  if (ctx) {
+    chartComp = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: periodos.map(p => p.label),
+        datasets: [{
+          label: 'Processos',
+          data:  periodos.map(p => p.total),
+          backgroundColor: periodos.map((p, i) =>
+            p === pico ? 'rgba(200,167,91,.9)' : `rgba(200,167,91,${0.25 + (i / periodos.length) * 0.45})`),
+          borderRadius: 4,
+          borderSkipped: false,
+        }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: c => ` ${fmt(c.raw)} processos` } },
+        },
+        scales: {
+          x: { grid: { color: 'rgba(200,167,91,.06)' }, ticks: { color: 'rgba(232,230,224,.4)', font: { size: 10 } } },
+          y: { grid: { color: 'rgba(200,167,91,.06)' }, ticks: { color: 'rgba(232,230,224,.4)', callback: v => fmt(v) }, beginAtZero: true },
+        },
+      },
+    });
+  }
+
+  // Table
+  const tbody = document.getElementById('tbody-comp');
+  if (!periodos.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:1.5rem">Sem dados</td></tr>';
+    return;
+  }
+  tbody.innerHTML = periodos.slice().reverse().map(p => {
+    const pct = total ? ((p.total / total) * 100).toFixed(1) + '%' : '—';
+    const topClasse = p.classes?.[0]?.nome ?? '—';
+    const isMax = p === pico;
+    return `<tr>
+      <td style="font-weight:${isMax?'700':'400'};color:${isMax?'var(--gold)':'inherit'}">${esc(p.label)}</td>
+      <td>${fmt(p.total)}</td>
+      <td>${pct}</td>
+      <td style="color:var(--muted);font-size:.78rem">${esc(topClasse)}</td>
+    </tr>`;
+  }).join('');
+}
+
 // ── Busca processo ────────────────────────────────────────────────────────────
 async function buscarProcesso() {
   const num = document.getElementById('proc-num-input').value.trim();
@@ -703,6 +975,15 @@ async function buscarProcesso() {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 (async function init(){
+  // Populate year select (2010 → current year)
+  const anoSel = document.getElementById('ano-select');
+  const anoAtual = new Date().getFullYear();
+  for (let a = anoAtual; a >= 2010; a--) {
+    const opt = document.createElement('option');
+    opt.value = String(a); opt.textContent = String(a);
+    anoSel.appendChild(opt);
+  }
+
   await loadVaras();
 
   // If server has VARA_NOME configured, auto-detect by loading stats without a vara param
@@ -711,13 +992,14 @@ async function buscarProcesso() {
     const stats = await apiFetch('/api/pje/stats', '');
     // If not mock and we got acervo, server has VARA_NOME configured
     if (!stats.mock && stats.acervo > 0) {
-      // Try to find which vara is active from the list
       currentVara = '__server__';
       document.getElementById('topbar-vara').textContent = 'Vara configurada no servidor';
       document.getElementById('vara-active-box').textContent = 'Vara do servidor (VARA_NOME)';
       document.getElementById('vara-active-box').classList.add('show');
       document.getElementById('empty-state').style.display = 'none';
       document.getElementById('dash-content').style.display = '';
+      document.getElementById('view-tabs').classList.add('show');
+      switchTab('metricas');
       await loadAll('');
     }
   } catch(_) {}

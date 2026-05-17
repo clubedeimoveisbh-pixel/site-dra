@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>API DataJud — Análise de Capacidades para o TRT-3</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cormorant+Garamond:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0f1117;
+  --surface:   #161b22;
+  --surface2:  #1c2128;
+  --surface3:  #12171e;
+  --border:    #30363d;
+  --border2:   #21262d;
+  --gold:      #C8A75B;
+  --gold-dim:  #8a6f32;
+  --gold-bg:   rgba(200,167,91,.08);
+  --gold-glow: rgba(200,167,91,.15);
+  --navy:      #0a1628;
+  --navy-m:    #1a2f5e;
+  --navy-l:    rgba(26,47,94,.45);
+  --navy-b:    rgba(200,167,91,.18);
+  --text:      #e8e4da;
+  --muted:     #9d9b96;
+  --muted2:    #6e7681;
+  --green:     #56d364;
+  --blue:      #79b8ff;
+  --orange:    #f0a826;
+  --purple:    #d2a8ff;
+  --red:       #ff7b7b;
+  --yellow:    #e3c770;
+  --code-bg:   #010409;
+  --radius:    10px;
+  --radius-lg: 14px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* ── HEADER ─────────────────────────────────────────── */
+.header {
+  background: linear-gradient(160deg, #0d1420 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 52px 32px 44px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 600px 300px at 50% 0%, rgba(200,167,91,.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px; font-weight: 600;
+  color: var(--gold); letter-spacing: .25em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  opacity: .85;
+}
+.header-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--gold-bg); border: 1px solid rgba(200,167,91,.3);
+  border-radius: 20px; padding: 4px 14px;
+  font-size: 11px; color: var(--gold); letter-spacing: .08em;
+  margin-bottom: 18px;
+}
+.header-badge svg { width: 12px; height: 12px; flex-shrink: 0; }
+.header-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px; color: var(--text); margin-bottom: 10px;
+  line-height: 1.25;
+}
+.header-title span { color: var(--gold); }
+.header-sub {
+  font-size: 15px; color: var(--muted); max-width: 620px; margin: 0 auto 24px;
+  line-height: 1.6;
+}
+.header-meta {
+  display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;
+  font-size: 11px; color: var(--muted2); letter-spacing: .04em;
+}
+.header-meta span { display: flex; align-items: center; gap: 5px; }
+
+/* ── NAV ─────────────────────────────────────────────── */
+.toc-wrap {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  position: sticky; top: 0; z-index: 100;
+  overflow-x: auto;
+}
+.toc {
+  display: flex; gap: 0; max-width: 1100px; margin: 0 auto;
+  white-space: nowrap;
+}
+.toc a {
+  padding: 14px 16px;
+  font-size: 11.5px; font-weight: 600;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted); text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: all .2s;
+}
+.toc a:hover { color: var(--gold); border-color: var(--gold-dim); }
+
+/* ── LAYOUT ──────────────────────────────────────────── */
+.page { max-width: 1100px; margin: 0 auto; padding: 40px 32px 80px; }
+
+/* ── SECTIONS ────────────────────────────────────────── */
+.section { margin-bottom: 60px; }
+.section-header {
+  display: flex; align-items: flex-start; gap: 14px;
+  margin-bottom: 28px; padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.section-num {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: var(--gold-bg); border: 1px solid rgba(200,167,91,.3);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px; color: var(--gold); font-weight: 600;
+  flex-shrink: 0; margin-top: 2px;
+}
+.section-header-text h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; color: var(--text); margin-bottom: 4px;
+}
+.section-header-text p { font-size: 13px; color: var(--muted); }
+
+/* ── CARDS ───────────────────────────────────────────── */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.card-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.card-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+.card {
+  background: var(--navy-l);
+  border: 1px solid var(--navy-b);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+}
+.card-sm { padding: 14px 18px; }
+.card-gold {
+  background: var(--gold-bg);
+  border-color: rgba(200,167,91,.25);
+}
+.card-dark {
+  background: var(--surface3);
+  border-color: var(--border2);
+}
+.card-title {
+  font-size: 12px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 10px;
+}
+.card-title-sm {
+  font-size: 11px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+}
+.card h3 {
+  font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px;
+}
+.card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+/* ── FIELD TABLE ─────────────────────────────────────── */
+.field-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.field-table th {
+  text-align: left; padding: 8px 12px;
+  font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted2); border-bottom: 1px solid var(--border);
+}
+.field-table td {
+  padding: 9px 12px; border-bottom: 1px solid var(--border2);
+  vertical-align: top; line-height: 1.5;
+}
+.field-table tr:last-child td { border-bottom: none; }
+.field-table tr:hover td { background: rgba(255,255,255,.015); }
+.field-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--blue);
+}
+.field-type {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--purple);
+}
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 4px;
+  font-size: 10px; font-weight: 700; letter-spacing: .06em;
+}
+.badge-green  { background: rgba(86,211,100,.12); color: var(--green); }
+.badge-blue   { background: rgba(121,184,255,.12); color: var(--blue); }
+.badge-orange { background: rgba(240,168,38,.12); color: var(--orange); }
+.badge-gold   { background: var(--gold-bg); color: var(--gold); border: 1px solid rgba(200,167,91,.2); }
+.badge-purple { background: rgba(210,168,255,.1); color: var(--purple); }
+
+/* ── CODE BLOCKS ─────────────────────────────────────── */
+.code-block-wrap { margin: 16px 0; }
+.code-header {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #1a1f2a; border: 1px solid var(--border); border-bottom: none;
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 8px 16px;
+}
+.code-label {
+  font-size: 11px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted2);
+  display: flex; align-items: center; gap: 6px;
+}
+.code-label::before {
+  content: '';
+  display: inline-block; width: 8px; height: 8px;
+  border-radius: 50%; background: var(--gold); opacity: .6;
+}
+.code-desc { font-size: 11px; color: var(--muted2); font-style: italic; }
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 20px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #cdd9e5;
+}
+.k  { color: #f47067; }   /* keyword */
+.s  { color: #96d0ff; }   /* string */
+.n  { color: #dcbdfb; }   /* field name */
+.v  { color: #6cb6ff; }   /* value/number */
+.c  { color: #768390; font-style: italic; } /* comment */
+.h  { color: var(--gold); } /* highlight */
+
+/* ── ANÁLISE CARDS ───────────────────────────────────── */
+.analise-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+.analise-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.analise-card-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border2);
+  display: flex; align-items: center; gap: 10px;
+}
+.analise-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--gold-bg); border: 1px solid rgba(200,167,91,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.analise-card-header h3 { font-size: 14px; font-weight: 600; color: var(--text); }
+.analise-card-body { padding: 14px 18px; }
+.analise-card-body p { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+.analise-points { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.analise-points li {
+  font-size: 12.5px; color: var(--muted);
+  padding-left: 14px; position: relative;
+}
+.analise-points li::before {
+  content: '→';
+  position: absolute; left: 0;
+  color: var(--gold); font-size: 11px;
+}
+
+/* ── FEATURE TIMELINE ────────────────────────────────── */
+.timeline { display: flex; flex-direction: column; gap: 0; position: relative; }
+.timeline::before {
+  content: '';
+  position: absolute; left: 20px; top: 0; bottom: 0; width: 2px;
+  background: linear-gradient(to bottom, var(--gold-dim), transparent);
+}
+.timeline-item { display: flex; gap: 24px; padding-bottom: 32px; position: relative; }
+.timeline-dot {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 2px solid var(--gold-dim);
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; position: relative; z-index: 1;
+  font-size: 13px; font-weight: 700; color: var(--gold);
+}
+.timeline-content { flex: 1; }
+.timeline-tag {
+  font-size: 10px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 6px;
+  display: block;
+}
+.timeline-content h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.timeline-content p { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+.feature-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.feature-list li {
+  font-size: 12.5px; color: var(--muted);
+  padding-left: 16px; position: relative;
+}
+.feature-list li::before {
+  content: '▸';
+  position: absolute; left: 0;
+  color: var(--gold-dim); font-size: 10px;
+  top: 2px;
+}
+
+/* ── ROADMAP ─────────────────────────────────────────── */
+.roadmap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.roadmap-card {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.roadmap-head {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border2);
+}
+.roadmap-phase {
+  font-size: 10px; font-weight: 700; letter-spacing: .18em;
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.roadmap-head h3 { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.roadmap-head p { font-size: 12px; color: var(--muted); }
+.roadmap-body { padding: 16px 20px; }
+.roadmap-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 7px 0; border-bottom: 1px solid var(--border2);
+}
+.roadmap-item:last-child { border-bottom: none; }
+.roadmap-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+.roadmap-item span { font-size: 12.5px; color: var(--muted); }
+
+/* Phase colors */
+.phase-1 .roadmap-head { background: rgba(86,211,100,.06); }
+.phase-1 .roadmap-phase { color: var(--green); }
+.phase-1 .roadmap-dot { background: var(--green); }
+.phase-2 .roadmap-head { background: rgba(200,167,91,.06); }
+.phase-2 .roadmap-phase { color: var(--gold); }
+.phase-2 .roadmap-dot { background: var(--gold); }
+.phase-3 .roadmap-head { background: rgba(210,168,255,.06); }
+.phase-3 .roadmap-phase { color: var(--purple); }
+.phase-3 .roadmap-dot { background: var(--purple); }
+
+/* ── ALERT / INFO BOXES ──────────────────────────────── */
+.infobox {
+  border-radius: var(--radius); padding: 14px 18px;
+  margin: 16px 0; display: flex; gap: 12px; align-items: flex-start;
+}
+.infobox-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.infobox-body { font-size: 13px; color: var(--muted); }
+.infobox-body strong { color: var(--text); }
+.infobox-gold { background: var(--gold-bg); border: 1px solid rgba(200,167,91,.2); }
+.infobox-blue { background: rgba(121,184,255,.06); border: 1px solid rgba(121,184,255,.2); }
+.infobox-red  { background: rgba(255,123,123,.06); border: 1px solid rgba(255,123,123,.18); }
+.infobox-green { background: rgba(86,211,100,.06); border: 1px solid rgba(86,211,100,.18); }
+
+/* ── TAGS ────────────────────────────────────────────── */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.tag {
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+/* ── LIMITACOES ──────────────────────────────────────── */
+.limit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.limit-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+.limit-card h4 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.limit-card p  { font-size: 12.5px; color: var(--muted); }
+
+/* ── SCROLLBAR ───────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── RESPONSIVE ──────────────────────────────────────── */
+@media (max-width: 800px) {
+  .card-grid-2, .card-grid-3, .roadmap-grid, .limit-grid { grid-template-columns: 1fr; }
+  .page { padding: 28px 18px 60px; }
+  .toc a { padding: 12px 10px; font-size: 10.5px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ HEADER ══════════ -->
+<header class="header">
+  <div class="logo">Marina Trabalhista · TRT-3 · MG</div>
+  <div class="header-badge">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+    Referência Técnica Interna
+  </div>
+  <h1 class="header-title">API DataJud — <span>Análise de Capacidades</span><br>para o TRT-3</h1>
+  <p class="header-sub">
+    Mapeamento completo das possibilidades analíticas da API pública do CNJ aplicadas
+    ao contexto da 3ª Região — do dashboard existente às análises estratégicas avançadas.
+  </p>
+  <div class="header-meta">
+    <span>
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="12" height="10" rx="1"/><path d="M5 2v4M11 2v4M2 8h12"/></svg>
+      Maio 2026
+    </span>
+    <span>
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2a6 6 0 100 12A6 6 0 008 2zM8 6v4M8 10h.01"/></svg>
+      Índice ElasticSearch: api_publica_trt3
+    </span>
+    <span>
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12L6 8l3 3 5-6"/></svg>
+      Endpoint público CNJ
+    </span>
+  </div>
+</header>
+
+<!-- ══════════ NAV ══════════ -->
+<nav class="toc-wrap">
+  <div class="toc">
+    <a href="#sec-api">1. O que a API oferece</a>
+    <a href="#sec-analises">2. Análises possíveis</a>
+    <a href="#sec-queries">3. Queries de exemplo</a>
+    <a href="#sec-features">4. Sugestões de features</a>
+    <a href="#sec-limitacoes">5. Limitações</a>
+    <a href="#sec-roadmap">6. Roadmap</a>
+  </div>
+</nav>
+
+<!-- ══════════ CONTEÚDO ══════════ -->
+<main class="page">
+
+  <!-- ── SEÇÃO 1: O QUE A API OFERECE ── -->
+  <section class="section" id="sec-api">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div class="section-header-text">
+        <h2>O que a API DataJud oferece</h2>
+        <p>Campos disponíveis, tipos de query e capacidades do motor ElasticSearch subjacente</p>
+      </div>
+    </div>
+
+    <div class="infobox infobox-gold">
+      <div class="infobox-icon">⚖</div>
+      <div class="infobox-body">
+        <strong>Contexto:</strong> A API DataJud é um índice ElasticSearch do CNJ que indexa dados processuais de todos os tribunais brasileiros. Para o TRT-3 (Tribunal Regional do Trabalho da 3ª Região — Minas Gerais), o índice <code style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px">api_publica_trt3</code> expõe metadados de processos públicos em tempo quase-real, com granularidade suficiente para análises quantitativas robustas.
+      </div>
+    </div>
+
+    <h3 style="font-size:14px;font-weight:700;color:var(--text);margin:28px 0 14px;letter-spacing:.05em;text-transform:uppercase;">Campos Disponíveis</h3>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:24px">
+      <table class="field-table">
+        <thead>
+          <tr>
+            <th>Campo</th>
+            <th>Tipo</th>
+            <th>Uso principal</th>
+            <th>Capacidade</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="field-name">numeroProcesso</span></td>
+            <td><span class="field-type">keyword</span></td>
+            <td style="color:var(--text)">Identificação única do processo (formato CNJ)</td>
+            <td><span class="badge badge-blue">filtro · busca</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">dataAjuizamento</span></td>
+            <td><span class="field-type">date</span></td>
+            <td style="color:var(--text)">Data de distribuição — formato <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">20101223000000</code></td>
+            <td><span class="badge badge-green">séries temporais · range</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">classe.nome.keyword</span></td>
+            <td><span class="field-type">keyword</span></td>
+            <td style="color:var(--text)">Classe processual: Reclamação Trabalhista, ACP, MS…</td>
+            <td><span class="badge badge-green">terms agg · filtro</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">orgaoJulgador.nome.keyword</span></td>
+            <td><span class="field-type">keyword</span></td>
+            <td style="color:var(--text)">Nome completo da vara (ex: "17ª VARA DO TRABALHO DE BH")</td>
+            <td><span class="badge badge-green">filtro · comparação</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">orgaoJulgador.codigo</span></td>
+            <td><span class="field-type">integer</span></td>
+            <td style="color:var(--text)">Código numérico da vara — mais preciso que o nome</td>
+            <td><span class="badge badge-blue">filtro preferencial</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">assuntos.nome.keyword</span></td>
+            <td><span class="field-type">keyword[]</span></td>
+            <td style="color:var(--text)">Assuntos do processo — array (Horas Extras, FGTS, etc.)</td>
+            <td><span class="badge badge-green">terms agg · filtro</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">movimentos.codigo</span></td>
+            <td><span class="field-type">integer[]</span></td>
+            <td style="color:var(--text)">Código de movimentação (Tabela Processual Unificada CNJ)</td>
+            <td><span class="badge badge-orange">pipeline · aninhado</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">movimentos.nome</span></td>
+            <td><span class="field-type">keyword[]</span></td>
+            <td style="color:var(--text)">Nome textual do movimento processual</td>
+            <td><span class="badge badge-orange">terms agg</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">movimentos.dataHora</span></td>
+            <td><span class="field-type">date[]</span></td>
+            <td style="color:var(--text)">Timestamp de cada movimentação</td>
+            <td><span class="badge badge-orange">pipeline · scripted</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">grau</span></td>
+            <td><span class="field-type">keyword</span></td>
+            <td style="color:var(--text)">Grau do processo: G1 (1ª instância), G2 (recursal)</td>
+            <td><span class="badge badge-blue">filtro · terms</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">formato.nome</span></td>
+            <td><span class="field-type">keyword</span></td>
+            <td style="color:var(--text)">Eletrônico ou Físico</td>
+            <td><span class="badge badge-blue">filtro</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">nivelSigilo</span></td>
+            <td><span class="field-type">integer</span></td>
+            <td style="color:var(--text)">0 = público; valores maiores = sigilo parcial/total</td>
+            <td><span class="badge badge-blue">filtro obrigatório</span></td>
+          </tr>
+          <tr>
+            <td><span class="field-name">tribunal</span></td>
+            <td><span class="field-type">keyword</span></td>
+            <td style="color:var(--text)">Código do tribunal (TRT3 = "trt3")</td>
+            <td><span class="badge badge-blue">filtro cross-tribunal</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-size:14px;font-weight:700;color:var(--text);margin:28px 0 14px;letter-spacing:.05em;text-transform:uppercase;">Capacidades ElasticSearch disponíveis</h3>
+
+    <div class="card-grid">
+      <div class="card card-dark">
+        <div class="card-title">Aggregations — terms</div>
+        <p>Contagem e ranking por qualquer campo keyword. Base para ranking de assuntos, classes, varas e juízes.</p>
+        <div class="tag-row">
+          <span class="tag">por_assunto</span>
+          <span class="tag">por_classe</span>
+          <span class="tag">por_vara</span>
+        </div>
+      </div>
+      <div class="card card-dark">
+        <div class="card-title">Aggregations — date_histogram</div>
+        <p>Séries temporais com granularidade de dia, mês, trimestre ou ano. Detecta sazonalidade e tendências.</p>
+        <div class="tag-row">
+          <span class="tag">calendar_interval</span>
+          <span class="tag">fixed_interval</span>
+        </div>
+      </div>
+      <div class="card card-dark">
+        <div class="card-title">Aggregations — range</div>
+        <p>Faixas de datas, valores numéricos. Necessário para distribuição de antiguidade processual.</p>
+        <div class="tag-row">
+          <span class="tag">date_range</span>
+          <span class="tag">range numérico</span>
+        </div>
+      </div>
+      <div class="card card-dark">
+        <div class="card-title">Nested aggregations</div>
+        <p>Combinar múltiplos níveis. Ex: para cada vara, contar os top-5 assuntos. Essencial para análise comparativa.</p>
+        <div class="tag-row">
+          <span class="tag">aggs dentro de aggs</span>
+        </div>
+      </div>
+      <div class="card card-dark">
+        <div class="card-title">Bool Query + Filters</div>
+        <p>Combinação de must / should / must_not com term, range, match. Filtros compostos sem custo de scoring.</p>
+        <div class="tag-row">
+          <span class="tag">filter context</span>
+          <span class="tag">must / must_not</span>
+        </div>
+      </div>
+      <div class="card card-dark">
+        <div class="card-title">Script fields &amp; Painless</div>
+        <p>Campos calculados em runtime via scripting (Painless). Útil para calcular tempo entre movimentos diretamente na query.</p>
+        <div class="tag-row">
+          <span class="tag">script_fields</span>
+          <span class="tag">runtime_mappings</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SEÇÃO 2: ANÁLISES POSSÍVEIS ── -->
+  <section class="section" id="sec-analises">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div class="section-header-text">
+        <h2>Análises possíveis com os dados disponíveis</h2>
+        <p>Mapeamento criativo e específico para o contexto trabalhista do TRT-3</p>
+      </div>
+    </div>
+
+    <div class="infobox infobox-blue">
+      <div class="infobox-icon">ℹ</div>
+      <div class="infobox-body">
+        Todas as análises abaixo partem exclusivamente dos campos disponíveis na API pública — nenhum dado externo é necessário. As análises foram pensadas para o contexto da <strong>Analista Judiciária do TRT-3</strong> e para comunicação com o público jurídico trabalhista de Minas Gerais.
+      </div>
+    </div>
+
+    <div class="analise-grid" style="margin-top:24px">
+
+      <div class="analise-card">
+        <div class="analise-card-header">
+          <div class="analise-icon">📅</div>
+          <h3>Sazonalidade de Ajuizamentos</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Identificar em quais meses do ano o volume de novas reclamações trabalhistas é maior — e o que explica esses picos (férias coletivas, dissídios, etc.).</p>
+          <ul class="analise-points">
+            <li>Picos após janeiro e julho (férias/rescisões sazonais)</li>
+            <li>Queda em dezembro (recesso judiciário)</li>
+            <li>Comparar ano a ano: crescimento estrutural ou conjuntural?</li>
+            <li>Identificar meses com mais Execuções vs. Conhecimento</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card">
+        <div class="analise-card-header">
+          <div class="analise-icon">📈</div>
+          <h3>Tendências por Assunto</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Quais temas trabalhistas cresceram nos últimos 5 anos? Quais diminuíram? O dado captura a evolução do mercado de trabalho em MG.</p>
+          <ul class="analise-points">
+            <li>Crescimento de demandas sobre trabalho remoto/home office</li>
+            <li>Evolução das ações de assédio moral ao longo do tempo</li>
+            <li>Impacto de decisões do TST em assuntos específicos</li>
+            <li>Comparar BH interior vs. varas regionais (Uberlândia, Juiz de Fora)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card">
+        <div class="analise-card-header">
+          <div class="analise-icon">⚖</div>
+          <h3>Comparativo entre Varas</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Radiografia de cada vara do TRT-3: volume de acervo, velocidade de tramitação estimada e perfil de demandas.</p>
+          <ul class="analise-points">
+            <li>Ranking de varas por volume de acervo ativo</li>
+            <li>Quais varas têm mais processos de Execução vs. Conhecimento</li>
+            <li>Varas com crescimento acelerado nos últimos 12 meses</li>
+            <li>Concentração geográfica: BH vs. interior de MG</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card">
+        <div class="analise-card-header">
+          <div class="analise-icon">🗂</div>
+          <h3>Perfil por Classe Processual</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>As Reclamações Trabalhistas dominam, mas o mix de classes conta uma história sobre o estado do direito trabalhista em MG.</p>
+          <ul class="analise-points">
+            <li>Proporção RT x Execução de Título Extrajudicial x ACP</li>
+            <li>Evolução de Mandados de Segurança (questionamentos processuais)</li>
+            <li>Ações de Rito Sumaríssimo vs. Ordinário (valor da causa)</li>
+            <li>Dissídios coletivos: indicador de tensão sindical</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card">
+        <div class="analise-card-header">
+          <div class="analise-icon">🏷</div>
+          <h3>Co-ocorrência de Assuntos</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Um processo raramente tem apenas um assunto. Mapear quais assuntos aparecem juntos revela padrões de violação de direitos.</p>
+          <ul class="analise-points">
+            <li>Horas Extras + Intervalo Intrajornada (vínculo clássico)</li>
+            <li>Assédio Moral + Verbas Rescisórias (demissão conflituosa)</li>
+            <li>FGTS + Equiparação Salarial (discriminação salarial)</li>
+            <li>Acidente de Trabalho + Dano Moral (casos graves)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card">
+        <div class="analise-card-header">
+          <div class="analise-icon">⏱</div>
+          <h3>Velocidade Processual por Movimentos</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Usando os timestamps dos movimentos processuais, é possível estimar o tempo entre etapas — da distribuição à sentença, por exemplo.</p>
+          <ul class="analise-points">
+            <li>Tempo médio entre distribuição e primeira audiência</li>
+            <li>Tempo médio até sentença por vara</li>
+            <li>Identificar processos "travados" sem movimentação há +180 dias</li>
+            <li>Acordos em audiência vs. sentenças (via código de movimento)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card">
+        <div class="analise-card-header">
+          <div class="analise-icon">📍</div>
+          <h3>Concentração de Demandas por Região</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>O TRT-3 abrange todo MG. Comparar varas de BH com varas do interior revela desigualdades regionais no acesso à justiça.</p>
+          <ul class="analise-points">
+            <li>Volume por cidade-sede de vara (BH, Uberlândia, Juiz de Fora…)</li>
+            <li>Assuntos predominantes por região (ex: agronegócio no Triângulo)</li>
+            <li>Crescimento relativo: interior ganha peso a cada ano?</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card">
+        <div class="analise-card-header">
+          <div class="analise-icon">🔎</div>
+          <h3>Detecção de Picos por Evento</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Cruzar o histórico mensal com eventos externos (reformas trabalhistas, decisões do TST, pandemia) para documentar impactos reais.</p>
+          <ul class="analise-points">
+            <li>Impacto da Reforma Trabalhista de 2017 nos assuntos mais afetados</li>
+            <li>Queda e recuperação de ajuizamentos durante a pandemia (2020-2021)</li>
+            <li>Efeito de decisões do STF sobre prescrição e FGTS</li>
+            <li>Ondas de demissões em massa por setor identificadas nos dados</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card">
+        <div class="analise-card-header">
+          <div class="analise-icon">📊</div>
+          <h3>Índice de Atividade da Vara</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Combinar novos processos, movimentos recentes e tempo sem atividade para criar um indicador de "saúde" da vara — visão gerencial.</p>
+          <ul class="analise-points">
+            <li>Processos com movimentação nos últimos 30 dias</li>
+            <li>Proporção acervo antigo (&gt;2 anos) vs. recente</li>
+            <li>Taxa de crescimento do acervo mês a mês</li>
+            <li>Processos em G2 (recursal) por vara</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── SEÇÃO 3: QUERIES DE EXEMPLO ── -->
+  <section class="section" id="sec-queries">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div class="section-header-text">
+        <h2>Queries ElasticSearch — exemplos reais</h2>
+        <p>Queries prontas para uso no endpoint <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">POST /api_publica_trt3/_search</code></p>
+      </div>
+    </div>
+
+    <!-- Query 1 -->
+    <div class="code-block-wrap">
+      <div class="code-header">
+        <div class="code-label">Query 1 — Volume mensal por vara (últimos 24 meses)</div>
+        <div class="code-desc">date_histogram com filtro de vara</div>
+      </div>
+      <pre>{
+  <span class="n">"query"</span>: {
+    <span class="k">"bool"</span>: {
+      <span class="n">"filter"</span>: [
+        { <span class="k">"term"</span>: { <span class="s">"orgaoJulgador.nome.keyword"</span>: <span class="s">"17ª VARA DO TRABALHO DE BELO HORIZONTE"</span> } },
+        { <span class="k">"range"</span>: { <span class="n">"dataAjuizamento"</span>: { <span class="k">"gte"</span>: <span class="s">"now-24M/M"</span> } } },
+        { <span class="k">"term"</span>: { <span class="n">"nivelSigilo"</span>: <span class="v">0</span> } }
+      ]
+    }
+  },
+  <span class="n">"size"</span>: <span class="v">0</span>,
+  <span class="n">"aggs"</span>: {
+    <span class="n">"por_mes"</span>: {
+      <span class="k">"date_histogram"</span>: {
+        <span class="n">"field"</span>: <span class="s">"dataAjuizamento"</span>,
+        <span class="n">"calendar_interval"</span>: <span class="s">"month"</span>,
+        <span class="n">"format"</span>: <span class="s">"MM/yyyy"</span>,
+        <span class="n">"min_doc_count"</span>: <span class="v">0</span>
+      }
+    }
+  }
+}</pre>
+    </div>
+
+    <!-- Query 2 -->
+    <div class="code-block-wrap">
+      <div class="code-header">
+        <div class="code-label">Query 2 — Top assuntos com tendência (3 anos, por ano)</div>
+        <div class="code-desc">Aggregation aninhada: por assunto → por ano</div>
+      </div>
+      <pre>{
+  <span class="n">"query"</span>: {
+    <span class="k">"bool"</span>: {
+      <span class="n">"filter"</span>: [
+        { <span class="k">"term"</span>: { <span class="s">"orgaoJulgador.nome.keyword"</span>: <span class="s">"17ª VARA DO TRABALHO DE BELO HORIZONTE"</span> } },
+        { <span class="k">"range"</span>: { <span class="n">"dataAjuizamento"</span>: { <span class="k">"gte"</span>: <span class="s">"now-3y/y"</span> } } }
+      ]
+    }
+  },
+  <span class="n">"size"</span>: <span class="v">0</span>,
+  <span class="n">"aggs"</span>: {
+    <span class="n">"top_assuntos"</span>: {
+      <span class="k">"terms"</span>: { <span class="n">"field"</span>: <span class="s">"assuntos.nome.keyword"</span>, <span class="n">"size"</span>: <span class="v">10</span> },
+      <span class="n">"aggs"</span>: {
+        <span class="n">"por_ano"</span>: {
+          <span class="k">"date_histogram"</span>: {
+            <span class="n">"field"</span>: <span class="s">"dataAjuizamento"</span>,
+            <span class="n">"calendar_interval"</span>: <span class="s">"year"</span>,
+            <span class="n">"format"</span>: <span class="s">"yyyy"</span>
+          }
+        }
+      }
+    }
+  }
+}
+<span class="c">// → permite visualizar se "Horas Extras" cresceu 40% em 2024 vs 2022</span></pre>
+    </div>
+
+    <!-- Query 3 -->
+    <div class="code-block-wrap">
+      <div class="code-header">
+        <div class="code-label">Query 3 — Comparativo de acervo entre todas as varas do TRT-3</div>
+        <div class="code-desc">Ranking de varas sem filtro de vara específica</div>
+      </div>
+      <pre>{
+  <span class="n">"query"</span>: {
+    <span class="k">"bool"</span>: {
+      <span class="n">"filter"</span>: [
+        { <span class="k">"term"</span>: { <span class="n">"nivelSigilo"</span>: <span class="v">0</span> } },
+        { <span class="k">"term"</span>: { <span class="n">"grau"</span>: <span class="s">"G1"</span> } }
+      ]
+    }
+  },
+  <span class="n">"size"</span>: <span class="v">0</span>,
+  <span class="n">"aggs"</span>: {
+    <span class="n">"por_vara"</span>: {
+      <span class="k">"terms"</span>: {
+        <span class="n">"field"</span>: <span class="s">"orgaoJulgador.nome.keyword"</span>,
+        <span class="n">"size"</span>: <span class="v">100</span>,
+        <span class="n">"order"</span>: { <span class="n">"_count"</span>: <span class="s">"desc"</span> }
+      },
+      <span class="n">"aggs"</span>: {
+        <span class="n">"top_classe"</span>: {
+          <span class="k">"terms"</span>: { <span class="n">"field"</span>: <span class="s">"classe.nome.keyword"</span>, <span class="n">"size"</span>: <span class="v">5</span> }
+        }
+      }
+    }
+  }
+}</pre>
+    </div>
+
+    <!-- Query 4 -->
+    <div class="code-block-wrap">
+      <div class="code-header">
+        <div class="code-label">Query 4 — Distribuição de antiguidade processual (faixas de tempo)</div>
+        <div class="code-desc">date_range para classificar acervo por idade</div>
+      </div>
+      <pre>{
+  <span class="n">"query"</span>: {
+    <span class="k">"term"</span>: { <span class="s">"orgaoJulgador.nome.keyword"</span>: <span class="s">"17ª VARA DO TRABALHO DE BELO HORIZONTE"</span> }
+  },
+  <span class="n">"size"</span>: <span class="v">0</span>,
+  <span class="n">"aggs"</span>: {
+    <span class="n">"faixas_tempo"</span>: {
+      <span class="k">"date_range"</span>: {
+        <span class="n">"field"</span>: <span class="s">"dataAjuizamento"</span>,
+        <span class="n">"ranges"</span>: [
+          { <span class="n">"key"</span>: <span class="s">"Menos de 6 meses"</span>,  <span class="n">"from"</span>: <span class="s">"now-6M"</span> },
+          { <span class="n">"key"</span>: <span class="s">"6 a 12 meses"</span>,      <span class="n">"from"</span>: <span class="s">"now-12M"</span>, <span class="n">"to"</span>: <span class="s">"now-6M"</span> },
+          { <span class="n">"key"</span>: <span class="s">"1 a 2 anos"</span>,        <span class="n">"from"</span>: <span class="s">"now-24M"</span>, <span class="n">"to"</span>: <span class="s">"now-12M"</span> },
+          { <span class="n">"key"</span>: <span class="s">"2 a 5 anos"</span>,        <span class="n">"from"</span>: <span class="s">"now-60M"</span>, <span class="n">"to"</span>: <span class="s">"now-24M"</span> },
+          { <span class="n">"key"</span>: <span class="s">"Mais de 5 anos"</span>,    <span class="n">"to"</span>: <span class="s">"now-60M"</span> }
+        ]
+      }
+    }
+  }
+}</pre>
+    </div>
+
+    <!-- Query 5 -->
+    <div class="code-block-wrap">
+      <div class="code-header">
+        <div class="code-label">Query 5 — Processos com movimentos recentes (últimos 30 dias)</div>
+        <div class="code-desc">Nested query em movimentos para detectar atividade recente</div>
+      </div>
+      <pre>{
+  <span class="n">"query"</span>: {
+    <span class="k">"bool"</span>: {
+      <span class="n">"filter"</span>: [
+        { <span class="k">"term"</span>: { <span class="s">"orgaoJulgador.nome.keyword"</span>: <span class="s">"17ª VARA DO TRABALHO DE BELO HORIZONTE"</span> } },
+        {
+          <span class="k">"nested"</span>: {
+            <span class="n">"path"</span>: <span class="s">"movimentos"</span>,
+            <span class="n">"query"</span>: {
+              <span class="k">"range"</span>: { <span class="n">"movimentos.dataHora"</span>: { <span class="k">"gte"</span>: <span class="s">"now-30d"</span> } }
+            }
+          }
+        }
+      ]
+    }
+  },
+  <span class="n">"size"</span>: <span class="v">50</span>,
+  <span class="n">"sort"</span>: [{ <span class="s">"dataAjuizamento"</span>: { <span class="k">"order"</span>: <span class="s">"asc"</span> } }],
+  <span class="n">"_source"</span>: [<span class="s">"numeroProcesso"</span>, <span class="s">"dataAjuizamento"</span>, <span class="s">"classe"</span>, <span class="s">"assuntos"</span>]
+}
+<span class="c">// → lista processos antigos com movimentação recente (acervo "vivo")</span></pre>
+    </div>
+
+    <!-- Query 6 -->
+    <div class="code-block-wrap">
+      <div class="code-header">
+        <div class="code-label">Query 6 — Top movimentos processuais (tipo de ato mais frequente)</div>
+        <div class="code-desc">Nested aggregation em movimentos.nome</div>
+      </div>
+      <pre>{
+  <span class="n">"query"</span>: {
+    <span class="k">"term"</span>: { <span class="s">"orgaoJulgador.nome.keyword"</span>: <span class="s">"17ª VARA DO TRABALHO DE BELO HORIZONTE"</span> }
+  },
+  <span class="n">"size"</span>: <span class="v">0</span>,
+  <span class="n">"aggs"</span>: {
+    <span class="n">"por_movimento"</span>: {
+      <span class="k">"nested"</span>: { <span class="n">"path"</span>: <span class="s">"movimentos"</span> },
+      <span class="n">"aggs"</span>: {
+        <span class="n">"tipo_movimento"</span>: {
+          <span class="k">"terms"</span>: { <span class="n">"field"</span>: <span class="s">"movimentos.nome.keyword"</span>, <span class="n">"size"</span>: <span class="v">20</span> }
+        }
+      }
+    }
+  }
+}
+<span class="c">// → revela se a vara tem mais "Julgamento Antecipado", "Audiência Designada", "Sentença"...</span></pre>
+    </div>
+
+    <!-- Query 7 -->
+    <div class="code-block-wrap">
+      <div class="code-header">
+        <div class="code-label">Query 7 — Processos sem movimentação há mais de 180 dias</div>
+        <div class="code-desc">Detecta acervo paralisado (must_not + nested range)</div>
+      </div>
+      <pre>{
+  <span class="n">"query"</span>: {
+    <span class="k">"bool"</span>: {
+      <span class="n">"filter"</span>: [
+        { <span class="k">"term"</span>: { <span class="s">"orgaoJulgador.nome.keyword"</span>: <span class="s">"17ª VARA DO TRABALHO DE BELO HORIZONTE"</span> } }
+      ],
+      <span class="n">"must_not"</span>: [
+        {
+          <span class="k">"nested"</span>: {
+            <span class="n">"path"</span>: <span class="s">"movimentos"</span>,
+            <span class="n">"query"</span>: {
+              <span class="k">"range"</span>: { <span class="n">"movimentos.dataHora"</span>: { <span class="k">"gte"</span>: <span class="s">"now-180d"</span> } }
+            }
+          }
+        }
+      ]
+    }
+  },
+  <span class="n">"size"</span>: <span class="v">0</span>
+}
+<span class="c">// → count de processos inativos — indicador de acervo represado</span></pre>
+    </div>
+
+    <!-- Query 8 -->
+    <div class="code-block-wrap">
+      <div class="code-header">
+        <div class="code-label">Query 8 — Crescimento trimestral dos 5 maiores assuntos (heatmap de tendência)</div>
+        <div class="code-desc">Aggregation tripla: assunto → ano → trimestre</div>
+      </div>
+      <pre>{
+  <span class="n">"query"</span>: {
+    <span class="k">"bool"</span>: {
+      <span class="n">"filter"</span>: [
+        { <span class="k">"term"</span>: { <span class="s">"orgaoJulgador.nome.keyword"</span>: <span class="s">"17ª VARA DO TRABALHO DE BELO HORIZONTE"</span> } },
+        { <span class="k">"range"</span>: { <span class="n">"dataAjuizamento"</span>: { <span class="k">"gte"</span>: <span class="s">"now-5y"</span> } } }
+      ]
+    }
+  },
+  <span class="n">"size"</span>: <span class="v">0</span>,
+  <span class="n">"aggs"</span>: {
+    <span class="n">"por_assunto"</span>: {
+      <span class="k">"terms"</span>: { <span class="n">"field"</span>: <span class="s">"assuntos.nome.keyword"</span>, <span class="n">"size"</span>: <span class="v">5</span> },
+      <span class="n">"aggs"</span>: {
+        <span class="n">"por_trimestre"</span>: {
+          <span class="k">"date_histogram"</span>: {
+            <span class="n">"field"</span>: <span class="s">"dataAjuizamento"</span>,
+            <span class="n">"calendar_interval"</span>: <span class="s">"quarter"</span>,
+            <span class="n">"format"</span>: <span class="s">"yyyy-QQ"</span>
+          }
+        }
+      }
+    }
+  }
+}</pre>
+    </div>
+
+  </section>
+
+  <!-- ── SEÇÃO 4: SUGESTÕES DE FEATURES ── -->
+  <section class="section" id="sec-features">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-header-text">
+        <h2>Sugestões de features para o dashboard</h2>
+        <p>Partindo do dashboard PJe já existente — o que adicionar e em qual ordem</p>
+      </div>
+    </div>
+
+    <div class="infobox infobox-green">
+      <div class="infobox-icon">✓</div>
+      <div class="infobox-body">
+        <strong>O dashboard atual</strong> já expõe: seleção de vara, acervo total, distribuídos no mês, classes processuais, assuntos, volume mensal (linha do tempo), tempo por faixas e lista de processos recentes. O que se segue parte desse ponto.
+      </div>
+    </div>
+
+    <div class="timeline" style="margin-top:28px">
+
+      <div class="timeline-item">
+        <div class="timeline-dot">A</div>
+        <div class="timeline-content">
+          <span class="timeline-tag">Curto prazo — sem novas queries complexas</span>
+          <h3>Melhorias imediatas no dashboard existente</h3>
+          <p>Ajustes que ampliam o valor sem mudar a arquitetura atual.</p>
+          <ul class="feature-list">
+            <li>Seletor de período no gráfico de volume mensal (6m / 12m / 24m / 5 anos)</li>
+            <li>Filtro por classe processual na lista de processos recentes</li>
+            <li>Card de crescimento MoM — % de variação vs mês anterior com seta direcional</li>
+            <li>Exportar dados da vara em CSV (acervo, assuntos, classes)</li>
+            <li>Link direto para o processo no portal PJe a partir do número CNJ</li>
+            <li>Toggle G1 / G2 — separar processos de 1ª instância dos recursais</li>
+            <li>Badge "dados ao vivo" com timestamp da última consulta à API</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot">B</div>
+        <div class="timeline-content">
+          <span class="timeline-tag">Médio prazo — novas abas e visualizações</span>
+          <h3>Análises de tendência e comparativo de varas</h3>
+          <p>Features que exigem queries adicionais mas nenhuma infraestrutura nova.</p>
+          <ul class="feature-list">
+            <li>Aba "Tendências" — gráfico de área empilhada com evolução dos top-5 assuntos por ano</li>
+            <li>Aba "Radar TRT-3" — mapa de calor comparando todas as varas por volume de acervo</li>
+            <li>Gráfico de rosca animado mostrando composição do acervo por classe</li>
+            <li>Painel "Distribuição do acervo" — barras por faixa de antiguidade (6m, 1a, 2a, 5a+)</li>
+            <li>Comparador de duas varas lado a lado (mesmos indicadores, varas diferentes)</li>
+            <li>Indicador de concentração: % de processos nos top-3 assuntos (quanto mais concentrado, mais especializada a vara)</li>
+            <li>Série histórica de ajuizamentos com linha de tendência (regressão linear simples)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot">C</div>
+        <div class="timeline-content">
+          <span class="timeline-tag">Longo prazo — análise avançada com movimentos</span>
+          <h3>Análise de velocidade processual e padrões de tramitação</h3>
+          <p>Requer pipeline de movimentos — mais complexo, alto valor analítico.</p>
+          <ul class="feature-list">
+            <li>Indicador de processos paralisados há +180 dias (acervo "morto")</li>
+            <li>Ranking de tipos de movimentos mais frequentes — retrato da dinâmica da vara</li>
+            <li>Estimativa de tempo até sentença com base nos movimentos históricos</li>
+            <li>Detecção de processos com movimentação recente mas ajuizamento antigo (acervo pré-reforma ativo)</li>
+            <li>Alerta de processos específicos sem movimentação há X dias (monitoramento personalizado)</li>
+            <li>Dashboard público simplificado para o Instagram — versão de 1 card por semana com dado da vara</li>
+            <li>Relatório PDF semanal exportável com os principais indicadores da vara</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── SEÇÃO 5: LIMITAÇÕES ── -->
+  <section class="section" id="sec-limitacoes">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-header-text">
+        <h2>Limitações e considerações importantes</h2>
+        <p>O que a API não oferece e como lidar com essas lacunas</p>
+      </div>
+    </div>
+
+    <div class="limit-grid">
+
+      <div class="limit-card">
+        <h4>Dados de sigilo excluídos</h4>
+        <p>Processos com <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">nivelSigilo &gt; 0</code> não aparecem na API pública. Em varas com volume relevante de ações envolvendo menores, saúde mental ou violência, isso pode distorcer as estatísticas. Sempre filtrar explicitamente <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">nivelSigilo: 0</code> para consistência.</p>
+      </div>
+
+      <div class="limit-card">
+        <h4>Sem dados financeiros ou de resultado</h4>
+        <p>A API não expõe valor da causa, valor da condenação, se houve acordo ou qual parte ganhou. Análises sobre impacto econômico, taxa de procedência ou valor médio das condenações são impossíveis apenas com DataJud.</p>
+      </div>
+
+      <div class="limit-card">
+        <h4>Latência de atualização</h4>
+        <p>O índice do DataJud não é atualizado em tempo real — há uma defasagem que varia de horas a dias dependendo do tribunal e do tipo de movimentação. O indicador "distribuídos no mês" pode estar defasado em relação ao PJe interno.</p>
+      </div>
+
+      <div class="limit-card">
+        <h4>Movimentos: campo aninhado complexo</h4>
+        <p>O array <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">movimentos</code> exige queries nested, que são mais lentas e pesadas. Para cálculos de tempo entre movimentos, pode ser necessário buscar os documentos e processar no servidor em vez de fazer tudo via aggregation.</p>
+      </div>
+
+      <div class="limit-card">
+        <h4>Limite de resultados por query</h4>
+        <p>O ElasticSearch tem limite padrão de 10.000 documentos por busca (<code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">max_result_window</code>). Para percorrer todo o acervo de uma vara grande, é necessário usar paginação com <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">search_after</code>. Aggregations não têm esse limite.</p>
+      </div>
+
+      <div class="limit-card">
+        <h4>Sem identificação das partes</h4>
+        <p>Por razões de privacidade, a API pública não retorna nomes de autores, réus, advogados ou empresa empregadora. Não é possível identificar quais empresas são mais processadas na vara ou quais escritórios atuam mais.</p>
+      </div>
+
+      <div class="limit-card">
+        <h4>Qualidade do preenchimento varia</h4>
+        <p>A completude dos campos <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">assuntos</code> e <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">movimentos</code> depende do preenchimento correto no PJe. Processos mais antigos tendem a ter menos assuntos cadastrados, o que pode distorcer análises retrospectivas longas.</p>
+      </div>
+
+      <div class="limit-card">
+        <h4>Rate limiting e uso responsável</h4>
+        <p>A API pública é compartilhada com toda a comunidade jurídica. Queries muito frequentes ou muito pesadas (grandes aggregations sem filtro de vara) podem ser throttled. Recomendado: cache de 1 hora para queries estáticas e evitar varreduras sem filtro de vara.</p>
+      </div>
+
+    </div>
+
+    <div class="infobox infobox-red" style="margin-top:20px">
+      <div class="infobox-icon">⚠</div>
+      <div class="infobox-body">
+        <strong>Consideração ética:</strong> embora os dados sejam públicos, o uso agregado para "rankear" varas ou juízes publicamente requer contexto adequado. Dados sem contexto podem ser mal interpretados. O dashboard é uma ferramenta de análise interna — qualquer publicação deve incluir as devidas ressalvas metodológicas.
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SEÇÃO 6: ROADMAP ── -->
+  <section class="section" id="sec-roadmap">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div class="section-header-text">
+        <h2>Roadmap sugerido — 3 fases</h2>
+        <p>Da consolidação do dashboard atual até análises estratégicas avançadas</p>
+      </div>
+    </div>
+
+    <div class="roadmap-grid">
+
+      <div class="roadmap-card phase-1">
+        <div class="roadmap-head">
+          <div class="roadmap-phase">Fase 1 · Consolidação · 0–2 meses</div>
+          <h3>Dashboard sólido</h3>
+          <p>Polir o que existe e adicionar as análises de maior impacto imediato com o mínimo de esforço.</p>
+        </div>
+        <div class="roadmap-body">
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Seletor de período no gráfico de volume (6m / 12m / 24m / 5a)</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Card de crescimento MoM com variação percentual</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Toggle G1/G2 — processos de 1ª instância vs. recursais</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Gráfico de distribuição de antiguidade do acervo (faixas)</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Exportação CSV dos dados exibidos</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Link direto ao processo no PJe público</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="roadmap-card phase-2">
+        <div class="roadmap-head">
+          <div class="roadmap-phase">Fase 2 · Análise · 2–5 meses</div>
+          <h3>Tendências e comparativos</h3>
+          <p>Introduzir análises longitudinais e a visão do TRT-3 como um todo — não só uma vara.</p>
+        </div>
+        <div class="roadmap-body">
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Aba "Tendências" — evolução dos top-5 assuntos por ano</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Aba "Radar TRT-3" — mapa comparativo de todas as varas</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Comparador lado a lado de duas varas</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Linha de tendência (regressão) no gráfico de volume</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Endpoint /api/pje/tendencias com dados agregados por ano</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Cache de 1 hora no servidor para queries pesadas</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="roadmap-card phase-3">
+        <div class="roadmap-head">
+          <div class="roadmap-phase">Fase 3 · Estratégica · 5–12 meses</div>
+          <h3>Inteligência processual</h3>
+          <p>Análise profunda via movimentos, alertas automáticos e publicações de dados para o público externo.</p>
+        </div>
+        <div class="roadmap-body">
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Pipeline de movimentos — calcular tempo entre etapas</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Indicador de processos paralisados há +180 dias</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Relatório PDF semanal exportável por vara</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Card público mensal para o Instagram (dado da vara)</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Monitoramento de processos específicos (sem movimentação)</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Banco histórico local para análises sem depender da API</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="infobox infobox-gold" style="margin-top:28px">
+      <div class="infobox-icon">★</div>
+      <div class="infobox-body">
+        <strong>Prioridade recomendada para a Fase 1:</strong> o seletor de período e o card de crescimento MoM são as mudanças de maior impacto visual para quem usa o dashboard — aumentam dramaticamente a percepção de profundidade analítica sem complexidade técnica adicional. O toggle G1/G2 é igualmente importante para quem trabalha em vara de 1ª instância e não quer ver processos recursais distorcendo os números.
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer style="border-top:1px solid var(--border);padding:28px 32px;text-align:center">
+  <p style="font-size:12px;color:var(--muted2)">
+    Referência técnica interna · <span style="color:var(--gold)">Marina Grojpen Couto</span> · TRT-3 · Minas Gerais
+    <span style="margin:0 10px;opacity:.3">·</span>
+    Endpoint: <code style="font-family:'JetBrains Mono',monospace;font-size:11px">api-publica.datajud.cnj.jus.br/api_publica_trt3/_search</code>
+    <span style="margin:0 10px;opacity:.3">·</span>
+    Maio 2026
+  </p>
+</footer>
+
+</body>
+</html>

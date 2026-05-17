@@ -7,7 +7,7 @@ const PORT    = process.env.PORT || 3000;
 app.use(express.json());
 
 // ── DataJud proxy config ──────────────────────────────────────────────────────
-const DATAJUD_KEY  = process.env.DATAJUD_API_KEY || '';
+const DATAJUD_KEY  = process.env.DATAJUD_API_KEY || 'cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw==';
 const DATAJUD_URL  = 'https://api-publica.datajud.cnj.jus.br';
 const INDEX_NAME   = 'api_publica_trt3';
 const VARA_NOME    = process.env.VARA_NOME   || '';  // ex: "17ª VARA DO TRABALHO DE BELO HORIZONTE"
@@ -116,6 +116,30 @@ function buildFilter(varaNomeParam) {
 
 function hasConfig() { return !!DATAJUD_KEY; }
 
+function buildPeriodFilter(req) {
+  const mes = req.query.mes;
+  const ano = req.query.ano;
+  if (mes && /^\d{4}-\d{2}$/.test(mes)) {
+    const [y, m] = mes.split('-').map(Number);
+    const next = new Date(y, m, 1);
+    return { range: { dataAjuizamento: {
+      gte: `${y}-${String(m).padStart(2,'0')}-01`,
+      lt:  `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-01`,
+    } } };
+  }
+  if (ano && /^\d{4}$/.test(ano)) {
+    return { range: { dataAjuizamento: { gte: `${ano}-01-01`, lt: `${Number(ano)+1}-01-01` } } };
+  }
+  return null;
+}
+
+function buildQuery(req) {
+  const vara = varaQuery(req);
+  if (!vara) return null;
+  const period = buildPeriodFilter(req);
+  return period ? { bool: { must: [vara, period] } } : vara;
+}
+
 // ── Auth middleware for dashboard ─────────────────────────────────────────────
 function dashAuth(req, res, next) {
   const pw = req.query.pw || req.headers['x-dashboard-password'] || '';
@@ -176,24 +200,32 @@ app.get('/api/pje/varas', async (req, res) => {
 
 // ── API: stats ────────────────────────────────────────────────────────────────
 app.get('/api/pje/stats', async (req, res) => {
-  const q = varaQuery(req);
+  const q = buildQuery(req);
   if (!q) return res.json({ ...MOCK_STATS, ultima_atualizacao: new Date().toISOString() });
+  const hasPeriod = !!(req.query.mes || req.query.ano);
   try {
-    const inicioMes = new Date(); inicioMes.setDate(1);
-    const body = {
-      query: q, size: 0,
-      aggs: { dist_mes: { filter: { range: { dataAjuizamento: { gte: inicioMes.toISOString().slice(0,7) } } } } },
-    };
+    const body = { query: q, size: 0 };
+    if (!hasPeriod) {
+      const inicioMes = new Date(); inicioMes.setDate(1);
+      body.aggs = { dist_mes: { filter: { range: { dataAjuizamento: { gte: inicioMes.toISOString().slice(0,7) } } } } };
+    }
     const r = await datajudPost(IDX, body);
     if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
-    res.json({ acervo: r.body.hits?.total?.value ?? 0, distribuidos_mes: r.body.aggregations?.dist_mes?.doc_count ?? 0,
-               concluidos_mes: null, taxa_acordo: null, ultima_atualizacao: new Date().toISOString(), mock: false });
+    const total = r.body.hits?.total?.value ?? 0;
+    res.json({
+      acervo:            hasPeriod ? null  : total,
+      ajuizados_periodo: hasPeriod ? total : null,
+      distribuidos_mes:  hasPeriod ? null  : (r.body.aggregations?.dist_mes?.doc_count ?? 0),
+      periodo_filtrado:  hasPeriod,
+      concluidos_mes: null, taxa_acordo: null,
+      ultima_atualizacao: new Date().toISOString(), mock: false,
+    });
   } catch (e) { console.error('[pje/stats]', e.message); res.status(502).json({ error: e.message }); }
 });
 
 // ── API: classes ──────────────────────────────────────────────────────────────
 app.get('/api/pje/classes', async (req, res) => {
-  const q = varaQuery(req);
+  const q = buildQuery(req);
   if (!q) return res.json({ classes: MOCK_CLASSES, mock: true });
   try {
     const body = { query: q, size: 0, aggs: { por_classe: { terms: { field: 'classe.nome.keyword', size: 20 } } } };
@@ -205,7 +237,7 @@ app.get('/api/pje/classes', async (req, res) => {
 
 // ── API: volume mensal ────────────────────────────────────────────────────────
 app.get('/api/pje/volume-mensal', async (req, res) => {
-  const q = varaQuery(req);
+  const q = buildQuery(req);
   if (!q) return res.json({ por_mes: MOCK_POR_MES, mock: true });
   try {
     const body = { query: q, size: 0, aggs: { por_mes: { date_histogram: { field: 'dataAjuizamento', calendar_interval: 'month', format: 'MM/yy' } } } };
@@ -217,7 +249,7 @@ app.get('/api/pje/volume-mensal', async (req, res) => {
 
 // ── API: assuntos ─────────────────────────────────────────────────────────────
 app.get('/api/pje/assuntos', async (req, res) => {
-  const q = varaQuery(req);
+  const q = buildQuery(req);
   if (!q) return res.json({ assuntos: MOCK_ASSUNTOS, mock: true });
   try {
     const body = { query: q, size: 0, aggs: { por_assunto: { terms: { field: 'assuntos.nome.keyword', size: 15 } } } };
@@ -234,7 +266,7 @@ app.get('/api/pje/tempos', async (req, res) => {
 
 // ── API: processos recentes ───────────────────────────────────────────────────
 app.get('/api/pje/processos', async (req, res) => {
-  const q = varaQuery(req);
+  const q = buildQuery(req);
   if (!q) return res.json({ processos: MOCK_PROCESSOS, mock: true });
   try {
     const body = { query: q, sort: [{ dataAjuizamento: { order: 'desc' } }],
@@ -248,6 +280,58 @@ app.get('/api/pje/processos', async (req, res) => {
       grau:        h._source.grau ?? '—',
     })), mock: false });
   } catch (e) { console.error('[pje/processos]', e.message); res.status(502).json({ error: e.message }); }
+});
+
+// ── API: busca processo individual ────────────────────────────────────────────
+app.get('/api/pje/processo/:numero', async (req, res) => {
+  const numero = req.params.numero.replace(/[^\d.\-]/g, '');
+  if (!numero) return res.status(400).json({ error: 'Número inválido' });
+  try {
+    const body = { query: { match: { numeroProcesso: numero } }, size: 1 };
+    const r = await datajudPost(IDX, body);
+    if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
+    const hit = r.body.hits?.hits?.[0];
+    if (!hit) return res.status(404).json({ error: 'Processo não encontrado' });
+    res.json({ processo: hit._source });
+  } catch (e) { console.error('[pje/processo]', e.message); res.status(502).json({ error: e.message }); }
+});
+
+// ── API: comparativo por período ──────────────────────────────────────────────
+app.get('/api/pje/comparativo', async (req, res) => {
+  const q    = varaQuery(req);
+  const tipo = req.query.tipo || 'mes';
+  if (!q) {
+    const MOCK = tipo === 'mes'
+      ? MOCK_POR_MES.map(m => ({ label: m.mes, total: m.total, classes: [] }))
+      : Array.from({length:5}, (_, i) => ({ label: String(new Date().getFullYear()-4+i), total: Math.round(200+Math.random()*100), classes: [] }));
+    return res.json({ tipo, periodos: MOCK, mock: true });
+  }
+  const interval = tipo === 'mes' ? 'month' : 'year';
+  const fmt      = tipo === 'mes' ? 'MM/yyyy' : 'yyyy';
+  try {
+    const body = {
+      query: q, size: 0,
+      aggs: {
+        por_periodo: {
+          date_histogram: { field: 'dataAjuizamento', calendar_interval: interval, format: fmt, min_doc_count: 0 },
+          aggs: { por_classe: { terms: { field: 'classe.nome.keyword', size: 3 } } },
+        },
+      },
+    };
+    const r = await datajudPost(IDX, body);
+    if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
+    const buckets = r.body.aggregations?.por_periodo?.buckets ?? [];
+    const slice   = tipo === 'mes' ? 24 : 10;
+    res.json({
+      tipo,
+      periodos: buckets.filter(b => b.doc_count > 0).slice(-slice).map(b => ({
+        label:   b.key_as_string,
+        total:   b.doc_count,
+        classes: (b.por_classe?.buckets ?? []).map(c => ({ nome: c.key, total: c.doc_count })),
+      })),
+      mock: false,
+    });
+  } catch (e) { console.error('[pje/comparativo]', e.message); res.status(502).json({ error: e.message }); }
 });
 
 // ── Dashboard (protected) ─────────────────────────────────────────────────────
