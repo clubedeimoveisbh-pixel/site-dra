@@ -35,36 +35,17 @@
         <div class="tool-header-icon">&#x23F3;</div>
         <div class="tool-header-text">
           <h3>Calculadora de Prescri&ccedil;&atilde;o — Lei 14.010/2020</h3>
-          <p>Insira a data e calcule automaticamente o ajuste de 141 dias da suspens&atilde;o pand&ecirc;mica</p>
+          <p>Informe a data do ajuizamento e obtenha a prescri&ccedil;&atilde;o quinquenal simples e com a suspens&atilde;o pand&ecirc;mica de 141 dias</p>
         </div>
       </div>
       <div class="tool-body">
         <div class="form-group">
-          <label for="data-prescricao">Data original da prescri&ccedil;&atilde;o</label>
+          <label for="data-prescricao">Data do ajuizamento da a&ccedil;&atilde;o</label>
           <input type="date" id="data-prescricao" max="2030-12-31">
         </div>
         <button class="btn btn-primary" onclick="calcPrescricao()">Calcular</button>
 
         <div class="tool-result" id="result-prescricao">
-          <div class="result-label">Data com suspens&atilde;o aplicada</div>
-          <div class="result-value" id="prescricao-valor">—</div>
-          <div class="result-detail">
-            <div class="result-detail-item">
-              <div class="rd-label">Data original</div>
-              <div class="rd-value" id="prescricao-original">—</div>
-            </div>
-            <div class="result-detail-item">
-              <div class="rd-label">Dias adicionados</div>
-              <div class="rd-value">141 dias</div>
-            </div>
-            <div class="result-detail-item">
-              <div class="rd-label">Per&iacute;odo suspenso</div>
-              <div class="rd-value">20/03 a 07/08/2020</div>
-            </div>
-          </div>
-          <div class="result-note">
-            <p>&#9432;&nbsp; A Lei 14.010/2020 (LGDP) suspendeu os prazos prescricionais por 141 dias durante a emerg&ecirc;ncia sanit&aacute;ria da Covid-19 (per&iacute;odo: 20/03/2020 a 07/08/2020). A prescri&ccedil;&atilde;o s&oacute; voltou a correr ap&oacute;s esse per&iacute;odo, devendo-se acrescentar 141 dias ao prazo original.</p>
-          </div>
         </div>
       </div>
     </div>
@@ -133,7 +114,7 @@
         </div>
       </div>
       <div class="tool-body">
-        <p style="margin-bottom:1rem;font-size:0.9rem">A natureza jur&iacute;dica das verbas trabalhistas determina quais parcelas integram a remunera&ccedil;&atilde;o para c&aacute;lculo de FGTS, f&eacute;rias, 13&ordm; sal&aacute;rio, aviso pr&eacute;vio e contribui&ccedil;&otilde;es previdenci&aacute;rias.</p>
+        <p style="margin-bottom:1rem;font-size:0.9rem">A natureza jur&iacute;dica das verbas trabalhistas determina quais parcelas integram a remunera&ccedil;&atilde;o para c&aacute;lculo de FGTS, f&eacute;rias, 13&ordm; sal&aacute;rio, aviso pr&eacute;vio e contribui&ccedil;&otilde;es previdenci&aacute;rias, entre outros.</p>
 
         <table class="reflexos-table">
           <thead>
@@ -176,7 +157,7 @@
             </tr>
             <tr>
               <td><strong>Gorjetas</strong></td>
-              <td><span class="badge-salarial">Salarial</span></td>
+              <td><span class="badge-remuneratorio">Remuneratório</span></td>
               <td class="legal-ref">Art. 457, &sect;3&ordm;, CLT; Sm. 354, TST</td>
             </tr>
             <tr>
@@ -188,6 +169,11 @@
               <td><strong>Di&aacute;rias acima de 50% do sal&aacute;rio</strong></td>
               <td><span class="badge-salarial">Salarial</span></td>
               <td class="legal-ref">Art. 457, &sect;2&ordm;, CLT; Sm. 101, TST</td>
+            </tr>
+            <tr>
+              <td><strong>Aviso pr&eacute;vio trabalhado</strong></td>
+              <td><span class="badge-salarial">Salarial</span></td>
+              <td class="legal-ref">Art. 487, CLT; Art. 15, Lei 8.036/1990</td>
             </tr>
             <tr>
               <td><strong>F&eacute;rias indenizadas + 1/3</strong></td>

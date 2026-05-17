@@ -21,6 +21,12 @@ function addDays(date, days) {
   return d;
 }
 
+function subtractYears(date, years) {
+  const d = new Date(date);
+  d.setFullYear(d.getFullYear() - years);
+  return d;
+}
+
 function formatDate(date) {
   return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
 }
@@ -42,13 +48,16 @@ function diffYears(from, to) {
    ────────────────────────────────────────────────────────── */
 
 /**
- * A Lei 14.010/2020 suspendeu os prazos prescricionais
- * de 12/06/2020 a 30/10/2020 = 141 dias.
- * Ao calcular a prescrição, subtrai-se 141 dias do prazo.
+ * Entrada: data do ajuizamento da ação
  *
- * Entrada: data da lesão / rescisão / fato gerador
- * Saída: data até a qual o trabalhador tem para ajuizar
- *        (prazo de 2 anos + 141 dias de suspensão)
+ * a) Prescrição quinquenal simples:
+ *    ajuizamento − 5 anos
+ *
+ * b) Prescrição com suspensão Lei 14.010/2020:
+ *    A lei suspendeu prazos de 12/06/2020 a 30/10/2020 (141 dias).
+ *    Se o período prescricional (ajuizamento − 5 anos … ajuizamento)
+ *    engloba esse intervalo, subtrai-se mais 141 dias da data de
+ *    prescrição (a prescrição alcança 141 dias a mais para trás).
  */
 
 const SUSPENSAO_INICIO = new Date(2020, 5, 12); // 12/06/2020
@@ -61,73 +70,78 @@ function calcPrescricao() {
 
   if (!inputEl || !resultEl) return;
   const val = inputEl.value;
-  if (!val) { alert('Por favor, informe a data do fato gerador.'); return; }
+  if (!val) { alert('Por favor, informe a data do ajuizamento da ação.'); return; }
 
-  const dataFato = parseLocalDate(val);
-  // Prazo ordinário: 2 anos após rescisão/fato
-  const prazoOrdinario = addDays(dataFato, 2 * 365);
+  const dataAjuizamento = parseLocalDate(val);
 
-  // Verifica se o período de suspensão se sobrepõe ao prazo
-  let diasAcrescidos = 0;
-  if (dataFato <= SUSPENSAO_FIM) {
-    // O período de suspensão afeta este prazo
-    const inicioSuspensao = dataFato > SUSPENSAO_INICIO ? dataFato : SUSPENSAO_INICIO;
-    const fimSuspensao    = SUSPENSAO_FIM;
-    const ms = Math.max(0, fimSuspensao - inicioSuspensao);
-    diasAcrescidos = Math.min(DIAS_SUSPENSAO, Math.ceil(ms / (1000 * 60 * 60 * 24)) + 1);
+  // a) Prescrição quinquenal simples: ajuizamento − 5 anos
+  const prescricaoSimples = subtractYears(dataAjuizamento, 5);
+
+  // b) Há sobreposição se o período (prescricaoSimples … dataAjuizamento)
+  //    intersecta (SUSPENSAO_INICIO … SUSPENSAO_FIM)
+  let aplicaSuspensao = false;
+  let prescricaoComSuspensao = prescricaoSimples;
+
+  if (prescricaoSimples < SUSPENSAO_FIM && dataAjuizamento > SUSPENSAO_INICIO) {
+    aplicaSuspensao = true;
+    prescricaoComSuspensao = addDays(prescricaoSimples, -DIAS_SUSPENSAO);
   }
 
-  const dataLimite = addDays(prazoOrdinario, diasAcrescidos);
-
-  // Contagem regressiva
-  const hoje = new Date();
-  hoje.setHours(0,0,0,0);
-  const diasRestantes = Math.ceil((dataLimite - hoje) / (1000*60*60*24));
-  const vencido = diasRestantes < 0;
-
   resultEl.innerHTML = `
-    <div class="result-label">Data-limite para ajuizamento</div>
-    <div class="result-value">${formatDate(dataLimite)}</div>
-    <div class="result-detail" style="margin-top:1.25rem">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.5rem">
+
+      <div style="background:rgba(200,167,91,0.07);border:1px solid rgba(200,167,91,0.25);border-radius:var(--radius);padding:1.25rem">
+        <div class="result-label" style="margin-bottom:0.5rem">Prescrição quinquenal simples</div>
+        <div class="result-value" style="font-size:1.3rem">${formatDateShort(prescricaoSimples)}</div>
+        <p style="font-size:0.8rem;margin-top:0.75rem;color:var(--text-light);line-height:1.5">
+          Ajuizamento (${formatDateShort(dataAjuizamento)}) &minus; 5 anos
+        </p>
+      </div>
+
+      <div style="background:${aplicaSuspensao ? 'rgba(74,222,128,0.07)' : 'rgba(100,116,139,0.07)'};border:1px solid ${aplicaSuspensao ? 'rgba(74,222,128,0.30)' : 'rgba(100,116,139,0.20)'};border-radius:var(--radius);padding:1.25rem">
+        <div class="result-label" style="margin-bottom:0.5rem">Com suspensão Lei 14.010/2020</div>
+        <div class="result-value" style="font-size:1.3rem;color:${aplicaSuspensao ? '#4ade80' : 'inherit'}">${aplicaSuspensao ? formatDateShort(prescricaoComSuspensao) : '—'}</div>
+        <p style="font-size:0.8rem;margin-top:0.75rem;color:var(--text-light);line-height:1.5">
+          ${aplicaSuspensao
+            ? `Quinquenal simples &minus; ${DIAS_SUSPENSAO} dias de suspensão`
+            : 'Suspensão não se aplica a este período'}
+        </p>
+      </div>
+
+    </div>
+
+    <div class="result-detail">
       <div class="result-detail-item">
-        <div class="rd-label">Data do fato</div>
-        <div class="rd-value">${formatDateShort(dataFato)}</div>
+        <div class="rd-label">Data do ajuizamento</div>
+        <div class="rd-value">${formatDateShort(dataAjuizamento)}</div>
       </div>
       <div class="result-detail-item">
-        <div class="rd-label">Prazo ordinário (2 anos)</div>
-        <div class="rd-value">${formatDateShort(prazoOrdinario)}</div>
+        <div class="rd-label">Período prescricional abrangido</div>
+        <div class="rd-value">${formatDateShort(prescricaoSimples)} a ${formatDateShort(dataAjuizamento)}</div>
       </div>
       <div class="result-detail-item">
-        <div class="rd-label">Dias suspensos acrescidos</div>
-        <div class="rd-value">${diasAcrescidos} dias</div>
-      </div>
-      <div class="result-detail-item">
-        <div class="rd-label">${vencido ? 'Prazo expirado há' : 'Dias restantes'}</div>
-        <div class="rd-value" style="color:${vencido ? '#f87171' : '#4ade80'}">${Math.abs(diasRestantes)} dias</div>
+        <div class="rd-label">Suspensão (12/06 – 30/10/2020)</div>
+        <div class="rd-value">${aplicaSuspensao ? 'Aplica-se — 141 dias' : 'Não se aplica'}</div>
       </div>
     </div>
-    ${diasAcrescidos > 0 ? `
+
+    ${aplicaSuspensao ? `
     <div class="result-note" style="margin-top:1.25rem">
       <p>
         <strong style="color:var(--gold)">&#9432; Suspensão aplicada:</strong>
-        Durante a pandemia, a Lei 14.010/2020 suspendeu os prazos prescricionais
-        de 12/06/2020 a 30/10/2020 (<strong>${diasAcrescidos} dias</strong>).
-        Esse período foi acrescido ao prazo ordinário de 2 anos.
+        O período de 5 anos retroativos ao ajuizamento engloba o intervalo de suspensão da
+        Lei 14.010/2020 (12/06/2020 a 30/10/2020 — 141 dias). Com a suspensão, a prescrição
+        alcança <strong>${formatDateShort(prescricaoComSuspensao)}</strong>, ou seja, 141 dias a mais
+        para trás em relação ao prazo quinquenal simples.
       </p>
     </div>` : `
     <div class="result-note" style="margin-top:1.25rem">
       <p>
-        A data do fato gerador é posterior ao período de suspensão (12/06 – 30/10/2020),
-        portanto o prazo ordinário de 2 anos se aplica integralmente.
+        O período de 5 anos retroativos ao ajuizamento não engloba o intervalo de suspensão
+        da Lei 14.010/2020 (12/06/2020 a 30/10/2020), portanto aplica-se apenas o prazo
+        quinquenal simples.
       </p>
     </div>`}
-    ${vencido ? `
-    <div class="result-note" style="margin-top:0.75rem;border-color:#f87171;background:rgba(248,113,113,0.08)">
-      <p style="color:#fca5a5">
-        <strong>&#9888; Atenção:</strong> O prazo já se encontra <strong>expirado</strong>.
-        Consulte um advogado para verificar a possibilidade de alegação de causas interruptivas.
-      </p>
-    </div>` : ''}
   `;
   resultEl.classList.add('visible');
   resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
