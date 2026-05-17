@@ -86,7 +86,7 @@ body {
 }
 .header-title span { color: var(--gold); }
 .header-sub {
-  font-size: 15px; color: var(--muted); max-width: 620px; margin: 0 auto 24px;
+  font-size: 15px; color: var(--muted); max-width: 640px; margin: 0 auto 24px;
   line-height: 1.6;
 }
 .header-meta {
@@ -204,6 +204,7 @@ body {
 .badge-orange { background: rgba(240,168,38,.12); color: var(--orange); }
 .badge-gold   { background: var(--gold-bg); color: var(--gold); border: 1px solid rgba(200,167,91,.2); }
 .badge-purple { background: rgba(210,168,255,.1); color: var(--purple); }
+.badge-red    { background: rgba(255,123,123,.1); color: var(--red); }
 
 /* ── CODE BLOCKS ─────────────────────────────────────── */
 .code-block-wrap { margin: 16px 0; }
@@ -250,10 +251,19 @@ pre {
   border-radius: var(--radius-lg);
   overflow: hidden;
 }
+.analise-card.implementado {
+  border-color: rgba(86,211,100,.25);
+}
+.analise-card.possivel {
+  border-color: rgba(121,184,255,.2);
+}
 .analise-card-header {
   padding: 14px 18px;
   border-bottom: 1px solid var(--border2);
   display: flex; align-items: center; gap: 10px;
+}
+.analise-card.implementado .analise-card-header {
+  border-bottom-color: rgba(86,211,100,.15);
 }
 .analise-icon {
   width: 32px; height: 32px; border-radius: 8px;
@@ -261,6 +271,8 @@ pre {
   display: flex; align-items: center; justify-content: center;
   font-size: 15px; flex-shrink: 0;
 }
+.analise-card.implementado .analise-icon { background: rgba(86,211,100,.08); border-color: rgba(86,211,100,.2); }
+.analise-card.possivel .analise-icon { background: rgba(121,184,255,.07); border-color: rgba(121,184,255,.2); }
 .analise-card-header h3 { font-size: 14px; font-weight: 600; color: var(--text); }
 .analise-card-body { padding: 14px 18px; }
 .analise-card-body p { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
@@ -275,41 +287,34 @@ pre {
   color: var(--gold); font-size: 11px;
 }
 
-/* ── FEATURE TIMELINE ────────────────────────────────── */
-.timeline { display: flex; flex-direction: column; gap: 0; position: relative; }
-.timeline::before {
-  content: '';
-  position: absolute; left: 20px; top: 0; bottom: 0; width: 2px;
-  background: linear-gradient(to bottom, var(--gold-dim), transparent);
+/* ── SUBSECTION HEADERS ──────────────────────────────── */
+.subsec-header {
+  display: flex; align-items: center; gap: 10px;
+  margin: 32px 0 18px;
 }
-.timeline-item { display: flex; gap: 24px; padding-bottom: 32px; position: relative; }
-.timeline-dot {
-  width: 40px; height: 40px; border-radius: 50%;
-  border: 2px solid var(--gold-dim);
-  background: var(--bg);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; position: relative; z-index: 1;
-  font-size: 13px; font-weight: 700; color: var(--gold);
+.subsec-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 14px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; letter-spacing: .09em;
+  text-transform: uppercase;
 }
-.timeline-content { flex: 1; }
-.timeline-tag {
-  font-size: 10px; font-weight: 700; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--gold); margin-bottom: 6px;
-  display: block;
+.subsec-pill-green { background: rgba(86,211,100,.1); border: 1px solid rgba(86,211,100,.25); color: var(--green); }
+.subsec-pill-blue  { background: rgba(121,184,255,.1); border: 1px solid rgba(121,184,255,.25); color: var(--blue); }
+.subsec-hr { flex: 1; height: 1px; background: var(--border2); }
+
+/* ── FEATURE TABLE ───────────────────────────────────── */
+.feature-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.feature-table th {
+  text-align: left; padding: 8px 14px;
+  font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted2); border-bottom: 1px solid var(--border);
 }
-.timeline-content h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
-.timeline-content p { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
-.feature-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
-.feature-list li {
-  font-size: 12.5px; color: var(--muted);
-  padding-left: 16px; position: relative;
+.feature-table td {
+  padding: 9px 14px; border-bottom: 1px solid var(--border2);
+  vertical-align: middle;
 }
-.feature-list li::before {
-  content: '▸';
-  position: absolute; left: 0;
-  color: var(--gold-dim); font-size: 10px;
-  top: 2px;
-}
+.feature-table tr:last-child td { border-bottom: none; }
+.feature-table tr:hover td { background: rgba(255,255,255,.015); }
 
 /* ── ROADMAP ─────────────────────────────────────────── */
 .roadmap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
@@ -336,11 +341,13 @@ pre {
 .roadmap-item:last-child { border-bottom: none; }
 .roadmap-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
 .roadmap-item span { font-size: 12.5px; color: var(--muted); }
+.roadmap-item.done span { color: rgba(232,228,218,.5); text-decoration: line-through; text-decoration-color: rgba(86,211,100,.4); }
+.roadmap-item.done .roadmap-dot { background: var(--green) !important; }
 
 /* Phase colors */
-.phase-1 .roadmap-head { background: rgba(86,211,100,.06); }
-.phase-1 .roadmap-phase { color: var(--green); }
-.phase-1 .roadmap-dot { background: var(--green); }
+.phase-done .roadmap-head { background: rgba(86,211,100,.05); }
+.phase-done .roadmap-phase { color: var(--green); }
+.phase-done .roadmap-dot { background: var(--green); }
 .phase-2 .roadmap-head { background: rgba(200,167,91,.06); }
 .phase-2 .roadmap-phase { color: var(--gold); }
 .phase-2 .roadmap-dot { background: var(--gold); }
@@ -360,6 +367,7 @@ pre {
 .infobox-blue { background: rgba(121,184,255,.06); border: 1px solid rgba(121,184,255,.2); }
 .infobox-red  { background: rgba(255,123,123,.06); border: 1px solid rgba(255,123,123,.18); }
 .infobox-green { background: rgba(86,211,100,.06); border: 1px solid rgba(86,211,100,.18); }
+.infobox-orange { background: rgba(240,168,38,.06); border: 1px solid rgba(240,168,38,.2); }
 
 /* ── TAGS ────────────────────────────────────────────── */
 .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
@@ -378,8 +386,20 @@ pre {
   border-radius: var(--radius);
   padding: 16px 18px;
 }
-.limit-card h4 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.limit-card.critical {
+  border-color: rgba(255,123,123,.25);
+  background: rgba(255,123,123,.04);
+}
+.limit-card h4 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 7px; }
 .limit-card p  { font-size: 12.5px; color: var(--muted); }
+.limit-tag {
+  display: inline-block; padding: 1px 7px; border-radius: 4px;
+  font-size: 10px; font-weight: 700; letter-spacing: .07em;
+  background: rgba(255,123,123,.12); color: var(--red); border: 1px solid rgba(255,123,123,.2);
+}
+.limit-tag-warn {
+  background: rgba(240,168,38,.12); color: var(--orange); border-color: rgba(240,168,38,.2);
+}
 
 /* ── SCROLLBAR ───────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -401,17 +421,16 @@ pre {
   <div class="logo">Marina Trabalhista · TRT-3 · MG</div>
   <div class="header-badge">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
-    Referência Técnica Interna
+    Referência Técnica Interna — Atualizada com dados reais
   </div>
   <h1 class="header-title">API DataJud — <span>Análise de Capacidades</span><br>para o TRT-3</h1>
   <p class="header-sub">
-    Mapeamento completo das possibilidades analíticas da API pública do CNJ aplicadas
-    ao contexto da 3ª Região — do dashboard existente às análises estratégicas avançadas.
+    Estado real da integração com o DataJud: o que foi descoberto na prática, o que já está implementado no dashboard e o que ainda é possível construir.
   </p>
   <div class="header-meta">
     <span>
       <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="12" height="10" rx="1"/><path d="M5 2v4M11 2v4M2 8h12"/></svg>
-      Maio 2026
+      Maio 2026 — v2 (pós-implementação)
     </span>
     <span>
       <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2a6 6 0 100 12A6 6 0 008 2zM8 6v4M8 10h.01"/></svg>
@@ -419,7 +438,7 @@ pre {
     </span>
     <span>
       <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12L6 8l3 3 5-6"/></svg>
-      Endpoint público CNJ
+      Dashboard PJe em produção (Railway)
     </span>
   </div>
 </header>
@@ -428,11 +447,12 @@ pre {
 <nav class="toc-wrap">
   <div class="toc">
     <a href="#sec-api">1. O que a API oferece</a>
-    <a href="#sec-analises">2. Análises possíveis</a>
-    <a href="#sec-queries">3. Queries de exemplo</a>
-    <a href="#sec-features">4. Sugestões de features</a>
-    <a href="#sec-limitacoes">5. Limitações</a>
-    <a href="#sec-roadmap">6. Roadmap</a>
+    <a href="#sec-pratica">2. Descobertas na prática</a>
+    <a href="#sec-analises">3. Análises — feitas e possíveis</a>
+    <a href="#sec-queries">4. Queries de exemplo</a>
+    <a href="#sec-features">5. Features — status atual</a>
+    <a href="#sec-limitacoes">6. Limitações reais</a>
+    <a href="#sec-roadmap">7. Roadmap</a>
   </div>
 </nav>
 
@@ -452,7 +472,7 @@ pre {
     <div class="infobox infobox-gold">
       <div class="infobox-icon">⚖</div>
       <div class="infobox-body">
-        <strong>Contexto:</strong> A API DataJud é um índice ElasticSearch do CNJ que indexa dados processuais de todos os tribunais brasileiros. Para o TRT-3 (Tribunal Regional do Trabalho da 3ª Região — Minas Gerais), o índice <code style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px">api_publica_trt3</code> expõe metadados de processos públicos em tempo quase-real, com granularidade suficiente para análises quantitativas robustas.
+        <strong>Contexto:</strong> A API DataJud é um índice ElasticSearch do CNJ que indexa dados processuais de todos os tribunais brasileiros. Para o TRT-3 (Tribunal Regional do Trabalho da 3ª Região — Minas Gerais), o índice <code style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px">api_publica_trt3</code> expõe metadados de processos públicos com granularidade suficiente para análises quantitativas robustas. O endpoint base é <code style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:11px">https://api-publica.datajud.cnj.jus.br</code>.
       </div>
     </div>
 
@@ -478,7 +498,7 @@ pre {
           <tr>
             <td><span class="field-name">dataAjuizamento</span></td>
             <td><span class="field-type">date</span></td>
-            <td style="color:var(--text)">Data de distribuição — formato <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">20101223000000</code></td>
+            <td style="color:var(--text)">Data de distribuição — formato <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">20101223000000</code> — <strong style="color:var(--red)">dados corrompidos em ~1%</strong></td>
             <td><span class="badge badge-green">séries temporais · range</span></td>
           </tr>
           <tr>
@@ -490,13 +510,13 @@ pre {
           <tr>
             <td><span class="field-name">orgaoJulgador.nome.keyword</span></td>
             <td><span class="field-type">keyword</span></td>
-            <td style="color:var(--text)">Nome completo da vara (ex: "17ª VARA DO TRABALHO DE BH")</td>
+            <td style="color:var(--text)">Nome completo da vara — útil para filtro mas mais lento sem cache</td>
             <td><span class="badge badge-green">filtro · comparação</span></td>
           </tr>
           <tr>
             <td><span class="field-name">orgaoJulgador.codigo</span></td>
             <td><span class="field-type">integer</span></td>
-            <td style="color:var(--text)">Código numérico da vara — mais preciso que o nome</td>
+            <td style="color:var(--text)">Código numérico da vara — mais preciso e mais rápido que o nome</td>
             <td><span class="badge badge-blue">filtro preferencial</span></td>
           </tr>
           <tr>
@@ -556,7 +576,7 @@ pre {
     <div class="card-grid">
       <div class="card card-dark">
         <div class="card-title">Aggregations — terms</div>
-        <p>Contagem e ranking por qualquer campo keyword. Base para ranking de assuntos, classes, varas e juízes.</p>
+        <p>Contagem e ranking por qualquer campo keyword. Base para ranking de assuntos, classes, varas. Usado extensivamente no dashboard.</p>
         <div class="tag-row">
           <span class="tag">por_assunto</span>
           <span class="tag">por_classe</span>
@@ -565,204 +585,389 @@ pre {
       </div>
       <div class="card card-dark">
         <div class="card-title">Aggregations — date_histogram</div>
-        <p>Séries temporais com granularidade de dia, mês, trimestre ou ano. Detecta sazonalidade e tendências.</p>
+        <p>Séries temporais com granularidade de dia, mês, trimestre ou ano. Detecta sazonalidade e tendências. Atenção: gera buckets futuros vazios — filtrar por <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">doc_count &gt; 0</code>.</p>
         <div class="tag-row">
           <span class="tag">calendar_interval</span>
           <span class="tag">fixed_interval</span>
         </div>
       </div>
       <div class="card card-dark">
-        <div class="card-title">Aggregations — range</div>
-        <p>Faixas de datas, valores numéricos. Necessário para distribuição de antiguidade processual.</p>
+        <div class="card-title">Aggregations — date_range</div>
+        <p>Faixas de datas — base para distribuição de antiguidade processual. Implementado na aba Eficiência. Não gera buckets vazios — retorna exatamente as faixas definidas.</p>
         <div class="tag-row">
           <span class="tag">date_range</span>
           <span class="tag">range numérico</span>
         </div>
       </div>
       <div class="card card-dark">
-        <div class="card-title">Nested aggregations</div>
-        <p>Combinar múltiplos níveis. Ex: para cada vara, contar os top-5 assuntos. Essencial para análise comparativa.</p>
+        <div class="card-title">_count endpoint</div>
+        <p>Endpoint separado para contagem exata sem limitação de 10 mil documentos. Essencial: <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">track_total_hits: true</code> no <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">_search</code> causa timeout.</p>
         <div class="tag-row">
-          <span class="tag">aggs dentro de aggs</span>
+          <span class="tag">_count</span>
+          <span class="tag">contagem exata</span>
         </div>
       </div>
       <div class="card card-dark">
-        <div class="card-title">Bool Query + Filters</div>
-        <p>Combinação de must / should / must_not com term, range, match. Filtros compostos sem custo de scoring.</p>
+        <div class="card-title">Bool Query — filter context</div>
+        <p>Combinação de must / should / must_not com term, range, match. O <strong>filter context</strong> é mais rápido que query context para varas — usa cache do ES e não calcula scoring.</p>
         <div class="tag-row">
           <span class="tag">filter context</span>
           <span class="tag">must / must_not</span>
         </div>
       </div>
       <div class="card card-dark">
-        <div class="card-title">Script fields &amp; Painless</div>
-        <p>Campos calculados em runtime via scripting (Painless). Útil para calcular tempo entre movimentos diretamente na query.</p>
+        <div class="card-title">Nested aggregations</div>
+        <p>Combinar múltiplos níveis. Ex: para cada vara, top-5 assuntos. Usado no comparativo de varas. Mais pesado — usar com filtros restritos.</p>
         <div class="tag-row">
-          <span class="tag">script_fields</span>
-          <span class="tag">runtime_mappings</span>
+          <span class="tag">aggs dentro de aggs</span>
+          <span class="tag">nested path</span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ── SEÇÃO 2: ANÁLISES POSSÍVEIS ── -->
-  <section class="section" id="sec-analises">
+  <!-- ── SEÇÃO 2: DESCOBERTAS NA PRÁTICA ── -->
+  <section class="section" id="sec-pratica">
     <div class="section-header">
       <div class="section-num">2</div>
       <div class="section-header-text">
-        <h2>Análises possíveis com os dados disponíveis</h2>
-        <p>Mapeamento criativo e específico para o contexto trabalhista do TRT-3</p>
+        <h2>O que descobrimos na prática</h2>
+        <p>Comportamentos reais da API observados durante a construção do dashboard — o que a documentação não diz</p>
       </div>
     </div>
 
-    <div class="infobox infobox-blue">
+    <div class="infobox infobox-orange">
+      <div class="infobox-icon">⚡</div>
+      <div class="infobox-body">
+        Estas descobertas vieram de tentativa e erro real durante a implementação. Cada item aqui evitou um bug ou um timeout em produção. Documentar para não repetir os erros nas próximas iterações.
+      </div>
+    </div>
+
+    <div class="limit-grid" style="margin-top:20px">
+
+      <div class="limit-card critical">
+        <h4><span class="limit-tag">CONFIRMADO</span> Delay de indexação: ~47 dias</h4>
+        <p>O último processo indexado na 42ª Vara de BH era de <strong>31/03/2026</strong>, acessado em <strong>17/05/2026</strong>. Isso representa um gap de ~47 dias entre o ajuizamento/movimentação e a disponibilidade na API. Qualquer análise de "distribuídos no mês" subestima o volume real dos últimos 30–60 dias.</p>
+      </div>
+
+      <div class="limit-card critical">
+        <h4><span class="limit-tag">BUG</span> Datas corrompidas — anos 2608–2612</h4>
+        <p>Alguns processos têm <code style="font-family:'JetBrains Mono',monospace;font-size:11px">dataAjuizamento</code> em formato errado: o padrão deveria ser <code style="font-family:'JetBrains Mono',monospace;font-size:11px">YYYYMMDD</code>, mas alguns registros têm <code style="font-family:'JetBrains Mono',monospace;font-size:11px">DDMMYYYY</code> interpretado como ano — gerando datas como 2608 ou 2612. O dashboard filtra explicitamente <code style="font-family:'JetBrains Mono',monospace;font-size:11px">y &lt;= yearNow + 1</code> para descartar esses outliers.</p>
+      </div>
+
+      <div class="limit-card critical">
+        <h4><span class="limit-tag">TIMEOUT</span> track_total_hits derruba a API</h4>
+        <p>Usar <code style="font-family:'JetBrains Mono',monospace;font-size:11px">track_total_hits: true</code> no endpoint <code style="font-family:'JetBrains Mono',monospace;font-size:11px">_search</code> para obter a contagem exata causa timeout consistente. A solução é chamar o endpoint <code style="font-family:'JetBrains Mono',monospace;font-size:11px">_count</code> separadamente — retorna o total exato sem limitação e sem timeout.</p>
+      </div>
+
+      <div class="limit-card critical">
+        <h4><span class="limit-tag">BUG</span> Buckets futuros no date_histogram</h4>
+        <p>O <code style="font-family:'JetBrains Mono',monospace;font-size:11px">date_histogram</code> com <code style="font-family:'JetBrains Mono',monospace;font-size:11px">min_doc_count: 0</code> (padrão) gera buckets para meses futuros com <code style="font-family:'JetBrains Mono',monospace;font-size:11px">doc_count: 0</code>. Usar <code style="font-family:'JetBrains Mono',monospace;font-size:11px">.slice(-24)</code> pega os últimos 24 buckets — que podem ser os 24 meses futuros vazios. Solução: filtrar por <code style="font-family:'JetBrains Mono',monospace;font-size:11px">doc_count &gt; 0</code> antes do slice.</p>
+      </div>
+
+      <div class="limit-card">
+        <h4><span class="limit-tag warn limit-tag-warn">PERF</span> filter context vs query context</h4>
+        <p>Filtrar por vara usando <code style="font-family:'JetBrains Mono',monospace;font-size:11px">filter</code> (não <code style="font-family:'JetBrains Mono',monospace;font-size:11px">must</code>) é significativamente mais rápido — o ES cacheia filtros exatos. Queries que usam <code style="font-family:'JetBrains Mono',monospace;font-size:11px">query context</code> calculam relevância desnecessariamente para filtros binários como vara ou nivelSigilo.</p>
+      </div>
+
+      <div class="limit-card">
+        <h4><span class="limit-tag warn limit-tag-warn">PERF</span> Queries paralelas causam timeout</h4>
+        <p>Múltiplas queries simultâneas ao DataJud (ex: 5+ em paralelo) sobrecarregam a API e causam timeouts. O servidor usa timeout de <strong>28 segundos</strong> (Railway mata conexões após 60s). Queries pesadas como a de varas-comparativo fazem requisições em série quando o grupo é grande.</p>
+      </div>
+
+      <div class="limit-card">
+        <h4><span class="limit-tag warn limit-tag-warn">OBS</span> Busca por número de processo</h4>
+        <p>Usar <code style="font-family:'JetBrains Mono',monospace;font-size:11px">match</code> tokeniza o número e não casa exato. A busca combina <code style="font-family:'JetBrains Mono',monospace;font-size:11px">term</code> + <code style="font-family:'JetBrains Mono',monospace;font-size:11px">query_string</code> + <code style="font-family:'JetBrains Mono',monospace;font-size:11px">term</code> no número sem formatação com <code style="font-family:'JetBrains Mono',monospace;font-size:11px">minimum_should_match: 1</code> para garantir encontrar o processo independente do formato digitado.</p>
+      </div>
+
+      <div class="limit-card">
+        <h4><span class="limit-tag warn limit-tag-warn">OBS</span> orgaoJulgador.nome pode ser lento</h4>
+        <p>Filtrar por <code style="font-family:'JetBrains Mono',monospace;font-size:11px">orgaoJulgador.nome.keyword</code> funciona mas pode ser lento sem cache warm. A alternativa mais performática é filtrar por <code style="font-family:'JetBrains Mono',monospace;font-size:11px">orgaoJulgador.codigo</code> (integer), quando o código da vara é conhecido. O dashboard suporta ambos via variáveis de ambiente.</p>
+      </div>
+
+    </div>
+
+    <div class="infobox infobox-blue" style="margin-top:20px">
       <div class="infobox-icon">ℹ</div>
       <div class="infobox-body">
-        Todas as análises abaixo partem exclusivamente dos campos disponíveis na API pública — nenhum dado externo é necessário. As análises foram pensadas para o contexto da <strong>Analista Judiciária do TRT-3</strong> e para comunicação com o público jurídico trabalhista de Minas Gerais.
+        <strong>O que a API definitivamente não oferece:</strong> dados de partes (reclamante/reclamado), valores de causa ou condenação, resultado da sentença (procedente/improcedente/acordo), e tempo em cada fase processual de forma diretamente agregável — este último requereria processar movimentos individualmente no servidor.
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SEÇÃO 3: ANÁLISES POSSÍVEIS ── -->
+  <section class="section" id="sec-analises">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div class="section-header-text">
+        <h2>Análises — o que foi feito e o que ainda é possível</h2>
+        <p>Mapeamento das análises disponíveis: separadas entre as já implementadas no dashboard e as que ainda podem ser construídas</p>
       </div>
     </div>
 
-    <div class="analise-grid" style="margin-top:24px">
-
-      <div class="analise-card">
-        <div class="analise-card-header">
-          <div class="analise-icon">📅</div>
-          <h3>Sazonalidade de Ajuizamentos</h3>
-        </div>
-        <div class="analise-card-body">
-          <p>Identificar em quais meses do ano o volume de novas reclamações trabalhistas é maior — e o que explica esses picos (férias coletivas, dissídios, etc.).</p>
-          <ul class="analise-points">
-            <li>Picos após janeiro e julho (férias/rescisões sazonais)</li>
-            <li>Queda em dezembro (recesso judiciário)</li>
-            <li>Comparar ano a ano: crescimento estrutural ou conjuntural?</li>
-            <li>Identificar meses com mais Execuções vs. Conhecimento</li>
-          </ul>
-        </div>
+    <!-- Implementadas -->
+    <div class="subsec-header">
+      <div class="subsec-pill subsec-pill-green">
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="2 8 6 12 14 4"/></svg>
+        Já implementado no dashboard
       </div>
+      <div class="subsec-hr"></div>
+    </div>
 
-      <div class="analise-card">
-        <div class="analise-card-header">
-          <div class="analise-icon">📈</div>
-          <h3>Tendências por Assunto</h3>
-        </div>
-        <div class="analise-card-body">
-          <p>Quais temas trabalhistas cresceram nos últimos 5 anos? Quais diminuíram? O dado captura a evolução do mercado de trabalho em MG.</p>
-          <ul class="analise-points">
-            <li>Crescimento de demandas sobre trabalho remoto/home office</li>
-            <li>Evolução das ações de assédio moral ao longo do tempo</li>
-            <li>Impacto de decisões do TST em assuntos específicos</li>
-            <li>Comparar BH interior vs. varas regionais (Uberlândia, Juiz de Fora)</li>
-          </ul>
-        </div>
-      </div>
+    <div class="analise-grid" style="margin-top:4px">
 
-      <div class="analise-card">
-        <div class="analise-card-header">
-          <div class="analise-icon">⚖</div>
-          <h3>Comparativo entre Varas</h3>
-        </div>
-        <div class="analise-card-body">
-          <p>Radiografia de cada vara do TRT-3: volume de acervo, velocidade de tramitação estimada e perfil de demandas.</p>
-          <ul class="analise-points">
-            <li>Ranking de varas por volume de acervo ativo</li>
-            <li>Quais varas têm mais processos de Execução vs. Conhecimento</li>
-            <li>Varas com crescimento acelerado nos últimos 12 meses</li>
-            <li>Concentração geográfica: BH vs. interior de MG</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="analise-card">
-        <div class="analise-card-header">
-          <div class="analise-icon">🗂</div>
-          <h3>Perfil por Classe Processual</h3>
-        </div>
-        <div class="analise-card-body">
-          <p>As Reclamações Trabalhistas dominam, mas o mix de classes conta uma história sobre o estado do direito trabalhista em MG.</p>
-          <ul class="analise-points">
-            <li>Proporção RT x Execução de Título Extrajudicial x ACP</li>
-            <li>Evolução de Mandados de Segurança (questionamentos processuais)</li>
-            <li>Ações de Rito Sumaríssimo vs. Ordinário (valor da causa)</li>
-            <li>Dissídios coletivos: indicador de tensão sindical</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="analise-card">
-        <div class="analise-card-header">
-          <div class="analise-icon">🏷</div>
-          <h3>Co-ocorrência de Assuntos</h3>
-        </div>
-        <div class="analise-card-body">
-          <p>Um processo raramente tem apenas um assunto. Mapear quais assuntos aparecem juntos revela padrões de violação de direitos.</p>
-          <ul class="analise-points">
-            <li>Horas Extras + Intervalo Intrajornada (vínculo clássico)</li>
-            <li>Assédio Moral + Verbas Rescisórias (demissão conflituosa)</li>
-            <li>FGTS + Equiparação Salarial (discriminação salarial)</li>
-            <li>Acidente de Trabalho + Dano Moral (casos graves)</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="analise-card">
-        <div class="analise-card-header">
-          <div class="analise-icon">⏱</div>
-          <h3>Velocidade Processual por Movimentos</h3>
-        </div>
-        <div class="analise-card-body">
-          <p>Usando os timestamps dos movimentos processuais, é possível estimar o tempo entre etapas — da distribuição à sentença, por exemplo.</p>
-          <ul class="analise-points">
-            <li>Tempo médio entre distribuição e primeira audiência</li>
-            <li>Tempo médio até sentença por vara</li>
-            <li>Identificar processos "travados" sem movimentação há +180 dias</li>
-            <li>Acordos em audiência vs. sentenças (via código de movimento)</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="analise-card">
-        <div class="analise-card-header">
-          <div class="analise-icon">📍</div>
-          <h3>Concentração de Demandas por Região</h3>
-        </div>
-        <div class="analise-card-body">
-          <p>O TRT-3 abrange todo MG. Comparar varas de BH com varas do interior revela desigualdades regionais no acesso à justiça.</p>
-          <ul class="analise-points">
-            <li>Volume por cidade-sede de vara (BH, Uberlândia, Juiz de Fora…)</li>
-            <li>Assuntos predominantes por região (ex: agronegócio no Triângulo)</li>
-            <li>Crescimento relativo: interior ganha peso a cada ano?</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="analise-card">
-        <div class="analise-card-header">
-          <div class="analise-icon">🔎</div>
-          <h3>Detecção de Picos por Evento</h3>
-        </div>
-        <div class="analise-card-body">
-          <p>Cruzar o histórico mensal com eventos externos (reformas trabalhistas, decisões do TST, pandemia) para documentar impactos reais.</p>
-          <ul class="analise-points">
-            <li>Impacto da Reforma Trabalhista de 2017 nos assuntos mais afetados</li>
-            <li>Queda e recuperação de ajuizamentos durante a pandemia (2020-2021)</li>
-            <li>Efeito de decisões do STF sobre prescrição e FGTS</li>
-            <li>Ondas de demissões em massa por setor identificadas nos dados</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="analise-card">
+      <div class="analise-card implementado">
         <div class="analise-card-header">
           <div class="analise-icon">📊</div>
-          <h3>Índice de Atividade da Vara</h3>
+          <h3>Acervo total da vara</h3>
         </div>
         <div class="analise-card-body">
-          <p>Combinar novos processos, movimentos recentes e tempo sem atividade para criar um indicador de "saúde" da vara — visão gerencial.</p>
+          <p>Contagem exata via endpoint <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">_count</code> — sem limitação de 10k, sem timeout. Exibido como KPI principal na aba Métricas.</p>
           <ul class="analise-points">
-            <li>Processos com movimentação nos últimos 30 dias</li>
-            <li>Proporção acervo antigo (&gt;2 anos) vs. recente</li>
-            <li>Taxa de crescimento do acervo mês a mês</li>
-            <li>Processos em G2 (recursal) por vara</li>
+            <li>Usa endpoint _count separado do _search</li>
+            <li>Também conta ajuizamentos no período quando filtro de data está ativo</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card implementado">
+        <div class="analise-card-header">
+          <div class="analise-icon">📅</div>
+          <h3>Volume mensal de ajuizamentos</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Line chart com até 36 meses de histórico. Filtra buckets com <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">doc_count = 0</code> e datas inválidas antes de renderizar.</p>
+          <ul class="analise-points">
+            <li>Aba Métricas (gráfico de linha)</li>
+            <li>Aba Comparativo — mês ou ano, com top classe por período</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card implementado">
+        <div class="analise-card-header">
+          <div class="analise-icon">🗂</div>
+          <h3>Ranking de classes processuais</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Top classes da vara por volume — horizontal bar chart. Mostra Reclamação Trabalhista, Execução, MS, ACP e demais na proporção real.</p>
+          <ul class="analise-points">
+            <li>Aba Métricas (hbar)</li>
+            <li>Aba Comparativo — top classe por período (nested agg)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card implementado">
+        <div class="analise-card-header">
+          <div class="analise-icon">🏷</div>
+          <h3>Ranking de assuntos</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Top-15 assuntos do acervo da vara — Horas Extras, FGTS, Verbas Rescisórias, etc. Horizontal bar chart com percentuais relativos.</p>
+          <ul class="analise-points">
+            <li>Aba Métricas (hbar)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card implementado">
+        <div class="analise-card-header">
+          <div class="analise-icon">⏱</div>
+          <h3>Distribuição de antiguidade do acervo</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Faixas: menos de 1 ano, 1–2 anos, 2–4 anos, mais de 4 anos. Doughnut chart + KPIs de tempo médio estimado. Usa <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">date_range</code> com <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">now-Ny/d</code>.</p>
+          <ul class="analise-points">
+            <li>Aba Eficiência — doughnut + 4 KPIs</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card implementado">
+        <div class="analise-card-header">
+          <div class="analise-icon">⚖</div>
+          <h3>Comparativo entre varas</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Ranking de varas próximas ou todas de BH por volume de acervo. Inclui posição no ranking, percentil e tabela com mini-barras. Suporta dois modos: varas próximas numericamente ou todas as varas de BH.</p>
+          <ul class="analise-points">
+            <li>Aba Varas — ranking + tabela com top classe por vara</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card implementado">
+        <div class="analise-card-header">
+          <div class="analise-icon">🔎</div>
+          <h3>Busca de processo individual</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Busca por número CNJ no sidebar. Hero com número, classe, grau e status de atividade (Ativo / Moderado / Lento / Paralisado) baseado na última movimentação.</p>
+          <ul class="analise-points">
+            <li>Quick stats: idade, n° movimentações, ajuizamento, última atividade</li>
+            <li>Cards de info da vara + assuntos como tags</li>
+            <li>Timeline de movimentos agrupada por mês, com pontos coloridos por categoria</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card implementado">
+        <div class="analise-card-header">
+          <div class="analise-icon">📋</div>
+          <h3>Processos recentes da vara</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Tabela com os 30 processos mais recentes: número, classe, data de ajuizamento e grau. Ordenados por <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">dataAjuizamento desc</code>.</p>
+          <ul class="analise-points">
+            <li>Aba Métricas — tabela de processos recentes</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card implementado">
+        <div class="analise-card-header">
+          <div class="analise-icon">📈</div>
+          <h3>Comparativo temporal por período</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Bar chart comparando volume por mês ou por ano. Nested aggregation que traz a top classe de cada período. Filtra anos inválidos (datas corrompidas) antes de renderizar.</p>
+          <ul class="analise-points">
+            <li>Aba Comparativo — seletor mês/ano</li>
+            <li>Tabela com top classe por período abaixo do gráfico</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Possíveis -->
+    <div class="subsec-header" style="margin-top:36px">
+      <div class="subsec-pill subsec-pill-blue">
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"/><path d="M8 5v4M8 10h.01"/></svg>
+        Possível implementar
+      </div>
+      <div class="subsec-hr"></div>
+    </div>
+
+    <div class="analise-grid" style="margin-top:4px">
+
+      <div class="analise-card possivel">
+        <div class="analise-card-header">
+          <div class="analise-icon">🌡</div>
+          <h3>Cache server-side das agregações</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>As queries de acervo, classes e assuntos raramente mudam em poucos minutos. Cache com TTL de 1h reduziria tempo de carregamento e eliminaria timeouts por uso intensivo.</p>
+          <ul class="analise-points">
+            <li>TTL de 1h para acervo, classes, assuntos</li>
+            <li>Cache por vara (chave: nome + tipo de query)</li>
+            <li>Cache em memória (Map) ou Redis se disponível</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card possivel">
+        <div class="analise-card-header">
+          <div class="analise-icon">📍</div>
+          <h3>Concentração geográfica no TRT-3</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Comparar BH com varas do interior (Uberlândia, Juiz de Fora, Montes Claros). Identificar quais assuntos dominam em cada região — agronegócio no Triângulo, mineração no Quadrilátero.</p>
+          <ul class="analise-points">
+            <li>Filtro por cidade-sede de vara</li>
+            <li>Assuntos predominantes por região</li>
+            <li>Evolução: interior ganha peso a cada ano?</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card possivel">
+        <div class="analise-card-header">
+          <div class="analise-icon">📊</div>
+          <h3>Co-ocorrência de assuntos</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Um processo raramente tem um único assunto. Nested aggregation revela quais assuntos aparecem juntos — padrões de violação de direitos em conjunto.</p>
+          <ul class="analise-points">
+            <li>Horas Extras + Intervalo Intrajornada</li>
+            <li>Assédio Moral + Verbas Rescisórias</li>
+            <li>Acidente de Trabalho + Dano Moral</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card possivel">
+        <div class="analise-card-header">
+          <div class="analise-icon">🔔</div>
+          <h3>Alerta de processos paralisados</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Detectar processos sem movimentação há mais de X dias usando <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">must_not + nested range</code> em <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">movimentos.dataHora</code>. Indicador de acervo represado.</p>
+          <ul class="analise-points">
+            <li>Count de processos sem mov. há +180 dias</li>
+            <li>KPI exibível na aba Eficiência</li>
+            <li>Consideração: delay de 47 dias afeta a precisão</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card possivel">
+        <div class="analise-card-header">
+          <div class="analise-icon">📈</div>
+          <h3>Tendências por assunto ao longo dos anos</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Nested agg: por assunto → por ano. Mostra se Horas Extras cresceu 40% em 2024 vs 2022. Captura impactos de reformas, decisões do TST e mudanças no mercado de trabalho.</p>
+          <ul class="analise-points">
+            <li>Top-5 assuntos × série temporal anual</li>
+            <li>Possível aba "Tendências" com área empilhada</li>
+            <li>Impacto da Reforma Trabalhista de 2017</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card possivel">
+        <div class="analise-card-header">
+          <div class="analise-icon">📤</div>
+          <h3>Exportação CSV / Excel</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Botão de export nos gráficos e tabelas para os dados exibidos. Útil para análises offline, relatórios institucionais e compartilhamento com a chefia.</p>
+          <ul class="analise-points">
+            <li>Export CSV dos dados de assuntos, classes, volume</li>
+            <li>Export da tabela de processos recentes</li>
+            <li>Sem infraestrutura adicional — client-side via Blob</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card possivel">
+        <div class="analise-card-header">
+          <div class="analise-icon">📸</div>
+          <h3>Histórico de snapshots</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Salvar periodicamente o acervo e top assuntos da vara em banco local. Permite ver evolução do acervo mês a mês — dado que a API não guarda histórico de "qual era o acervo em X".</p>
+          <ul class="analise-points">
+            <li>Snapshot semanal em banco local (SQLite ou PostgreSQL)</li>
+            <li>Permite gráfico de evolução real do acervo</li>
+            <li>Independente do delay de 47 dias da API</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analise-card possivel">
+        <div class="analise-card-header">
+          <div class="analise-icon">⚡</div>
+          <h3>Detecção de fases processuais</h3>
+        </div>
+        <div class="analise-card-body">
+          <p>Via movimentos recentes: identificar processos em Instrução, Sentença, Recurso ou Execução. Requer mapear códigos TPU para categorias de fase.</p>
+          <ul class="analise-points">
+            <li>Filtro por código de movimento recente</li>
+            <li>Contagem de processos por fase estimada</li>
+            <li>Mais complexo: movimentos são array aninhado</li>
           </ul>
         </div>
       </div>
@@ -770,29 +975,47 @@ pre {
     </div>
   </section>
 
-  <!-- ── SEÇÃO 3: QUERIES DE EXEMPLO ── -->
+  <!-- ── SEÇÃO 4: QUERIES DE EXEMPLO ── -->
   <section class="section" id="sec-queries">
     <div class="section-header">
-      <div class="section-num">3</div>
+      <div class="section-num">4</div>
       <div class="section-header-text">
         <h2>Queries ElasticSearch — exemplos reais</h2>
-        <p>Queries prontas para uso no endpoint <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">POST /api_publica_trt3/_search</code></p>
+        <p>Queries usadas em produção e exemplos adicionais para análises futuras</p>
       </div>
     </div>
 
-    <!-- Query 1 -->
+    <!-- Query _count -->
     <div class="code-block-wrap">
       <div class="code-header">
-        <div class="code-label">Query 1 — Volume mensal por vara (últimos 24 meses)</div>
-        <div class="code-desc">date_histogram com filtro de vara</div>
+        <div class="code-label">Query 1 — Acervo total exato (via _count)</div>
+        <div class="code-desc">Endpoint _count — sem timeout, sem limite de 10k</div>
+      </div>
+      <pre><span class="c">// POST /api_publica_trt3/_count  ← endpoint separado!</span>
+{
+  <span class="n">"query"</span>: {
+    <span class="k">"bool"</span>: {
+      <span class="n">"filter"</span>: [
+        { <span class="k">"term"</span>: { <span class="s">"orgaoJulgador.nome.keyword"</span>: <span class="s">"42ª VARA DO TRABALHO DE BELO HORIZONTE"</span> } }
+      ]
+    }
+  }
+}
+<span class="c">// → { "count": 1847, "_shards": {...} }
+// NUNCA usar track_total_hits: true no _search — causa timeout</span></pre>
+    </div>
+
+    <!-- Query volume mensal -->
+    <div class="code-block-wrap">
+      <div class="code-header">
+        <div class="code-label">Query 2 — Volume mensal (com filtro de datas inválidas)</div>
+        <div class="code-desc">date_histogram — filtrar doc_count = 0 e anos futuros no servidor</div>
       </div>
       <pre>{
   <span class="n">"query"</span>: {
     <span class="k">"bool"</span>: {
       <span class="n">"filter"</span>: [
-        { <span class="k">"term"</span>: { <span class="s">"orgaoJulgador.nome.keyword"</span>: <span class="s">"17ª VARA DO TRABALHO DE BELO HORIZONTE"</span> } },
-        { <span class="k">"range"</span>: { <span class="n">"dataAjuizamento"</span>: { <span class="k">"gte"</span>: <span class="s">"now-24M/M"</span> } } },
-        { <span class="k">"term"</span>: { <span class="n">"nivelSigilo"</span>: <span class="v">0</span> } }
+        { <span class="k">"term"</span>: { <span class="s">"orgaoJulgador.nome.keyword"</span>: <span class="s">"42ª VARA DO TRABALHO DE BELO HORIZONTE"</span> } }
       ]
     }
   },
@@ -802,33 +1025,152 @@ pre {
       <span class="k">"date_histogram"</span>: {
         <span class="n">"field"</span>: <span class="s">"dataAjuizamento"</span>,
         <span class="n">"calendar_interval"</span>: <span class="s">"month"</span>,
-        <span class="n">"format"</span>: <span class="s">"MM/yyyy"</span>,
-        <span class="n">"min_doc_count"</span>: <span class="v">0</span>
+        <span class="n">"format"</span>: <span class="s">"MM/yyyy"</span>
+        <span class="c">// min_doc_count: 0 é o padrão — gera buckets futuros!</span>
       }
     }
   }
-}</pre>
+}
+<span class="c">// No servidor: filtrar buckets com doc_count > 0 E ano <= anosAtual + 1
+// Depois: .slice(-36) para pegar os 36 últimos meses com dados reais
+// NÃO usar .slice(-24) sem filtrar primeiro — pode pegar só buckets futuros vazios</span></pre>
     </div>
 
-    <!-- Query 2 -->
+    <!-- Query eficiência -->
     <div class="code-block-wrap">
       <div class="code-header">
-        <div class="code-label">Query 2 — Top assuntos com tendência (3 anos, por ano)</div>
-        <div class="code-desc">Aggregation aninhada: por assunto → por ano</div>
+        <div class="code-label">Query 3 — Distribuição do acervo por antiguidade (date_range)</div>
+        <div class="code-desc">Aba Eficiência — faixas de tempo sem buckets vazios</div>
       </div>
       <pre>{
   <span class="n">"query"</span>: {
     <span class="k">"bool"</span>: {
       <span class="n">"filter"</span>: [
-        { <span class="k">"term"</span>: { <span class="s">"orgaoJulgador.nome.keyword"</span>: <span class="s">"17ª VARA DO TRABALHO DE BELO HORIZONTE"</span> } },
-        { <span class="k">"range"</span>: { <span class="n">"dataAjuizamento"</span>: { <span class="k">"gte"</span>: <span class="s">"now-3y/y"</span> } } }
+        { <span class="k">"term"</span>: { <span class="s">"orgaoJulgador.nome.keyword"</span>: <span class="s">"42ª VARA DO TRABALHO DE BELO HORIZONTE"</span> } }
+      ]
+    }
+  },
+  <span class="n">"size"</span>: <span class="v">0</span>,
+  <span class="n">"aggs"</span>: {
+    <span class="n">"por_faixa"</span>: {
+      <span class="k">"date_range"</span>: {
+        <span class="n">"field"</span>: <span class="s">"dataAjuizamento"</span>,
+        <span class="n">"ranges"</span>: [
+          { <span class="n">"key"</span>: <span class="s">"Menos de 1 ano"</span>, <span class="n">"from"</span>: <span class="s">"now-1y/d"</span> },
+          { <span class="n">"key"</span>: <span class="s">"1 a 2 anos"</span>,     <span class="n">"from"</span>: <span class="s">"now-2y/d"</span>, <span class="n">"to"</span>: <span class="s">"now-1y/d"</span> },
+          { <span class="n">"key"</span>: <span class="s">"2 a 4 anos"</span>,     <span class="n">"from"</span>: <span class="s">"now-4y/d"</span>, <span class="n">"to"</span>: <span class="s">"now-2y/d"</span> },
+          { <span class="n">"key"</span>: <span class="s">"Mais de 4 anos"</span>, <span class="n">"to"</span>:   <span class="s">"now-4y/d"</span> }
+        ]
+      }
+    }
+  }
+}
+<span class="c">// date_range não gera buckets extras — retorna exatamente as faixas definidas
+// Vantagem sobre date_histogram para esta análise</span></pre>
+    </div>
+
+    <!-- Query varas comparativo -->
+    <div class="code-block-wrap">
+      <div class="code-header">
+        <div class="code-label">Query 4 — Comparativo de varas (ranking por acervo)</div>
+        <div class="code-desc">Aba Varas — todas as varas do TRT-3 em uma query, depois filtrar BH</div>
+      </div>
+      <pre>{
+  <span class="n">"size"</span>: <span class="v">0</span>,
+  <span class="n">"aggs"</span>: {
+    <span class="n">"varas"</span>: {
+      <span class="k">"terms"</span>: {
+        <span class="n">"field"</span>: <span class="s">"orgaoJulgador.nome.keyword"</span>,
+        <span class="n">"size"</span>: <span class="v">300</span>,
+        <span class="n">"order"</span>: { <span class="n">"_count"</span>: <span class="s">"desc"</span> }
+      }
+    }
+  }
+}
+<span class="c">// → traz todas as varas do TRT-3 com acervo em uma query
+// No servidor: filtrar /BELO HORIZONTE/i para rankear só varas de BH
+// Depois: query separada por vara para ultimos_12m e top_classe (paralela)
+// Importante: fazer em paralelo mas limitar o grupo a 8 varas para não timeout</span></pre>
+    </div>
+
+    <!-- Query comparativo temporal -->
+    <div class="code-block-wrap">
+      <div class="code-header">
+        <div class="code-label">Query 5 — Comparativo temporal (mês ou ano) com top classe</div>
+        <div class="code-desc">Aba Comparativo — nested agg date_histogram + terms</div>
+      </div>
+      <pre>{
+  <span class="n">"query"</span>: {
+    <span class="k">"bool"</span>: {
+      <span class="n">"filter"</span>: [
+        { <span class="k">"term"</span>: { <span class="s">"orgaoJulgador.nome.keyword"</span>: <span class="s">"42ª VARA DO TRABALHO DE BELO HORIZONTE"</span> } }
+      ]
+    }
+  },
+  <span class="n">"size"</span>: <span class="v">0</span>,
+  <span class="n">"aggs"</span>: {
+    <span class="n">"por_periodo"</span>: {
+      <span class="k">"date_histogram"</span>: {
+        <span class="n">"field"</span>: <span class="s">"dataAjuizamento"</span>,
+        <span class="n">"calendar_interval"</span>: <span class="s">"month"</span>,  <span class="c">// ou "year"</span>
+        <span class="n">"format"</span>: <span class="s">"MM/yyyy"</span>,
+        <span class="n">"min_doc_count"</span>: <span class="v">0</span>
+      },
+      <span class="n">"aggs"</span>: {
+        <span class="n">"por_classe"</span>: {
+          <span class="k">"terms"</span>: { <span class="n">"field"</span>: <span class="s">"classe.nome.keyword"</span>, <span class="n">"size"</span>: <span class="v">3</span> }
+        }
+      }
+    }
+  }
+}
+<span class="c">// Filtrar no servidor: doc_count > 0 E ano válido (< anosAtual + 1)
+// Usar .filter(b => b.doc_count > 0).slice(-24) — na ordem correta</span></pre>
+    </div>
+
+    <!-- Query processo individual -->
+    <div class="code-block-wrap">
+      <div class="code-header">
+        <div class="code-label">Query 6 — Busca de processo por número CNJ</div>
+        <div class="code-desc">match tokeniza — combinar term + query_string para busca confiável</div>
+      </div>
+      <pre>{
+  <span class="n">"query"</span>: {
+    <span class="k">"bool"</span>: {
+      <span class="n">"should"</span>: [
+        { <span class="k">"term"</span>:         { <span class="s">"numeroProcesso.keyword"</span>: <span class="s">"0001234-56.2024.5.03.0042"</span> } },
+        { <span class="k">"query_string"</span>: { <span class="n">"query"</span>: <span class="s">"\"0001234-56.2024.5.03.0042\""</span>, <span class="n">"default_field"</span>: <span class="s">"numeroProcesso"</span> } },
+        { <span class="k">"term"</span>:         { <span class="s">"numeroProcesso.keyword"</span>: <span class="s">"0000123456202450300042"</span> } }
+      ],
+      <span class="n">"minimum_should_match"</span>: <span class="v">1</span>
+    }
+  },
+  <span class="n">"size"</span>: <span class="v">1</span>
+}
+<span class="c">// 3 strategies: número formatado, query_string com aspas, número só dígitos
+// minimum_should_match: 1 — basta um casar
+// Não usar match — tokeniza o número e traz resultados errados</span></pre>
+    </div>
+
+    <!-- Query tendências por assunto -->
+    <div class="code-block-wrap">
+      <div class="code-header">
+        <div class="code-label">Query 7 — Tendências de assuntos ao longo dos anos (futura)</div>
+        <div class="code-desc">Aggregation aninhada: por assunto → por ano — para análise de evolução</div>
+      </div>
+      <pre>{
+  <span class="n">"query"</span>: {
+    <span class="k">"bool"</span>: {
+      <span class="n">"filter"</span>: [
+        { <span class="k">"term"</span>: { <span class="s">"orgaoJulgador.nome.keyword"</span>: <span class="s">"42ª VARA DO TRABALHO DE BELO HORIZONTE"</span> } },
+        { <span class="k">"range"</span>: { <span class="n">"dataAjuizamento"</span>: { <span class="k">"gte"</span>: <span class="s">"now-5y/y"</span> } } }
       ]
     }
   },
   <span class="n">"size"</span>: <span class="v">0</span>,
   <span class="n">"aggs"</span>: {
     <span class="n">"top_assuntos"</span>: {
-      <span class="k">"terms"</span>: { <span class="n">"field"</span>: <span class="s">"assuntos.nome.keyword"</span>, <span class="n">"size"</span>: <span class="v">10</span> },
+      <span class="k">"terms"</span>: { <span class="n">"field"</span>: <span class="s">"assuntos.nome.keyword"</span>, <span class="n">"size"</span>: <span class="v">5</span> },
       <span class="n">"aggs"</span>: {
         <span class="n">"por_ano"</span>: {
           <span class="k">"date_histogram"</span>: {
@@ -841,314 +1183,236 @@ pre {
     }
   }
 }
-<span class="c">// → permite visualizar se "Horas Extras" cresceu 40% em 2024 vs 2022</span></pre>
-    </div>
-
-    <!-- Query 3 -->
-    <div class="code-block-wrap">
-      <div class="code-header">
-        <div class="code-label">Query 3 — Comparativo de acervo entre todas as varas do TRT-3</div>
-        <div class="code-desc">Ranking de varas sem filtro de vara específica</div>
-      </div>
-      <pre>{
-  <span class="n">"query"</span>: {
-    <span class="k">"bool"</span>: {
-      <span class="n">"filter"</span>: [
-        { <span class="k">"term"</span>: { <span class="n">"nivelSigilo"</span>: <span class="v">0</span> } },
-        { <span class="k">"term"</span>: { <span class="n">"grau"</span>: <span class="s">"G1"</span> } }
-      ]
-    }
-  },
-  <span class="n">"size"</span>: <span class="v">0</span>,
-  <span class="n">"aggs"</span>: {
-    <span class="n">"por_vara"</span>: {
-      <span class="k">"terms"</span>: {
-        <span class="n">"field"</span>: <span class="s">"orgaoJulgador.nome.keyword"</span>,
-        <span class="n">"size"</span>: <span class="v">100</span>,
-        <span class="n">"order"</span>: { <span class="n">"_count"</span>: <span class="s">"desc"</span> }
-      },
-      <span class="n">"aggs"</span>: {
-        <span class="n">"top_classe"</span>: {
-          <span class="k">"terms"</span>: { <span class="n">"field"</span>: <span class="s">"classe.nome.keyword"</span>, <span class="n">"size"</span>: <span class="v">5</span> }
-        }
-      }
-    }
-  }
-}</pre>
-    </div>
-
-    <!-- Query 4 -->
-    <div class="code-block-wrap">
-      <div class="code-header">
-        <div class="code-label">Query 4 — Distribuição de antiguidade processual (faixas de tempo)</div>
-        <div class="code-desc">date_range para classificar acervo por idade</div>
-      </div>
-      <pre>{
-  <span class="n">"query"</span>: {
-    <span class="k">"term"</span>: { <span class="s">"orgaoJulgador.nome.keyword"</span>: <span class="s">"17ª VARA DO TRABALHO DE BELO HORIZONTE"</span> }
-  },
-  <span class="n">"size"</span>: <span class="v">0</span>,
-  <span class="n">"aggs"</span>: {
-    <span class="n">"faixas_tempo"</span>: {
-      <span class="k">"date_range"</span>: {
-        <span class="n">"field"</span>: <span class="s">"dataAjuizamento"</span>,
-        <span class="n">"ranges"</span>: [
-          { <span class="n">"key"</span>: <span class="s">"Menos de 6 meses"</span>,  <span class="n">"from"</span>: <span class="s">"now-6M"</span> },
-          { <span class="n">"key"</span>: <span class="s">"6 a 12 meses"</span>,      <span class="n">"from"</span>: <span class="s">"now-12M"</span>, <span class="n">"to"</span>: <span class="s">"now-6M"</span> },
-          { <span class="n">"key"</span>: <span class="s">"1 a 2 anos"</span>,        <span class="n">"from"</span>: <span class="s">"now-24M"</span>, <span class="n">"to"</span>: <span class="s">"now-12M"</span> },
-          { <span class="n">"key"</span>: <span class="s">"2 a 5 anos"</span>,        <span class="n">"from"</span>: <span class="s">"now-60M"</span>, <span class="n">"to"</span>: <span class="s">"now-24M"</span> },
-          { <span class="n">"key"</span>: <span class="s">"Mais de 5 anos"</span>,    <span class="n">"to"</span>: <span class="s">"now-60M"</span> }
-        ]
-      }
-    }
-  }
-}</pre>
-    </div>
-
-    <!-- Query 5 -->
-    <div class="code-block-wrap">
-      <div class="code-header">
-        <div class="code-label">Query 5 — Processos com movimentos recentes (últimos 30 dias)</div>
-        <div class="code-desc">Nested query em movimentos para detectar atividade recente</div>
-      </div>
-      <pre>{
-  <span class="n">"query"</span>: {
-    <span class="k">"bool"</span>: {
-      <span class="n">"filter"</span>: [
-        { <span class="k">"term"</span>: { <span class="s">"orgaoJulgador.nome.keyword"</span>: <span class="s">"17ª VARA DO TRABALHO DE BELO HORIZONTE"</span> } },
-        {
-          <span class="k">"nested"</span>: {
-            <span class="n">"path"</span>: <span class="s">"movimentos"</span>,
-            <span class="n">"query"</span>: {
-              <span class="k">"range"</span>: { <span class="n">"movimentos.dataHora"</span>: { <span class="k">"gte"</span>: <span class="s">"now-30d"</span> } }
-            }
-          }
-        }
-      ]
-    }
-  },
-  <span class="n">"size"</span>: <span class="v">50</span>,
-  <span class="n">"sort"</span>: [{ <span class="s">"dataAjuizamento"</span>: { <span class="k">"order"</span>: <span class="s">"asc"</span> } }],
-  <span class="n">"_source"</span>: [<span class="s">"numeroProcesso"</span>, <span class="s">"dataAjuizamento"</span>, <span class="s">"classe"</span>, <span class="s">"assuntos"</span>]
-}
-<span class="c">// → lista processos antigos com movimentação recente (acervo "vivo")</span></pre>
-    </div>
-
-    <!-- Query 6 -->
-    <div class="code-block-wrap">
-      <div class="code-header">
-        <div class="code-label">Query 6 — Top movimentos processuais (tipo de ato mais frequente)</div>
-        <div class="code-desc">Nested aggregation em movimentos.nome</div>
-      </div>
-      <pre>{
-  <span class="n">"query"</span>: {
-    <span class="k">"term"</span>: { <span class="s">"orgaoJulgador.nome.keyword"</span>: <span class="s">"17ª VARA DO TRABALHO DE BELO HORIZONTE"</span> }
-  },
-  <span class="n">"size"</span>: <span class="v">0</span>,
-  <span class="n">"aggs"</span>: {
-    <span class="n">"por_movimento"</span>: {
-      <span class="k">"nested"</span>: { <span class="n">"path"</span>: <span class="s">"movimentos"</span> },
-      <span class="n">"aggs"</span>: {
-        <span class="n">"tipo_movimento"</span>: {
-          <span class="k">"terms"</span>: { <span class="n">"field"</span>: <span class="s">"movimentos.nome.keyword"</span>, <span class="n">"size"</span>: <span class="v">20</span> }
-        }
-      }
-    }
-  }
-}
-<span class="c">// → revela se a vara tem mais "Julgamento Antecipado", "Audiência Designada", "Sentença"...</span></pre>
-    </div>
-
-    <!-- Query 7 -->
-    <div class="code-block-wrap">
-      <div class="code-header">
-        <div class="code-label">Query 7 — Processos sem movimentação há mais de 180 dias</div>
-        <div class="code-desc">Detecta acervo paralisado (must_not + nested range)</div>
-      </div>
-      <pre>{
-  <span class="n">"query"</span>: {
-    <span class="k">"bool"</span>: {
-      <span class="n">"filter"</span>: [
-        { <span class="k">"term"</span>: { <span class="s">"orgaoJulgador.nome.keyword"</span>: <span class="s">"17ª VARA DO TRABALHO DE BELO HORIZONTE"</span> } }
-      ],
-      <span class="n">"must_not"</span>: [
-        {
-          <span class="k">"nested"</span>: {
-            <span class="n">"path"</span>: <span class="s">"movimentos"</span>,
-            <span class="n">"query"</span>: {
-              <span class="k">"range"</span>: { <span class="n">"movimentos.dataHora"</span>: { <span class="k">"gte"</span>: <span class="s">"now-180d"</span> } }
-            }
-          }
-        }
-      ]
-    }
-  },
-  <span class="n">"size"</span>: <span class="v">0</span>
-}
-<span class="c">// → count de processos inativos — indicador de acervo represado</span></pre>
-    </div>
-
-    <!-- Query 8 -->
-    <div class="code-block-wrap">
-      <div class="code-header">
-        <div class="code-label">Query 8 — Crescimento trimestral dos 5 maiores assuntos (heatmap de tendência)</div>
-        <div class="code-desc">Aggregation tripla: assunto → ano → trimestre</div>
-      </div>
-      <pre>{
-  <span class="n">"query"</span>: {
-    <span class="k">"bool"</span>: {
-      <span class="n">"filter"</span>: [
-        { <span class="k">"term"</span>: { <span class="s">"orgaoJulgador.nome.keyword"</span>: <span class="s">"17ª VARA DO TRABALHO DE BELO HORIZONTE"</span> } },
-        { <span class="k">"range"</span>: { <span class="n">"dataAjuizamento"</span>: { <span class="k">"gte"</span>: <span class="s">"now-5y"</span> } } }
-      ]
-    }
-  },
-  <span class="n">"size"</span>: <span class="v">0</span>,
-  <span class="n">"aggs"</span>: {
-    <span class="n">"por_assunto"</span>: {
-      <span class="k">"terms"</span>: { <span class="n">"field"</span>: <span class="s">"assuntos.nome.keyword"</span>, <span class="n">"size"</span>: <span class="v">5</span> },
-      <span class="n">"aggs"</span>: {
-        <span class="n">"por_trimestre"</span>: {
-          <span class="k">"date_histogram"</span>: {
-            <span class="n">"field"</span>: <span class="s">"dataAjuizamento"</span>,
-            <span class="n">"calendar_interval"</span>: <span class="s">"quarter"</span>,
-            <span class="n">"format"</span>: <span class="s">"yyyy-QQ"</span>
-          }
-        }
-      }
-    }
-  }
-}</pre>
+<span class="c">// → permite ver se "Horas Extras" cresceu 40% em 2024 vs 2022
+// Filtrar anos inválidos (>2025) no servidor antes de renderizar</span></pre>
     </div>
 
   </section>
 
-  <!-- ── SEÇÃO 4: SUGESTÕES DE FEATURES ── -->
+  <!-- ── SEÇÃO 5: FEATURES ── -->
   <section class="section" id="sec-features">
-    <div class="section-header">
-      <div class="section-num">4</div>
-      <div class="section-header-text">
-        <h2>Sugestões de features para o dashboard</h2>
-        <p>Partindo do dashboard PJe já existente — o que adicionar e em qual ordem</p>
-      </div>
-    </div>
-
-    <div class="infobox infobox-green">
-      <div class="infobox-icon">✓</div>
-      <div class="infobox-body">
-        <strong>O dashboard atual</strong> já expõe: seleção de vara, acervo total, distribuídos no mês, classes processuais, assuntos, volume mensal (linha do tempo), tempo por faixas e lista de processos recentes. O que se segue parte desse ponto.
-      </div>
-    </div>
-
-    <div class="timeline" style="margin-top:28px">
-
-      <div class="timeline-item">
-        <div class="timeline-dot">A</div>
-        <div class="timeline-content">
-          <span class="timeline-tag">Curto prazo — sem novas queries complexas</span>
-          <h3>Melhorias imediatas no dashboard existente</h3>
-          <p>Ajustes que ampliam o valor sem mudar a arquitetura atual.</p>
-          <ul class="feature-list">
-            <li>Seletor de período no gráfico de volume mensal (6m / 12m / 24m / 5 anos)</li>
-            <li>Filtro por classe processual na lista de processos recentes</li>
-            <li>Card de crescimento MoM — % de variação vs mês anterior com seta direcional</li>
-            <li>Exportar dados da vara em CSV (acervo, assuntos, classes)</li>
-            <li>Link direto para o processo no portal PJe a partir do número CNJ</li>
-            <li>Toggle G1 / G2 — separar processos de 1ª instância dos recursais</li>
-            <li>Badge "dados ao vivo" com timestamp da última consulta à API</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="timeline-item">
-        <div class="timeline-dot">B</div>
-        <div class="timeline-content">
-          <span class="timeline-tag">Médio prazo — novas abas e visualizações</span>
-          <h3>Análises de tendência e comparativo de varas</h3>
-          <p>Features que exigem queries adicionais mas nenhuma infraestrutura nova.</p>
-          <ul class="feature-list">
-            <li>Aba "Tendências" — gráfico de área empilhada com evolução dos top-5 assuntos por ano</li>
-            <li>Aba "Radar TRT-3" — mapa de calor comparando todas as varas por volume de acervo</li>
-            <li>Gráfico de rosca animado mostrando composição do acervo por classe</li>
-            <li>Painel "Distribuição do acervo" — barras por faixa de antiguidade (6m, 1a, 2a, 5a+)</li>
-            <li>Comparador de duas varas lado a lado (mesmos indicadores, varas diferentes)</li>
-            <li>Indicador de concentração: % de processos nos top-3 assuntos (quanto mais concentrado, mais especializada a vara)</li>
-            <li>Série histórica de ajuizamentos com linha de tendência (regressão linear simples)</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="timeline-item">
-        <div class="timeline-dot">C</div>
-        <div class="timeline-content">
-          <span class="timeline-tag">Longo prazo — análise avançada com movimentos</span>
-          <h3>Análise de velocidade processual e padrões de tramitação</h3>
-          <p>Requer pipeline de movimentos — mais complexo, alto valor analítico.</p>
-          <ul class="feature-list">
-            <li>Indicador de processos paralisados há +180 dias (acervo "morto")</li>
-            <li>Ranking de tipos de movimentos mais frequentes — retrato da dinâmica da vara</li>
-            <li>Estimativa de tempo até sentença com base nos movimentos históricos</li>
-            <li>Detecção de processos com movimentação recente mas ajuizamento antigo (acervo pré-reforma ativo)</li>
-            <li>Alerta de processos específicos sem movimentação há X dias (monitoramento personalizado)</li>
-            <li>Dashboard público simplificado para o Instagram — versão de 1 card por semana com dado da vara</li>
-            <li>Relatório PDF semanal exportável com os principais indicadores da vara</li>
-          </ul>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ── SEÇÃO 5: LIMITAÇÕES ── -->
-  <section class="section" id="sec-limitacoes">
     <div class="section-header">
       <div class="section-num">5</div>
       <div class="section-header-text">
-        <h2>Limitações e considerações importantes</h2>
-        <p>O que a API não oferece e como lidar com essas lacunas</p>
+        <h2>Features — estado atual do dashboard</h2>
+        <p>O que está funcionando em produção, o que está em desenvolvimento e o que vem a seguir</p>
+      </div>
+    </div>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:24px">
+      <table class="feature-table">
+        <thead>
+          <tr>
+            <th width="36">Status</th>
+            <th>Feature</th>
+            <th>Onde</th>
+            <th>Observação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="text-align:center;font-size:14px">✅</td>
+            <td style="color:var(--text);font-weight:500">Seleção de vara (lista completa do TRT-3)</td>
+            <td><span class="badge badge-blue">sidebar</span></td>
+            <td style="color:var(--muted);font-size:12px">Busca filtrável, carregada da API</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">✅</td>
+            <td style="color:var(--text);font-weight:500">Acervo total via _count</td>
+            <td><span class="badge badge-blue">Métricas</span></td>
+            <td style="color:var(--muted);font-size:12px">Contagem exata, sem timeout</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">✅</td>
+            <td style="color:var(--text);font-weight:500">Distribuídos no mês</td>
+            <td><span class="badge badge-blue">Métricas</span></td>
+            <td style="color:var(--muted);font-size:12px">Sujeito ao delay de ~47 dias</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">✅</td>
+            <td style="color:var(--text);font-weight:500">Top classes processuais (hbar)</td>
+            <td><span class="badge badge-blue">Métricas</span></td>
+            <td style="color:var(--muted);font-size:12px">Top-20 por volume</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">✅</td>
+            <td style="color:var(--text);font-weight:500">Top assuntos (hbar)</td>
+            <td><span class="badge badge-blue">Métricas</span></td>
+            <td style="color:var(--muted);font-size:12px">Top-15 por volume</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">✅</td>
+            <td style="color:var(--text);font-weight:500">Volume mensal (line chart, 36 meses)</td>
+            <td><span class="badge badge-blue">Métricas</span></td>
+            <td style="color:var(--muted);font-size:12px">Filtra buckets vazios e datas corrompidas</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">✅</td>
+            <td style="color:var(--text);font-weight:500">Processos recentes (tabela, 30 itens)</td>
+            <td><span class="badge badge-blue">Métricas</span></td>
+            <td style="color:var(--muted);font-size:12px">Ordenados por dataAjuizamento desc</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">✅</td>
+            <td style="color:var(--text);font-weight:500">Comparativo temporal mês/ano com top classe</td>
+            <td><span class="badge badge-purple">Comparativo</span></td>
+            <td style="color:var(--muted);font-size:12px">Nested agg — bar chart + tabela</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">✅</td>
+            <td style="color:var(--text);font-weight:500">Distribuição do acervo por antiguidade</td>
+            <td><span class="badge badge-orange">Eficiência</span></td>
+            <td style="color:var(--muted);font-size:12px">4 faixas via date_range + tempo médio estimado</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">✅</td>
+            <td style="color:var(--text);font-weight:500">Comparativo com varas próximas ou todas de BH</td>
+            <td><span class="badge badge-green">Varas</span></td>
+            <td style="color:var(--muted);font-size:12px">Ranking + posição + percentil + tabela</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">✅</td>
+            <td style="color:var(--text);font-weight:500">Busca de processo individual por número CNJ</td>
+            <td><span class="badge badge-blue">sidebar</span></td>
+            <td style="color:var(--muted);font-size:12px">term + query_string + soDigits</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">✅</td>
+            <td style="color:var(--text);font-weight:500">View de processo — hero, quick stats, assuntos</td>
+            <td><span class="badge badge-blue">processo</span></td>
+            <td style="color:var(--muted);font-size:12px">Status: Ativo/Moderado/Lento/Paralisado</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">✅</td>
+            <td style="color:var(--text);font-weight:500">Timeline de movimentações por mês</td>
+            <td><span class="badge badge-blue">processo</span></td>
+            <td style="color:var(--muted);font-size:12px">Pontos coloridos por categoria (audiência, decisão, recurso...)</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">✅</td>
+            <td style="color:var(--text);font-weight:500">Badge live/mock + timestamp de atualização</td>
+            <td><span class="badge badge-blue">topbar</span></td>
+            <td style="color:var(--muted);font-size:12px">Verde = API real, âmbar = mock data</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">✅</td>
+            <td style="color:var(--text);font-weight:500">Autenticação por senha (dashboard protegido)</td>
+            <td><span class="badge badge-blue">server</span></td>
+            <td style="color:var(--muted);font-size:12px">?pw= ou header x-dashboard-password</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">🔨</td>
+            <td style="color:var(--text);font-weight:500">Cache server-side das agregações pesadas</td>
+            <td><span class="badge badge-blue">server</span></td>
+            <td style="color:var(--muted);font-size:12px">Reduz timeouts em horários de pico</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">💡</td>
+            <td style="color:var(--muted)">Exportação CSV/Excel dos dados exibidos</td>
+            <td style="color:var(--muted2)">qualquer aba</td>
+            <td style="color:var(--muted);font-size:12px">Client-side via Blob — sem infra adicional</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">💡</td>
+            <td style="color:var(--muted)">Tendências de assuntos ao longo dos anos</td>
+            <td style="color:var(--muted2)">nova aba</td>
+            <td style="color:var(--muted);font-size:12px">Nested agg assunto × ano</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">💡</td>
+            <td style="color:var(--muted)">Alerta de processos paralisados (+180 dias)</td>
+            <td style="color:var(--muted2)">Eficiência</td>
+            <td style="color:var(--muted);font-size:12px">must_not nested range em movimentos.dataHora</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">💡</td>
+            <td style="color:var(--muted)">Co-ocorrência de assuntos</td>
+            <td style="color:var(--muted2)">nova aba</td>
+            <td style="color:var(--muted);font-size:12px">Nested agg — mais complexo</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">💡</td>
+            <td style="color:var(--muted)">Snapshots históricos do acervo</td>
+            <td style="color:var(--muted2)">banco local</td>
+            <td style="color:var(--muted);font-size:12px">Contorna o problema do delay de 47 dias</td>
+          </tr>
+          <tr>
+            <td style="text-align:center;font-size:14px">💡</td>
+            <td style="color:var(--muted)">Comparativo com varas do interior do TRT-3</td>
+            <td style="color:var(--muted2)">Varas</td>
+            <td style="color:var(--muted);font-size:12px">Uberlândia, Juiz de Fora, Montes Claros</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display:flex;gap:20px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:12px">
+      <span>✅ Implementado e funcionando em produção</span>
+      <span>🔨 Em desenvolvimento / próximo passo</span>
+      <span>💡 A implementar (futura sprint)</span>
+    </div>
+  </section>
+
+  <!-- ── SEÇÃO 6: LIMITAÇÕES ── -->
+  <section class="section" id="sec-limitacoes">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div class="section-header-text">
+        <h2>Limitações reais — descobertas em produção</h2>
+        <p>O que a API não oferece e o que descobrimos que funciona diferente do esperado</p>
       </div>
     </div>
 
     <div class="limit-grid">
 
+      <div class="limit-card critical">
+        <h4><span class="limit-tag">CRÍTICO</span> Delay de indexação: ~47 dias</h4>
+        <p>Confirmado em maio/2026: o último processo indexado na 42ª Vara era de 31/03/2026. Isso significa que a contagem de "distribuídos no mês" está sempre subestimada para os últimos 30–60 dias. Qualquer análise de "volume recente" precisa dessa ressalva.</p>
+      </div>
+
+      <div class="limit-card critical">
+        <h4><span class="limit-tag">CRÍTICO</span> Datas corrompidas (~1% dos processos)</h4>
+        <p>Alguns processos têm <code style="font-family:'JetBrains Mono',monospace;font-size:11px">dataAjuizamento</code> com dia e mês interpretados como ano — gerando datas como 2608 ou 2612. O dashboard já filtra esses outliers. Qualquer nova query com filtro de datas deve incluir a validação <code style="font-family:'JetBrains Mono',monospace;font-size:11px">year &lt;= anosAtual + 1</code>.</p>
+      </div>
+
       <div class="limit-card">
-        <h4>Dados de sigilo excluídos</h4>
-        <p>Processos com <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">nivelSigilo &gt; 0</code> não aparecem na API pública. Em varas com volume relevante de ações envolvendo menores, saúde mental ou violência, isso pode distorcer as estatísticas. Sempre filtrar explicitamente <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">nivelSigilo: 0</code> para consistência.</p>
+        <h4><span class="limit-tag warn limit-tag-warn">TÉCNICO</span> track_total_hits causa timeout</h4>
+        <p>Usar <code style="font-family:'JetBrains Mono',monospace;font-size:11px">track_total_hits: true</code> no endpoint <code style="font-family:'JetBrains Mono',monospace;font-size:11px">_search</code> para contagem exata causa timeout consistente. Solução: usar o endpoint <code style="font-family:'JetBrains Mono',monospace;font-size:11px">_count</code> separado — mais rápido e sem limitação de 10k.</p>
+      </div>
+
+      <div class="limit-card">
+        <h4><span class="limit-tag warn limit-tag-warn">TÉCNICO</span> Timeout de 28 segundos</h4>
+        <p>O servidor usa timeout de 28s nas chamadas ao DataJud (Railway mata a conexão HTTP em 60s). Queries muito complexas — especialmente a de varas-comparativo com muitas varas em paralelo — podem estourar esse limite em horários de pico.</p>
+      </div>
+
+      <div class="limit-card">
+        <h4>Sem dados de partes</h4>
+        <p>Por razões de privacidade, a API pública não retorna nomes de autores, réus, advogados ou empresa empregadora. Não é possível identificar quais empresas são mais processadas ou quais escritórios atuam mais na vara. Confirmado na prática.</p>
       </div>
 
       <div class="limit-card">
         <h4>Sem dados financeiros ou de resultado</h4>
-        <p>A API não expõe valor da causa, valor da condenação, se houve acordo ou qual parte ganhou. Análises sobre impacto econômico, taxa de procedência ou valor médio das condenações são impossíveis apenas com DataJud.</p>
+        <p>A API não expõe valor da causa, valor da condenação, se houve acordo ou qual parte ganhou. Análises sobre taxa de procedência ou valor médio das condenações são impossíveis apenas com DataJud.</p>
       </div>
 
       <div class="limit-card">
-        <h4>Latência de atualização</h4>
-        <p>O índice do DataJud não é atualizado em tempo real — há uma defasagem que varia de horas a dias dependendo do tribunal e do tipo de movimentação. O indicador "distribuídos no mês" pode estar defasado em relação ao PJe interno.</p>
+        <h4>Tempo por fase não é agregável diretamente</h4>
+        <p>Calcular quanto tempo um processo ficou em cada fase (ex: distribuição até sentença) exige buscar os movimentos de cada processo individualmente e calcular no servidor. Não existe aggregation nativa do ES que faça isso.</p>
       </div>
 
       <div class="limit-card">
-        <h4>Movimentos: campo aninhado complexo</h4>
-        <p>O array <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">movimentos</code> exige queries nested, que são mais lentas e pesadas. Para cálculos de tempo entre movimentos, pode ser necessário buscar os documentos e processar no servidor em vez de fazer tudo via aggregation.</p>
+        <h4>Rate limiting implícito</h4>
+        <p>Muitas queries simultâneas (5+) causam timeout. A API pública é compartilhada. O dashboard já mitiga isso limitando grupos de varas a 8 e usando Promise.all controlado. Cache server-side seria a solução definitiva.</p>
       </div>
 
       <div class="limit-card">
-        <h4>Limite de resultados por query</h4>
-        <p>O ElasticSearch tem limite padrão de 10.000 documentos por busca (<code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">max_result_window</code>). Para percorrer todo o acervo de uma vara grande, é necessário usar paginação com <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">search_after</code>. Aggregations não têm esse limite.</p>
-      </div>
-
-      <div class="limit-card">
-        <h4>Sem identificação das partes</h4>
-        <p>Por razões de privacidade, a API pública não retorna nomes de autores, réus, advogados ou empresa empregadora. Não é possível identificar quais empresas são mais processadas na vara ou quais escritórios atuam mais.</p>
+        <h4>Sigilo exclui processos da API pública</h4>
+        <p>Processos com <code style="font-family:'JetBrains Mono',monospace;font-size:11px">nivelSigilo &gt; 0</code> não aparecem. Em varas com ações envolvendo menores ou saúde mental, as estatísticas podem subestimar o acervo real. Filtrar <code style="font-family:'JetBrains Mono',monospace;font-size:11px">nivelSigilo: 0</code> explicitamente garante consistência.</p>
       </div>
 
       <div class="limit-card">
         <h4>Qualidade do preenchimento varia</h4>
-        <p>A completude dos campos <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">assuntos</code> e <code style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue)">movimentos</code> depende do preenchimento correto no PJe. Processos mais antigos tendem a ter menos assuntos cadastrados, o que pode distorcer análises retrospectivas longas.</p>
-      </div>
-
-      <div class="limit-card">
-        <h4>Rate limiting e uso responsável</h4>
-        <p>A API pública é compartilhada com toda a comunidade jurídica. Queries muito frequentes ou muito pesadas (grandes aggregations sem filtro de vara) podem ser throttled. Recomendado: cache de 1 hora para queries estáticas e evitar varreduras sem filtro de vara.</p>
+        <p>A completude dos campos <code style="font-family:'JetBrains Mono',monospace;font-size:11px">assuntos</code> e <code style="font-family:'JetBrains Mono',monospace;font-size:11px">movimentos</code> depende do preenchimento correto no PJe. Processos mais antigos tendem a ter menos assuntos cadastrados, distorcendo análises retrospectivas longas.</p>
       </div>
 
     </div>
@@ -1156,62 +1420,104 @@ pre {
     <div class="infobox infobox-red" style="margin-top:20px">
       <div class="infobox-icon">⚠</div>
       <div class="infobox-body">
-        <strong>Consideração ética:</strong> embora os dados sejam públicos, o uso agregado para "rankear" varas ou juízes publicamente requer contexto adequado. Dados sem contexto podem ser mal interpretados. O dashboard é uma ferramenta de análise interna — qualquer publicação deve incluir as devidas ressalvas metodológicas.
+        <strong>Consideração metodológica:</strong> o delay de ~47 dias é o dado mais relevante para quem usa o dashboard. Qualquer KPI de "distribuídos este mês" reflete na verdade o mês de cerca de 47 dias atrás. Isso deve estar visível no dashboard — a data do último processo indexado seria um indicador útil.
       </div>
     </div>
   </section>
 
-  <!-- ── SEÇÃO 6: ROADMAP ── -->
+  <!-- ── SEÇÃO 7: ROADMAP ── -->
   <section class="section" id="sec-roadmap">
     <div class="section-header">
-      <div class="section-num">6</div>
+      <div class="section-num">7</div>
       <div class="section-header-text">
-        <h2>Roadmap sugerido — 3 fases</h2>
-        <p>Da consolidação do dashboard atual até análises estratégicas avançadas</p>
+        <h2>Roadmap — estado atual e próximos passos</h2>
+        <p>O que está concluído, o que vem a seguir e o que fica para o longo prazo</p>
       </div>
     </div>
 
     <div class="roadmap-grid">
 
-      <div class="roadmap-card phase-1">
+      <div class="roadmap-card phase-done">
         <div class="roadmap-head">
-          <div class="roadmap-phase">Fase 1 · Consolidação · 0–2 meses</div>
-          <h3>Dashboard sólido</h3>
-          <p>Polir o que existe e adicionar as análises de maior impacto imediato com o mínimo de esforço.</p>
+          <div class="roadmap-phase">Fase 1 · CONCLUÍDO</div>
+          <h3>Dashboard funcional</h3>
+          <p>Dashboard em produção com 4 abas, busca de processo e dados reais da API DataJud.</p>
         </div>
         <div class="roadmap-body">
-          <div class="roadmap-item">
+          <div class="roadmap-item done">
             <div class="roadmap-dot"></div>
-            <span>Seletor de período no gráfico de volume (6m / 12m / 24m / 5a)</span>
+            <span>Acervo total via endpoint _count (sem timeout)</span>
           </div>
-          <div class="roadmap-item">
+          <div class="roadmap-item done">
             <div class="roadmap-dot"></div>
-            <span>Card de crescimento MoM com variação percentual</span>
+            <span>Volume mensal — gráfico de linha com 36 meses</span>
           </div>
-          <div class="roadmap-item">
+          <div class="roadmap-item done">
             <div class="roadmap-dot"></div>
-            <span>Toggle G1/G2 — processos de 1ª instância vs. recursais</span>
+            <span>Top classes e top assuntos (hbar)</span>
           </div>
-          <div class="roadmap-item">
+          <div class="roadmap-item done">
             <div class="roadmap-dot"></div>
-            <span>Gráfico de distribuição de antiguidade do acervo (faixas)</span>
+            <span>Distribuição de antiguidade do acervo (date_range)</span>
           </div>
-          <div class="roadmap-item">
+          <div class="roadmap-item done">
             <div class="roadmap-dot"></div>
-            <span>Exportação CSV dos dados exibidos</span>
+            <span>Comparativo temporal mês/ano com top classe</span>
           </div>
-          <div class="roadmap-item">
+          <div class="roadmap-item done">
             <div class="roadmap-dot"></div>
-            <span>Link direto ao processo no PJe público</span>
+            <span>Comparativo de varas — ranking BH + proximas</span>
+          </div>
+          <div class="roadmap-item done">
+            <div class="roadmap-dot"></div>
+            <span>Busca de processo individual + timeline de movimentos</span>
+          </div>
+          <div class="roadmap-item done">
+            <div class="roadmap-dot"></div>
+            <span>Badge live/mock + filtros de datas corrompidas</span>
           </div>
         </div>
       </div>
 
       <div class="roadmap-card phase-2">
         <div class="roadmap-head">
-          <div class="roadmap-phase">Fase 2 · Análise · 2–5 meses</div>
-          <h3>Tendências e comparativos</h3>
-          <p>Introduzir análises longitudinais e a visão do TRT-3 como um todo — não só uma vara.</p>
+          <div class="roadmap-phase">Fase 2 · Próximos passos</div>
+          <h3>Qualidade e análise</h3>
+          <p>Melhorias de performance e as análises de maior valor que faltam.</p>
+        </div>
+        <div class="roadmap-body">
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Cache server-side 1h para queries pesadas (acervo, classes, assuntos)</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Indicador do delay: "dados atualizados até [data do último processo]"</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Exportação CSV dos dados exibidos em qualquer aba</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>KPI de processos paralisados (+180 dias sem movimentação)</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Toggle G1/G2 — separar 1ª instância de recursais</span>
+          </div>
+          <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <span>Card de crescimento MoM — variação percentual vs mês anterior</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="roadmap-card phase-3">
+        <div class="roadmap-head">
+          <div class="roadmap-phase">Fase 3 · Longo prazo</div>
+          <h3>Inteligência processual</h3>
+          <p>Análises avançadas, histórico próprio e comparativos regionais do TRT-3.</p>
         </div>
         <div class="roadmap-body">
           <div class="roadmap-item">
@@ -1220,41 +1526,15 @@ pre {
           </div>
           <div class="roadmap-item">
             <div class="roadmap-dot"></div>
-            <span>Aba "Radar TRT-3" — mapa comparativo de todas as varas</span>
+            <span>Snapshots históricos do acervo em banco local (evolução real)</span>
           </div>
           <div class="roadmap-item">
             <div class="roadmap-dot"></div>
-            <span>Comparador lado a lado de duas varas</span>
+            <span>Comparativo com varas do interior — Uberlândia, Juiz de Fora</span>
           </div>
           <div class="roadmap-item">
             <div class="roadmap-dot"></div>
-            <span>Linha de tendência (regressão) no gráfico de volume</span>
-          </div>
-          <div class="roadmap-item">
-            <div class="roadmap-dot"></div>
-            <span>Endpoint /api/pje/tendencias com dados agregados por ano</span>
-          </div>
-          <div class="roadmap-item">
-            <div class="roadmap-dot"></div>
-            <span>Cache de 1 hora no servidor para queries pesadas</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="roadmap-card phase-3">
-        <div class="roadmap-head">
-          <div class="roadmap-phase">Fase 3 · Estratégica · 5–12 meses</div>
-          <h3>Inteligência processual</h3>
-          <p>Análise profunda via movimentos, alertas automáticos e publicações de dados para o público externo.</p>
-        </div>
-        <div class="roadmap-body">
-          <div class="roadmap-item">
-            <div class="roadmap-dot"></div>
-            <span>Pipeline de movimentos — calcular tempo entre etapas</span>
-          </div>
-          <div class="roadmap-item">
-            <div class="roadmap-dot"></div>
-            <span>Indicador de processos paralisados há +180 dias</span>
+            <span>Co-ocorrência de assuntos — padrões de violação de direitos</span>
           </div>
           <div class="roadmap-item">
             <div class="roadmap-dot"></div>
@@ -1262,15 +1542,7 @@ pre {
           </div>
           <div class="roadmap-item">
             <div class="roadmap-dot"></div>
-            <span>Card público mensal para o Instagram (dado da vara)</span>
-          </div>
-          <div class="roadmap-item">
-            <div class="roadmap-dot"></div>
-            <span>Monitoramento de processos específicos (sem movimentação)</span>
-          </div>
-          <div class="roadmap-item">
-            <div class="roadmap-dot"></div>
-            <span>Banco histórico local para análises sem depender da API</span>
+            <span>Linha de tendência (regressão) no gráfico de volume mensal</span>
           </div>
         </div>
       </div>
@@ -1280,7 +1552,7 @@ pre {
     <div class="infobox infobox-gold" style="margin-top:28px">
       <div class="infobox-icon">★</div>
       <div class="infobox-body">
-        <strong>Prioridade recomendada para a Fase 1:</strong> o seletor de período e o card de crescimento MoM são as mudanças de maior impacto visual para quem usa o dashboard — aumentam dramaticamente a percepção de profundidade analítica sem complexidade técnica adicional. O toggle G1/G2 é igualmente importante para quem trabalha em vara de 1ª instância e não quer ver processos recursais distorcendo os números.
+        <strong>Prioridade imediata recomendada:</strong> o cache server-side e o indicador do delay de ~47 dias têm o melhor custo-benefício. O cache elimina timeouts em horários de pico sem mudar a interface. O indicador de "dados até [data]" contextualiza os KPIs e é a principal ressalva metodológica para uso honesto do dashboard.
       </div>
     </div>
 
@@ -1295,7 +1567,7 @@ pre {
     <span style="margin:0 10px;opacity:.3">·</span>
     Endpoint: <code style="font-family:'JetBrains Mono',monospace;font-size:11px">api-publica.datajud.cnj.jus.br/api_publica_trt3/_search</code>
     <span style="margin:0 10px;opacity:.3">·</span>
-    Maio 2026
+    v2 — Maio 2026 (pós-implementação)
   </p>
 </footer>
 
