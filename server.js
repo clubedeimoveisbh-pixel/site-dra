@@ -100,6 +100,7 @@ function datajudPost(indexPath, body) {
         catch { resolve({ status: res.statusCode, body: data }); }
       });
     });
+    req.setTimeout(28000, () => { req.destroy(); reject(new Error('DataJud timeout')); });
     req.on('error', reject);
     req.write(payload);
     req.end();
@@ -134,10 +135,11 @@ function buildPeriodFilter(req) {
 }
 
 function buildQuery(req) {
-  const vara = varaQuery(req);
+  const vara   = varaQuery(req);
   if (!vara) return null;
   const period = buildPeriodFilter(req);
-  return period ? { bool: { must: [vara, period] } } : vara;
+  const filters = [vara, period].filter(Boolean);
+  return { bool: { filter: filters } };
 }
 
 // ── Auth middleware for dashboard ─────────────────────────────────────────────

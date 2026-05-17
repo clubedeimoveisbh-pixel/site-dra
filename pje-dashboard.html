@@ -225,6 +225,55 @@ tr:hover td{background:rgba(200,167,91,.04)}
 /* ── Gold divider ───────────────────────────────────────────── */
 .gold-line{height:1px;background:linear-gradient(90deg,var(--gold),transparent);margin:1.5rem 0;opacity:.3}
 
+/* ── Vara toggle ────────────────────────────────────────────── */
+.vara-toggle-btn{
+  width:100%;padding:.6rem .85rem;text-align:left;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r);
+  color:var(--muted);font-size:.78rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+  transition:border-color .2s;
+}
+.vara-toggle-btn:hover{border-color:rgba(200,167,91,.4)}
+.vara-toggle-btn.selected{border-color:rgba(200,167,91,.4);color:var(--gold);font-weight:600}
+.vara-toggle-btn svg{flex-shrink:0;opacity:.5;transition:transform .2s}
+.vara-toggle-btn.open svg{transform:rotate(180deg)}
+.vara-toggle-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── Sidebar mode toggle ────────────────────────────────────── */
+.sidebar-mode{display:flex;gap:.25rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r);padding:.2rem}
+.sidebar-mode-btn{flex:1;padding:.4rem;border-radius:5px;font-size:.73rem;font-weight:600;color:var(--muted);text-align:center;transition:all .2s;cursor:pointer}
+.sidebar-mode-btn.active{background:linear-gradient(135deg,var(--gold),var(--gold-b));color:var(--navy)}
+
+/* ── Process detail ─────────────────────────────────────────── */
+.proc-detail-wrap{animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.proc-number{font-family:'Courier New',monospace;font-size:.85rem;color:var(--gold);letter-spacing:.02em;margin-bottom:.3rem}
+.proc-class-row{display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.proc-class-badge{display:inline-block;padding:.3rem .85rem;background:rgba(200,167,91,.1);border:1px solid var(--border);border-radius:100px;font-size:.8rem;font-weight:600;color:var(--text)}
+.proc-info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1rem}
+.proc-info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:.85rem 1rem}
+.proc-info-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:.3rem}
+.proc-info-val{font-size:.85rem;font-weight:600;color:var(--text);line-height:1.3}
+.proc-section{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.25rem 1.5rem;margin-bottom:1rem}
+.proc-section-title{font-size:.67rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:.85rem;display:flex;align-items:center;justify-content:space-between}
+.proc-assuntos{display:flex;flex-wrap:wrap;gap:.5rem}
+.proc-assunto-tag{display:inline-block;padding:.28rem .8rem;background:rgba(200,167,91,.08);border:1px solid rgba(200,167,91,.2);border-radius:100px;font-size:.78rem;color:var(--text)}
+.proc-timeline{display:flex;flex-direction:column}
+.proc-mov{display:grid;grid-template-columns:145px 1fr;gap:.75rem;padding:.6rem 0;border-bottom:1px solid rgba(200,167,91,.06);align-items:start}
+.proc-mov:last-child{border-bottom:none}
+.proc-mov-date{font-size:.71rem;color:rgba(232,230,224,.45);font-family:'Courier New',monospace;padding-top:.07rem}
+.proc-mov-name{font-size:.81rem;color:var(--text)}
+.proc-mov-code{font-size:.67rem;color:rgba(232,230,224,.3);margin-top:.1rem}
+.proc-search-main{display:flex;gap:.5rem;margin-bottom:1.5rem}
+.proc-search-main input{flex:1;padding:.65rem 1rem;background:rgba(255,255,255,.04);border:1.5px solid var(--border);border-radius:var(--r);color:var(--text);font-size:.875rem;outline:none;font-family:inherit}
+.proc-search-main input:focus{border-color:var(--gold)}
+.proc-search-main button{padding:.65rem 1.25rem;background:linear-gradient(135deg,var(--gold),var(--gold-b));color:var(--navy);font-weight:700;font-size:.82rem;border-radius:var(--r);cursor:pointer;white-space:nowrap}
+.proc-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:45vh;gap:.85rem;text-align:center}
+.proc-empty svg{opacity:.15;width:40px;height:40px}
+.proc-empty h3{color:var(--text);font-size:.95rem;font-weight:600}
+.proc-empty p{color:var(--muted);font-size:.82rem;max-width:300px}
+.proc-not-found{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);border-radius:var(--r);padding:1rem 1.25rem;color:#f87171;font-size:.84rem}
+
 /* ── Period toggle ──────────────────────────────────────────── */
 .period-toggle{display:flex;gap:.3rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r);padding:.25rem;margin-bottom:.5rem}
 .period-btn{flex:1;padding:.38rem;border-radius:5px;font-size:.74rem;font-weight:600;color:var(--muted);transition:all .2s}
@@ -282,23 +331,21 @@ tr:hover td{background:rgba(200,167,91,.04)}
   <!-- Vara selector -->
   <div>
     <div class="sec-label">Vara do Trabalho</div>
-    <div class="vara-active-box" id="vara-active-box"></div>
-    <div class="vara-search-wrap" style="margin-top:.5rem">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-      <input class="vara-search-input" id="vara-search-input" type="text"
-             placeholder="Filtrar varas..." oninput="filterVaras(this.value)">
-    </div>
-    <div class="vara-list" id="vara-list">
-      <div class="vara-loading"><span class="spinner"></span> Carregando varas...</div>
-    </div>
-    <div class="sec-label" style="margin-top:1rem">Ou insira manualmente</div>
-    <div class="vara-custom-row">
-      <input class="vara-custom-input" id="vara-custom-input"
-             placeholder="Nome completo da vara"
-             onkeydown="if(event.key==='Enter')applyCustomVara()">
-      <button class="btn-ok" onclick="applyCustomVara()">OK</button>
+    <button id="vara-toggle-btn" class="vara-toggle-btn" onclick="toggleVaraPicker()">
+      <span class="vara-toggle-name" id="vara-toggle-text">Selecione uma vara...</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div id="vara-picker" style="display:none;margin-top:.4rem">
+      <div class="vara-search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input class="vara-search-input" id="vara-search-input" type="text"
+               placeholder="Filtrar varas..." oninput="filterVaras(this.value)">
+      </div>
+      <div class="vara-list" id="vara-list">
+        <div class="vara-loading"><span class="spinner"></span> Carregando varas...</div>
+      </div>
     </div>
   </div>
 
@@ -669,9 +716,18 @@ function renderVaraList(varas) {
   el.innerHTML = varas.map(v => {
     const nome = v.nome || v;
     const active = nome === currentVara ? ' active' : '';
-    const totalStr = v.total ? ` <small style="opacity:.5">(${fmt(v.total)})</small>` : '';
+    const totalStr = v.total ? ` <small style="opacity:.45">(${fmt(v.total)})</small>` : '';
     return `<div class="vara-item${active}" onclick="selectVara('${esc(nome)}')" title="${esc(nome)}">${esc(nome)}${totalStr}</div>`;
   }).join('');
+}
+
+function toggleVaraPicker() {
+  const picker = document.getElementById('vara-picker');
+  const btn    = document.getElementById('vara-toggle-btn');
+  const open   = picker.style.display === 'none';
+  picker.style.display = open ? '' : 'none';
+  btn.classList.toggle('open', open);
+  if (open) document.getElementById('vara-search-input').focus();
 }
 
 function filterVaras(term) {
@@ -679,19 +735,22 @@ function filterVaras(term) {
   renderVaraList(t ? allVaras.filter(v => (v.nome||v).toLowerCase().includes(t)) : allVaras);
 }
 
-function applyCustomVara() {
-  const val = document.getElementById('vara-custom-input').value.trim();
-  if (val) selectVara(val);
-}
 
 function selectVara(nome) {
   currentVara = nome;
-  document.getElementById('topbar-vara').textContent = nome;
-  document.getElementById('vara-active-box').textContent = nome;
-  document.getElementById('vara-active-box').classList.add('show');
+  // Update toggle button
+  const btn = document.getElementById('vara-toggle-btn');
+  document.getElementById('vara-toggle-text').textContent = nome;
+  btn.classList.add('selected');
+  btn.classList.remove('open');
+  document.getElementById('vara-picker').style.display = 'none';
+  // Highlight in list
   document.querySelectorAll('.vara-item').forEach(el => {
     el.classList.toggle('active', el.title === nome);
   });
+  // Update topbar
+  document.getElementById('topbar-vara').textContent = nome;
+  // Show dashboard
   document.getElementById('empty-state').style.display = 'none';
   document.getElementById('dash-content').style.display = '';
   document.getElementById('view-tabs').classList.add('show');
