@@ -331,13 +331,23 @@ tr:hover td{background:rgba(200,167,91,.04)}
 @media(max-width:860px){.proc-info-grid{grid-template-columns:1fr}}
 
 /* ── Period toggle ──────────────────────────────────────────── */
-.period-toggle{display:flex;gap:.3rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r);padding:.25rem;margin-bottom:.5rem}
-.period-btn{flex:1;padding:.38rem;border-radius:5px;font-size:.74rem;font-weight:600;color:var(--muted);transition:all .2s}
-.period-btn.active{background:linear-gradient(135deg,var(--gold),var(--gold-b));color:var(--navy)}
 .period-active-label{margin-top:.5rem;font-size:.71rem;color:var(--gold);background:rgba(200,167,91,.08);border:1px solid rgba(200,167,91,.2);border-radius:6px;padding:.35rem .65rem;display:none}
 .period-active-label.show{display:block}
 .btn-clear{background:rgba(200,167,91,.08);color:rgba(232,230,224,.55);border:1px solid var(--border);border-radius:var(--r);font-size:.73rem;font-weight:600;padding:.42rem .7rem;flex:1}
 .btn-clear:hover{color:var(--text)}
+/* ── Period slider ──────────────────────────────────────────── */
+.period-slider-wrap{margin-bottom:.5rem}
+.period-slider{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;background:var(--border);outline:none;margin-bottom:.5rem;cursor:pointer}
+.period-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-b));cursor:pointer;box-shadow:0 0 6px rgba(200,167,91,.4)}
+.period-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-b));cursor:pointer;border:none}
+.period-slider-label{text-align:center;font-size:.88rem;color:var(--gold);font-weight:700;padding:.2rem 0}
+.period-slider-ends{display:flex;justify-content:space-between;font-size:.62rem;color:rgba(232,230,224,.3);margin-top:.1rem}
+/* ── Comparativo tipo toggle ────────────────────────────────── */
+.comp-tipo-wrap{display:flex;align-items:center;gap:.6rem;margin-bottom:1.25rem}
+.comp-tipo-label{font-size:.72rem;color:var(--muted)}
+.comp-tipo-toggle{display:flex;gap:.2rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r);padding:.2rem}
+.comp-tipo-btn{padding:.3rem .75rem;border-radius:5px;font-size:.73rem;font-weight:600;color:var(--muted);transition:all .15s;cursor:pointer}
+.comp-tipo-btn.active{background:linear-gradient(135deg,var(--gold),var(--gold-b));color:var(--navy)}
 
 /* ── View tabs ──────────────────────────────────────────────── */
 .view-tabs{display:none;margin-bottom:1.5rem}
@@ -440,18 +450,14 @@ tr:hover td{background:rgba(200,167,91,.04)}
   <!-- Período -->
   <div>
     <div class="sec-label">Período</div>
-    <div class="period-toggle">
-      <button id="btn-p-mes" class="period-btn active" onclick="setPeriodType('mes')">Mês</button>
-      <button id="btn-p-ano" class="period-btn" onclick="setPeriodType('ano')">Ano</button>
-    </div>
-    <div id="picker-mes">
-      <input type="month" id="mes-input" class="vara-custom-input" style="width:100%"
-             min="2010-01" onkeydown="if(event.key==='Enter')applyPeriod()">
-    </div>
-    <div id="picker-ano" style="display:none">
-      <select id="ano-select" class="vara-custom-input" style="width:100%">
-        <option value="">Selecione o ano</option>
-      </select>
+    <div class="period-slider-wrap">
+      <div class="period-slider-label" id="mes-slider-label">—</div>
+      <input type="range" id="mes-slider" class="period-slider" min="0" max="0" value="0"
+             oninput="onSliderInput(this)">
+      <div class="period-slider-ends">
+        <span id="slider-start-label">—</span>
+        <span id="slider-end-label">—</span>
+      </div>
     </div>
     <div style="display:flex;gap:.4rem;margin-top:.5rem">
       <button class="btn-ok" style="flex:1" onclick="applyPeriod()">Aplicar</button>
@@ -638,9 +644,18 @@ tr:hover td{background:rgba(200,167,91,.04)}
 
     <!-- Comparativo view -->
     <div id="comparativo-view" style="display:none">
-      <div class="comp-header">
-        <h3 id="comp-title">Comparativo por Mês</h3>
-        <p id="comp-subtitle">Distribuição de processos ajuizados por período para a vara selecionada.</p>
+      <div class="comp-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+        <div>
+          <h3 id="comp-title">Comparativo por Mês</h3>
+          <p id="comp-subtitle">Distribuição de processos ajuizados por período para a vara selecionada.</p>
+        </div>
+        <div class="comp-tipo-wrap">
+          <span class="comp-tipo-label">Visualizar por:</span>
+          <div class="comp-tipo-toggle">
+            <button id="comp-btn-mes" class="comp-tipo-btn active" onclick="setComparativoTipo('mes')">Mensal</button>
+            <button id="comp-btn-ano" class="comp-tipo-btn" onclick="setComparativoTipo('ano')">Anual</button>
+          </div>
+        </div>
       </div>
 
       <!-- Summary stats -->
@@ -818,10 +833,12 @@ let chartVol      = null;
 let chartTmp      = null;
 let chartComp     = null;
 let loadingData   = false;
-let periodType    = 'mes';   // 'mes' | 'ano'
-let selectedMes   = '';      // 'YYYY-MM'
-let selectedAno   = '';      // 'YYYY'
-let currentTab    = 'metricas'; // 'metricas' | 'comparativo' | 'eficiencia' | 'varas'
+let periodType      = 'mes';
+let selectedMes     = '';
+let selectedAno     = '';
+let currentTab      = 'metricas';
+let comparativoTipo = 'mes'; // 'mes' | 'ano'
+let _mesesArr       = [];    // array de 'YYYY-MM' | 'eficiencia' | 'varas'
 let chartEfic     = null;
 let varasGrupo    = 'proximas'; // 'proximas' | 'bh'
 let varasData     = null;
@@ -861,42 +878,67 @@ function periodParams() {
 }
 
 // ── Period / Tab ──────────────────────────────────────────────────────────────
-function setPeriodType(tipo) {
-  periodType = tipo;
-  document.getElementById('btn-p-mes').classList.toggle('active', tipo === 'mes');
-  document.getElementById('btn-p-ano').classList.toggle('active', tipo === 'ano');
-  document.getElementById('picker-mes').style.display = tipo === 'mes' ? '' : 'none';
-  document.getElementById('picker-ano').style.display = tipo === 'ano' ? '' : 'none';
-  // If in comparativo tab, reload with new type
-  if (currentTab === 'comparativo' && currentVara) loadComparativo(currentVara);
+// ── Slider helpers ────────────────────────────────────────────
+const _nomeMes = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const _nomeMesFull = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                      'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function _labelMes(ym) {
+  if (!ym) return '—';
+  const [a, m] = ym.split('-');
+  return `${_nomeMes[+m]} ${a}`;
+}
+
+function onSliderInput(el) {
+  const ym = _mesesArr[el.value];
+  document.getElementById('mes-slider-label').textContent = _labelMes(ym);
+}
+
+function initSlider() {
+  // Gera array de meses de Jan/2020 até mês atual
+  const hoje = new Date();
+  _mesesArr = [];
+  for (let a = 2020; a <= hoje.getFullYear(); a++) {
+    const mFim = a === hoje.getFullYear() ? hoje.getMonth() + 1 : 12;
+    for (let m = 1; m <= mFim; m++) {
+      _mesesArr.push(`${a}-${String(m).padStart(2,'0')}`);
+    }
+  }
+  const slider = document.getElementById('mes-slider');
+  slider.max   = _mesesArr.length - 1;
+  slider.value = _mesesArr.length - 1;
+  document.getElementById('mes-slider-label').textContent  = _labelMes(_mesesArr[_mesesArr.length - 1]);
+  document.getElementById('slider-start-label').textContent = _labelMes(_mesesArr[0]);
+  document.getElementById('slider-end-label').textContent   = _labelMes(_mesesArr[_mesesArr.length - 1]);
 }
 
 function applyPeriod() {
-  if (periodType === 'mes') {
-    selectedMes = document.getElementById('mes-input').value;
-    selectedAno = '';
-    if (!selectedMes) return;
-  } else {
-    selectedAno = document.getElementById('ano-select').value;
-    selectedMes = '';
-    if (!selectedAno) return;
-  }
-  const label = periodType === 'mes' ? `Mês: ${selectedMes}` : `Ano: ${selectedAno}`;
+  const slider = document.getElementById('mes-slider');
+  const ym = _mesesArr[slider.value];
+  if (!ym) return;
+  selectedMes = ym; selectedAno = '';
+  const [a, m] = ym.split('-');
   const el = document.getElementById('period-active-label');
-  el.textContent = label;
+  el.textContent = `${_nomeMesFull[+m]} ${a}`;
   el.classList.add('show');
-  // Switch to métricas tab and reload
   switchTab('metricas');
   if (currentVara) loadAll(currentVara);
 }
 
 function clearPeriod() {
-  selectedMes = '';
-  selectedAno = '';
-  document.getElementById('mes-input').value = '';
-  document.getElementById('ano-select').value = '';
+  selectedMes = ''; selectedAno = '';
   document.getElementById('period-active-label').classList.remove('show');
+  const slider = document.getElementById('mes-slider');
+  slider.value = _mesesArr.length - 1;
+  document.getElementById('mes-slider-label').textContent = _labelMes(_mesesArr[_mesesArr.length - 1]);
   if (currentVara) loadAll(currentVara);
+}
+
+function setComparativoTipo(tipo) {
+  comparativoTipo = tipo;
+  document.getElementById('comp-btn-mes').classList.toggle('active', tipo === 'mes');
+  document.getElementById('comp-btn-ano').classList.toggle('active', tipo === 'ano');
+  if (currentVara) loadComparativo(currentVara);
 }
 
 function switchTab(tab) {
@@ -1142,14 +1184,14 @@ function buildTable(processos) {
 
 // ── Comparativo ───────────────────────────────────────────────────────────────
 async function loadComparativo(vara) {
-  const tipo = periodType;
+  const tipo = comparativoTipo;
   document.getElementById('comp-title').textContent =
     tipo === 'mes' ? 'Comparativo por Mês' : 'Comparativo por Ano';
   document.getElementById('comp-subtitle').textContent =
     `Distribuição de ajuizamentos por ${tipo === 'mes' ? 'mês' : 'ano'} para a vara selecionada.`;
 
   try {
-    const data = await apiFetch('/api/pje/comparativo', vara, { tipo });
+    const data = await apiFetch('/api/pje/comparativo', vara, { tipo: comparativoTipo });
     renderComparativo(data);
   } catch(e) {
     console.error('[comparativo]', e);
@@ -1707,15 +1749,7 @@ async function buscarProcesso() {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 (async function init(){
-  // Populate year select (2010 → current year)
-  const anoSel = document.getElementById('ano-select');
-  const anoAtual = new Date().getFullYear();
-  for (let a = anoAtual; a >= 2010; a--) {
-    const opt = document.createElement('option');
-    opt.value = String(a); opt.textContent = String(a);
-    anoSel.appendChild(opt);
-  }
-
+  initSlider();
   await loadVaras();
 
   // If server has VARA_NOME configured, auto-detect by loading stats without a vara param

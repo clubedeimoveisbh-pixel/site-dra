@@ -506,27 +506,28 @@ app.get('/api/pje/varas-comparativo', async (req, res) => {
     const detalhes = await Promise.all(grupoVaras.map(async nome => {
       const acervoLocal = todasVaras.find(v => v.nome === nome)?.acervo ?? 0;
       const varaFilter  = { term: { 'orgaoJulgador.nome.keyword': nome } };
-      const body12m = {
-        query: { bool: { filter: [varaFilter, { range: { dataAjuizamento: { gte: gte12mStr } } }] } },
+      // Uma única query por vara com sub-aggregations (evita N*2 queries simultâneas)
+      const bodyVara = {
+        query: { bool: { filter: [varaFilter] } },
         size: 0,
         aggs: {
-          por_classe:  { terms: { field: 'classe.nome.keyword',   size: 1 } },
-          por_assunto: { terms: { field: 'assuntos.nome.keyword', size: 1 } },
+          ultimos_12m: {
+            filter: { range: { dataAjuizamento: { gte: gte12mStr } } },
+            aggs: {
+              por_classe:  { terms: { field: 'classe.nome.keyword',   size: 1 } },
+              por_assunto: { terms: { field: 'assuntos.nome.keyword', size: 1 } },
+            },
+          },
+          antigos: { filter: { range: { dataAjuizamento: { lt: gte4yStr } } } },
         },
       };
-      const bodyAntigos = {
-        query: { bool: { filter: [varaFilter, { range: { dataAjuizamento: { lt: gte4yStr } } }] } },
-        size: 0,
-      };
       try {
-        const [r12m, rAnt] = await Promise.all([
-          datajudPost(IDX,       body12m),
-          datajudPost(IDX_COUNT, bodyAntigos),
-        ]);
-        const hits12m    = r12m.body?.hits?.total?.value ?? 0;
-        const antigos    = rAnt.body?.count ?? 0;
-        const topClasse  = r12m.body?.aggregations?.por_classe?.buckets?.[0]?.key  ?? '—';
-        const topAssunto = r12m.body?.aggregations?.por_assunto?.buckets?.[0]?.key ?? '—';
+        const r        = await datajudPost(IDX, bodyVara);
+        const aggs     = r.body?.aggregations ?? {};
+        const hits12m  = aggs.ultimos_12m?.doc_count ?? 0;
+        const antigos  = aggs.antigos?.doc_count ?? 0;
+        const topClasse  = aggs.ultimos_12m?.por_classe?.buckets?.[0]?.key  ?? '—';
+        const topAssunto = aggs.ultimos_12m?.por_assunto?.buckets?.[0]?.key ?? '—';
         const pctAntigos = acervoLocal > 0 ? +((antigos / acervoLocal) * 100).toFixed(1) : 0;
         return { nome, acervo: acervoLocal, ultimos_12m: hits12m,
                  media_mensal: Math.round(hits12m / 12),
