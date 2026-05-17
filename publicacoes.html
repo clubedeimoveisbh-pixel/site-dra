@@ -10,6 +10,69 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .pub-venue-name { font-size: 0.8rem; font-weight: 600; color: var(--gold); text-transform: uppercase; letter-spacing: 0.06em; }
+    .pub-venue-type { font-size: 0.75rem; color: var(--text-light); margin-top: 0.15rem; }
+
+    .pub-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+    }
+    .pub-actions .btn { display: inline-flex; align-items: center; gap: 0.35rem; }
+
+    .pub-citar {
+      margin-top: 1.25rem;
+      border-top: 1px solid rgba(200,167,91,0.15);
+      padding-top: 1rem;
+    }
+    .pub-citar summary {
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--gold-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      list-style: none;
+      user-select: none;
+    }
+    .pub-citar summary::-webkit-details-marker { display: none; }
+    .pub-citar summary::before {
+      content: '+ ';
+      font-size: 0.9rem;
+    }
+    .pub-citar[open] summary::before { content: '− '; }
+    .pub-citar-box {
+      margin-top: 0.85rem;
+      background: rgba(200,167,91,0.05);
+      border-left: 3px solid var(--gold);
+      border-radius: 0 6px 6px 0;
+      padding: 0.9rem 1rem;
+    }
+    .pub-citar-texto {
+      font-size: 0.82rem;
+      line-height: 1.65;
+      color: var(--text-light);
+      margin: 0 0 0.75rem;
+    }
+    .pub-citar-texto strong { font-style: italic; font-weight: 400; }
+    .btn-copiar {
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 1.5px solid var(--gold);
+      color: var(--gold);
+      background: transparent;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      font-family: var(--ff-body);
+      letter-spacing: 0.04em;
+    }
+    .btn-copiar:hover { background: var(--gold); color: var(--navy-deep); }
+  </style>
 </head>
 <body>
 
@@ -45,7 +108,7 @@
         <div class="pub-venue">
           <div class="pub-venue-icon">🤖</div>
           <div>
-            <div class="pub-venue-name">Publicação Acadêmica</div>
+            <div class="pub-venue-name">Revista do TRT da 3ª Região, n. 110</div>
             <div class="pub-venue-type">Inteligência Artificial · Ética · Direito do Trabalho</div>
           </div>
         </div>
@@ -59,15 +122,26 @@
         </p>
         <div class="pub-footer">
           <span class="pub-date">Marina Grojpen Couto</span>
-          <a href="publicacoes/A desumanização como risco ético - IA e JT - Marina Grojpen Couto.pdf" target="_blank" class="btn btn-outline btn-sm">Baixar PDF →</a>
         </div>
+        <div class="pub-actions">
+          <a href="publicacoes/A desumanização como risco ético - IA e JT - Marina Grojpen Couto.pdf" target="_blank" class="btn btn-outline btn-sm">⬇ Baixar PDF</a>
+          <a href="artigos/desumanizacao-risco-etico.html" class="btn btn-outline btn-sm">📖 Ler no site</a>
+          <a href="https://www.trt3.jus.br/publicacoes_ej/revista_110/" target="_blank" rel="noopener" class="btn btn-outline btn-sm">🔗 Publicação original</a>
+        </div>
+        <details class="pub-citar">
+          <summary>Como citar (ABNT)</summary>
+          <div class="pub-citar-box">
+            <p class="pub-citar-texto">COUTO, Marina Grojpen. A desumanização como risco ético: IA e Justiça do Trabalho. <strong>Revista do Tribunal Regional do Trabalho da 3ª Região</strong>, Belo Horizonte, n. 110.</p>
+            <button class="btn-copiar" onclick="copiarCitacao(this)">Copiar citação</button>
+          </div>
+        </details>
       </div>
 
       <div class="pub-card fade-up">
         <div class="pub-venue">
           <div class="pub-venue-icon">⚖️</div>
           <div>
-            <div class="pub-venue-name">Publicação Acadêmica</div>
+            <div class="pub-venue-name">Revista do TRT da 3ª Região, n. 107</div>
             <div class="pub-venue-type">Pandemia · Justiça do Trabalho · História</div>
           </div>
         </div>
@@ -81,15 +155,26 @@
         </p>
         <div class="pub-footer">
           <span class="pub-date">Marina Grojpen Couto</span>
-          <a href="publicacoes/Pandemia, Justiça do Trabalho e a História do Presente - Marina Grojpen Couto.pdf" target="_blank" class="btn btn-outline btn-sm">Baixar PDF →</a>
         </div>
+        <div class="pub-actions">
+          <a href="publicacoes/Pandemia, Justiça do Trabalho e a História do Presente - Marina Grojpen Couto.pdf" target="_blank" class="btn btn-outline btn-sm">⬇ Baixar PDF</a>
+          <a href="artigos/pandemia-justica-trabalho.html" class="btn btn-outline btn-sm">📖 Ler no site</a>
+          <a href="https://www.trt3.jus.br/publicacoes_ej/revista_107/" target="_blank" rel="noopener" class="btn btn-outline btn-sm">🔗 Publicação original</a>
+        </div>
+        <details class="pub-citar">
+          <summary>Como citar (ABNT)</summary>
+          <div class="pub-citar-box">
+            <p class="pub-citar-texto">COUTO, Marina Grojpen. Pandemia, Justiça do Trabalho e a história do presente. <strong>Revista do Tribunal Regional do Trabalho da 3ª Região</strong>, Belo Horizonte, n. 107.</p>
+            <button class="btn-copiar" onclick="copiarCitacao(this)">Copiar citação</button>
+          </div>
+        </details>
       </div>
 
       <div class="pub-card fade-up">
         <div class="pub-venue">
           <div class="pub-venue-icon">🏛️</div>
           <div>
-            <div class="pub-venue-name">Publicação Acadêmica</div>
+            <div class="pub-venue-name">Editora Dialética — Capítulo de livro</div>
             <div class="pub-venue-type">Sindicatos · Acesso à Justiça · Pandemia</div>
           </div>
         </div>
@@ -103,15 +188,26 @@
         </p>
         <div class="pub-footer">
           <span class="pub-date">Marina Grojpen Couto</span>
-          <a href="publicacoes/Sindicatos e Acesso à Justiça na Pandemia - Marina Grojpen Couto.pdf" target="_blank" class="btn btn-outline btn-sm">Baixar PDF →</a>
         </div>
+        <div class="pub-actions">
+          <a href="publicacoes/Sindicatos e Acesso à Justiça na Pandemia - Marina Grojpen Couto.pdf" target="_blank" class="btn btn-outline btn-sm">⬇ Baixar PDF</a>
+          <a href="artigos/sindicatos-acesso-justica.html" class="btn btn-outline btn-sm">📖 Ler no site</a>
+          <a href="https://loja.editoradialetica.com/humanidades/temas-transversais-do-acesso-a-justica-uma-abordagem-pela-via-dos-direitos?srsltid=AfmBOorrMfYUNtvGHsxxo0XG8PJwQ-rkq20hsq1fjzS9c0w8bPPv_BVV" target="_blank" rel="noopener" class="btn btn-outline btn-sm">🔗 Publicação original</a>
+        </div>
+        <details class="pub-citar">
+          <summary>Como citar (ABNT)</summary>
+          <div class="pub-citar-box">
+            <p class="pub-citar-texto">COUTO, Marina Grojpen. Sindicatos e acesso à justiça na pandemia. In: Temas transversais do acesso à justiça: uma abordagem pela via dos direitos. Belo Horizonte: Editora Dialética.</p>
+            <button class="btn-copiar" onclick="copiarCitacao(this)">Copiar citação</button>
+          </div>
+        </details>
       </div>
 
       <div class="pub-card fade-up">
         <div class="pub-venue">
           <div class="pub-venue-icon">📱</div>
           <div>
-            <div class="pub-venue-name">Publicação Acadêmica</div>
+            <div class="pub-venue-name">Revista do TRT da 3ª Região, n. 108</div>
             <div class="pub-venue-type">Trabalho de Plataforma · Capitalismo · Pós-pandemia</div>
           </div>
         </div>
@@ -125,8 +221,19 @@
         </p>
         <div class="pub-footer">
           <span class="pub-date">Marina Grojpen Couto</span>
-          <a href="publicacoes/Trabalho plataformizado no capitalismo pandêmico - o labor no pós pandemia - Marina Grojpen Couto.pdf" target="_blank" class="btn btn-outline btn-sm">Baixar PDF →</a>
         </div>
+        <div class="pub-actions">
+          <a href="publicacoes/Trabalho plataformizado no capitalismo pandêmico - o labor no pós pandemia - Marina Grojpen Couto.pdf" target="_blank" class="btn btn-outline btn-sm">⬇ Baixar PDF</a>
+          <a href="artigos/trabalho-plataformizado.html" class="btn btn-outline btn-sm">📖 Ler no site</a>
+          <a href="https://www.trt3.jus.br/publicacoes_ej/revista_108/" target="_blank" rel="noopener" class="btn btn-outline btn-sm">🔗 Publicação original</a>
+        </div>
+        <details class="pub-citar">
+          <summary>Como citar (ABNT)</summary>
+          <div class="pub-citar-box">
+            <p class="pub-citar-texto">COUTO, Marina Grojpen. Trabalho plataformizado no capitalismo pandêmico: o labor no pós-pandemia. <strong>Revista do Tribunal Regional do Trabalho da 3ª Região</strong>, Belo Horizonte, n. 108.</p>
+            <button class="btn-copiar" onclick="copiarCitacao(this)">Copiar citação</button>
+          </div>
+        </details>
       </div>
 
     </div>
@@ -148,5 +255,15 @@
 
 <div id="footer-placeholder"></div>
 <script src="js/nav.js"></script>
+<script>
+function copiarCitacao(btn) {
+  const texto = btn.previousElementSibling.textContent;
+  navigator.clipboard.writeText(texto).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = 'Copiado! ✓';
+    setTimeout(() => btn.textContent = orig, 2000);
+  });
+}
+</script>
 </body>
 </html>
