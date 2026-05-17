@@ -204,7 +204,7 @@ app.get('/api/pje/stats', async (req, res) => {
   if (!q) return res.json({ ...MOCK_STATS, ultima_atualizacao: new Date().toISOString() });
   const hasPeriod = !!(req.query.mes || req.query.ano);
   try {
-    const body = { query: q, size: 0 };
+    const body = { query: q, size: 0, track_total_hits: true };
     if (!hasPeriod) {
       const inicioMes = new Date(); inicioMes.setDate(1);
       body.aggs = { dist_mes: { filter: { range: { dataAjuizamento: { gte: inicioMes.toISOString().slice(0,7) } } } } };
@@ -287,7 +287,10 @@ app.get('/api/pje/processo/:numero', async (req, res) => {
   const numero = req.params.numero.replace(/[^\d.\-]/g, '');
   if (!numero) return res.status(400).json({ error: 'Número inválido' });
   try {
-    const body = { query: { match: { numeroProcesso: numero } }, size: 1 };
+    const body = { query: { bool: { should: [
+      { term:  { 'numeroProcesso.keyword': numero } },
+      { match: { numeroProcesso: numero } },
+    ], minimum_should_match: 1 } }, size: 1 };
     const r = await datajudPost(IDX, body);
     if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
     const hit = r.body.hits?.hits?.[0];
