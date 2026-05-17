@@ -19,9 +19,6 @@
       <a href="/modelos.html">Modelos Gratuitos</a>
       <a href="/cursos.html">Cursos</a>
     </div>
-    <div class="nav-cta">
-      <a href="/ferramentas.html">Ferramentas Grátis</a>
-    </div>
     <button class="nav-hamburger" id="hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -33,7 +30,6 @@
     <a href="/ferramentas.html">Ferramentas</a>
     <a href="/modelos.html">Modelos Gratuitos</a>
     <a href="/cursos.html">Cursos</a>
-    <a href="/ferramentas.html" class="mobile-cta">Ferramentas Grátis</a>
   </nav>
 </nav>`;
 
