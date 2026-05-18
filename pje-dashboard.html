@@ -805,6 +805,30 @@ tr:hover td{background:rgba(200,167,91,.04)}
           <div class="efic-fases-label">Tempo médio em cada fase processual</div>
           <div id="efic-fases-bars"></div>
         </div>
+
+        <!-- Evolução temporal -->
+        <div class="chart-card" style="margin-bottom:1.25rem">
+          <div class="chart-title">
+            Evolução da eficiência por ano de ajuizamento
+            <span style="font-size:.7rem;color:var(--muted);font-weight:400">tempo total até arquivamento · por coorte</span>
+          </div>
+          <div class="chart-wrap tall"><canvas id="chart-efic-evolucao"></canvas></div>
+        </div>
+
+        <!-- Tabela coortes -->
+        <div class="table-card" style="margin-bottom:1.25rem">
+          <div class="table-header"><div class="table-title">Detalhamento por coorte (ano de ajuizamento)</div></div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr>
+                <th>Ano</th><th>Amostra</th><th>Concluídos</th>
+                <th>Tempo total</th><th>Conhecimento</th><th>Recursal</th><th>Execução</th>
+                <th>% 2º grau</th><th>% Execução</th>
+              </tr></thead>
+              <tbody id="tbody-efic-coortes"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <div id="efic-fases-error" style="display:none;color:#f87171;font-size:.83rem;padding:.75rem 0;background:rgba(239,68,68,.07);border-radius:var(--r);padding:.75rem 1rem;margin-bottom:1rem"></div>
@@ -906,7 +930,8 @@ let periodType      = 'mes';
 let selectedMes     = '';
 let selectedAno     = '';
 let currentTab      = 'metricas';
-let comparativoTipo = 'mes'; // 'mes' | 'ano'
+let comparativoTipo   = 'mes'; // 'mes' | 'ano'
+let chartEficEvolucao = null;
 let _mesesArr       = [];    // array de 'YYYY-MM' | 'eficiencia' | 'varas'
 let chartEfic     = null;
 let varasGrupo    = 'proximas'; // 'proximas' | 'bh'
@@ -1387,61 +1412,122 @@ async function loadEficiencia(vara) {
     });
 }
 
+function diasParaLabel(d) {
+  if (!d) return '—';
+  const anos = Math.floor(d/365);
+  const meses = Math.round((d%365)/30);
+  if (anos > 0) return `${anos}a ${meses > 0 ? meses+'m' : ''}`.trim();
+  return `${meses}m`;
+}
+
 function renderFasesEficiencia(data) {
   const loadEl = document.getElementById('efic-fases-loading');
   const contEl = document.getElementById('efic-fases-content');
   const errEl  = document.getElementById('efic-fases-error');
   if (loadEl) loadEl.style.display = 'none';
 
-  if (!data.total_concluidos) {
+  const total = data.total;
+  if (!total || !total.concluidos) {
     if (errEl) {
-      errEl.textContent = `Nenhum processo concluído identificado na amostra de ${data.total_amostrado} processos. A detecção de arquivamento depende de palavras-chave nos movimentos — tente uma vara com mais processos concluídos.`;
+      errEl.textContent = `Nenhum processo concluído identificado (amostra: ${data.total?.amostrado ?? 0} processos). Detecção de arquivamento depende de palavras-chave nos movimentos.`;
       errEl.style.display = '';
     }
     return;
   }
 
-  // Total card
-  const d    = data.tempo_medio_total_dias || 0;
-  const anos = Math.floor(d / 365);
-  const meses = Math.round((d % 365) / 30);
-  const totalStr = anos > 0
-    ? `${anos} ano${anos>1?'s':''} ${meses > 0 ? `e ${meses} ${meses===1?'mês':'meses'}` : ''}`
-    : `${meses} ${meses===1?'mês':'meses'}`;
-  setEl('efic-total-val', totalStr.trim());
-  setEl('efic-total-sample', `Baseado em ${data.total_concluidos} processos concluídos · amostra de ${data.total_amostrado}`);
+  // ── Total card ──────────────────────────────────────────────
+  const d = total.tempo_medio_total_dias || 0;
+  const anosN = Math.floor(d/365), mesesN = Math.round((d%365)/30);
+  const totalStr = anosN > 0
+    ? `${anosN} ano${anosN>1?'s':''} ${mesesN>0?`e ${mesesN} ${mesesN===1?'mês':'meses'}`:''}`.trim()
+    : `${mesesN} ${mesesN===1?'mês':'meses'}`;
+  setEl('efic-total-val', totalStr);
+  setEl('efic-total-sample', `Baseado em ${total.concluidos} processos concluídos · ${(data.cohorts||[]).length} coortes anuais · ${total.amostrado} processos analisados`);
 
-  // Phase bars
-  const fases = [
-    { nome: 'Conhecimento (1º Grau)',  dias: data.tempo_medio_conhecimento_dias, cor: '#60a5fa', obs: null },
-    { nome: 'Recursal (2º Grau)',      dias: data.tempo_medio_recursal_dias,     cor: '#a78bfa', obs: `${data.pct_com_recurso}% dos processos chegaram ao 2º grau` },
-    { nome: 'Execução',                dias: data.tempo_medio_execucao_dias,     cor: '#f97316', obs: `${data.pct_com_execucao}% dos processos passaram por execução` },
-  ].filter(f => f.dias != null && f.dias > 0);
+  // ── Barras de fase (total geral) ─────────────────────────────
+  const faseDefs = [
+    { nome:'Conhecimento (1º Grau)', campo:'tempo_medio_conhecimento_dias', cor:'#60a5fa', obs:null },
+    { nome:'Recursal (2º Grau)',      campo:'tempo_medio_recursal_dias',     cor:'#a78bfa', obs:`${total.pct_com_recurso}% chegaram ao 2º grau` },
+    { nome:'Execução',                campo:'tempo_medio_execucao_dias',     cor:'#f97316', obs:`${total.pct_com_execucao}% passaram por execução` },
+  ].filter(f => total[f.campo] != null && total[f.campo] > 0);
 
-  const maxD = Math.max(...fases.map(f => f.dias), 1);
+  const maxD  = Math.max(...faseDefs.map(f=>total[f.campo]),1);
   const barsEl = document.getElementById('efic-fases-bars');
-  if (!barsEl) return;
+  if (barsEl) {
+    barsEl.innerHTML = faseDefs.length
+      ? faseDefs.map(f => {
+          const label = diasParaLabel(total[f.campo]);
+          const w = ((total[f.campo]/maxD)*100).toFixed(0);
+          return `<div class="efic-fase-row">
+            <div class="efic-fase-header">
+              <span class="efic-fase-nome">${f.nome}</span>
+              <span>
+                <span class="efic-fase-val" style="color:${f.cor}">${label}</span>
+                ${f.obs?`<span class="efic-fase-obs">(${f.obs})</span>`:''}
+              </span>
+            </div>
+            <div class="efic-fase-track">
+              <div class="efic-fase-fill" style="width:${w}%;background:${f.cor}70"></div>
+            </div>
+          </div>`;
+        }).join('')
+      : '<span style="color:var(--muted);font-size:.82rem">Fases não identificadas nesta amostra.</span>';
+  }
 
-  if (!fases.length) {
-    barsEl.innerHTML = '<span style="color:var(--muted);font-size:.82rem">Não foi possível identificar fases nos movimentos desta amostra.</span>';
-  } else {
-    barsEl.innerHTML = fases.map(f => {
-      const label = f.dias > 365 ? `${(f.dias/365).toFixed(1)} anos` : `${Math.round(f.dias/30)} meses`;
-      const w = ((f.dias / maxD) * 100).toFixed(0);
-      return `<div class="efic-fase-row">
-        <div class="efic-fase-header">
-          <span class="efic-fase-nome">${f.nome}</span>
-          <span>
-            <span class="efic-fase-val" style="color:${f.cor}">${label}</span>
-            ${f.obs ? `<span class="efic-fase-obs">(${f.obs})</span>` : ''}
-          </span>
-        </div>
-        <div class="efic-fase-track">
-          <div class="efic-fase-fill" style="width:${w}%;background:${f.cor}70"></div>
-        </div>
-      </div>`;
+  // ── Gráfico de evolução por coorte ───────────────────────────
+  const cohorts = (data.cohorts||[]).filter(c => c.concluidos > 0);
+  if (chartEficEvolucao) { chartEficEvolucao.destroy(); chartEficEvolucao=null; }
+  const ctxEv = document.getElementById('chart-efic-evolucao');
+  if (ctxEv && cohorts.length) {
+    chartEficEvolucao = new Chart(ctxEv, {
+      type: 'bar',
+      data: {
+        labels: cohorts.map(c=>String(c.ano)),
+        datasets: [
+          { label:'Total', data:cohorts.map(c=>c.tempo_medio_total_dias?+(c.tempo_medio_total_dias/365).toFixed(2):null),
+            backgroundColor:'rgba(200,167,91,.7)', borderRadius:4, order:1 },
+          { label:'Conhecimento', data:cohorts.map(c=>c.tempo_medio_conhecimento_dias?+(c.tempo_medio_conhecimento_dias/365).toFixed(2):null),
+            backgroundColor:'rgba(96,165,250,.6)', borderRadius:4, order:2 },
+          { label:'Execução', data:cohorts.map(c=>c.tempo_medio_execucao_dias?+(c.tempo_medio_execucao_dias/365).toFixed(2):null),
+            backgroundColor:'rgba(249,115,22,.6)', borderRadius:4, order:3 },
+        ],
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins: {
+          legend: { position:'bottom', labels:{ color:'rgba(232,230,224,.6)', padding:14, font:{size:11} } },
+          tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.raw?.toFixed(1) ?? '—'} anos` } },
+        },
+        scales: {
+          x: { grid:{color:'rgba(200,167,91,.06)'}, ticks:{color:'rgba(232,230,224,.45)'} },
+          y: { grid:{color:'rgba(200,167,91,.06)'}, ticks:{color:'rgba(232,230,224,.45)',callback:v=>`${v}a`}, beginAtZero:true,
+               title:{display:true,text:'anos',color:'rgba(232,230,224,.35)',font:{size:10}} },
+        },
+      },
+    });
+  }
+
+  // ── Tabela de coortes ─────────────────────────────────────────
+  const tbody = document.getElementById('tbody-efic-coortes');
+  if (tbody) {
+    tbody.innerHTML = (data.cohorts||[]).map(c => {
+      const sem = '<td style="color:var(--muted)">—</td>';
+      const td  = v => v!=null ? `<td style="font-weight:600">${diasParaLabel(v)}</td>` : sem;
+      const conc = c.concluidos > 0;
+      return `<tr ${!conc?'style="opacity:.4"':''}>
+        <td><strong>${c.ano}</strong></td>
+        <td style="color:var(--muted)">${c.amostrado}</td>
+        <td style="color:${conc?'#4ade80':'var(--muted)'};font-weight:600">${c.concluidos}</td>
+        ${td(c.tempo_medio_total_dias)}
+        ${td(c.tempo_medio_conhecimento_dias)}
+        ${td(c.tempo_medio_recursal_dias)}
+        ${td(c.tempo_medio_execucao_dias)}
+        <td>${conc?c.pct_com_recurso+'%':'—'}</td>
+        <td>${conc?c.pct_com_execucao+'%':'—'}</td>
+      </tr>`;
     }).join('');
   }
+
   if (contEl) contEl.style.display = '';
 }
 

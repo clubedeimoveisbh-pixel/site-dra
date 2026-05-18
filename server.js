@@ -404,36 +404,76 @@ const MOCK_EFICIENCIA = {
   mock: true,
 };
 
-// ── API: eficiência por fases (amostra de processos concluídos) ───────────────
+// ── API: eficiência por fases — coortes anuais + evolução temporal ────────────
 app.get('/api/pje/eficiencia-fases', async (req, res) => {
-  const q = varaQuery(req);
-  if (!q) return res.json({ mock: true, total_amostrado: 0, total_concluidos: 0,
-    tempo_medio_total_dias: null, tempo_medio_conhecimento_dias: null,
-    tempo_medio_recursal_dias: null, tempo_medio_execucao_dias: null,
-    pct_com_recurso: 0, pct_com_execucao: 0 });
-  try {
-    const r = await datajudPost(IDX, {
-      query: q, size: 50,
-      sort: [{ dataAjuizamento: { order: 'desc' } }],
-      _source: ['dataAjuizamento', 'movimentos', 'classe'],
-    });
-    if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
-    const hits  = r.body.hits?.hits ?? [];
-    const fases = hits.map(h => analisarFasesServer(h._source)).filter(Boolean);
-    const avg   = arr => arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : null;
-    const tc    = fases.map(f=>f.conhecimento_dias).filter(v=>v!=null);
-    const tr    = fases.map(f=>f.recursal_dias).filter(v=>v!=null);
-    const te    = fases.map(f=>f.execucao_dias).filter(v=>v!=null);
-    res.json({
-      mock: false,
-      total_amostrado:               hits.length,
-      total_concluidos:              fases.length,
+  const varaFilter = varaQuery(req);
+  if (!varaFilter) return res.json({ mock: true, cohorts: [], total: null });
+
+  const avg = arr => arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : null;
+
+  function sumarizarCoorte(processos) {
+    const fases = processos.map(h => analisarFasesServer(h._source)).filter(Boolean);
+    if (!fases.length) return null;
+    const tc = fases.map(f=>f.conhecimento_dias).filter(v=>v!=null);
+    const tr = fases.map(f=>f.recursal_dias).filter(v=>v!=null);
+    const te = fases.map(f=>f.execucao_dias).filter(v=>v!=null);
+    return {
+      amostrado:                     processos.length,
+      concluidos:                    fases.length,
       tempo_medio_total_dias:        avg(fases.map(f=>f.total_dias)),
       tempo_medio_conhecimento_dias: avg(tc),
       tempo_medio_recursal_dias:     avg(tr),
       tempo_medio_execucao_dias:     avg(te),
-      pct_com_recurso:  fases.length ? +((tr.length/fases.length)*100).toFixed(0) : 0,
-      pct_com_execucao: fases.length ? +((te.length/fases.length)*100).toFixed(0) : 0,
+      pct_com_recurso:  Math.round(tr.length/fases.length*100),
+      pct_com_execucao: Math.round(te.length/fases.length*100),
+    };
+  }
+
+  try {
+    const anoAtual = new Date().getFullYear();
+    // 6 coortes: processos ajuizados em cada ano (mais antigos têm mais concluídos)
+    const anos = [anoAtual-6, anoAtual-5, anoAtual-4, anoAtual-3, anoAtual-2, anoAtual-1];
+
+    const resultados = await Promise.all(anos.map(async ano => {
+      try {
+        const r = await datajudPost(IDX, {
+          query: { bool: { filter: [
+            varaFilter,
+            { range: { dataAjuizamento: { gte: `${ano}-01-01`, lt: `${ano+1}-01-01` } } },
+          ]}},
+          size: 30,
+          _source: ['dataAjuizamento', 'movimentos'],
+        });
+        const processos = r.body?.hits?.hits ?? [];
+        const stats = sumarizarCoorte(processos);
+        return { ano, ...(stats ?? { amostrado: processos.length, concluidos: 0 }) };
+      } catch { return { ano, amostrado: 0, concluidos: 0 }; }
+    }));
+
+    // Total geral (todos os coortes combinados)
+    const todosHits = resultados.flatMap(c => []); // já sumarizado por coorte
+    // Recalcula total a partir das médias ponderadas dos coortes
+    const comDados = resultados.filter(c => c.concluidos > 0);
+    const totalConcluidos = comDados.reduce((s,c) => s + c.concluidos, 0);
+    const totalAmostrado  = resultados.reduce((s,c) => s + c.amostrado, 0);
+    const mediaGlobal = field => {
+      const vals = comDados.flatMap(c => c[field] != null ? Array(c.concluidos).fill(c[field]) : []);
+      return avg(vals);
+    };
+
+    res.json({
+      mock: false,
+      cohorts: resultados,
+      total: {
+        amostrado:                     totalAmostrado,
+        concluidos:                    totalConcluidos,
+        tempo_medio_total_dias:        mediaGlobal('tempo_medio_total_dias'),
+        tempo_medio_conhecimento_dias: mediaGlobal('tempo_medio_conhecimento_dias'),
+        tempo_medio_recursal_dias:     mediaGlobal('tempo_medio_recursal_dias'),
+        tempo_medio_execucao_dias:     mediaGlobal('tempo_medio_execucao_dias'),
+        pct_com_recurso:  comDados.length ? Math.round(comDados.reduce((s,c)=>s+c.pct_com_recurso,0)/comDados.length) : 0,
+        pct_com_execucao: comDados.length ? Math.round(comDados.reduce((s,c)=>s+c.pct_com_execucao,0)/comDados.length) : 0,
+      },
     });
   } catch(e) { console.error('[eficiencia-fases]', e.message); res.status(502).json({ error: e.message }); }
 });
