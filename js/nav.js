@@ -9,13 +9,22 @@
   <div class="nav-inner">
     <a href="/index.html" class="nav-logo">
       <span class="nav-logo-name">Marina Trabalhista</span>
-      <span class="nav-logo-subtitle">Direito do Trabalho &amp; IA</span>
+      <span class="nav-logo-subtitle">Direito do Trabalho</span>
     </a>
     <div class="nav-links">
       <a href="/quem-sou-eu.html">Quem Sou Eu</a>
       <a href="/publicacoes.html">Publicações</a>
       <a href="/artigos.html">Artigos</a>
-      <a href="/ferramentas.html">Ferramentas</a>
+      <div class="nav-dropdown">
+        <a href="/ferramentas.html" class="nav-dropdown-toggle">Ferramentas ▾</a>
+        <div class="nav-dropdown-menu">
+          <a href="/ferramentas/prescricao.html">⏱ Calculadora de Prescrição</a>
+          <a href="/ferramentas/aviso-previo.html">📅 Calculadora de Aviso Prévio</a>
+          <a href="/ferramentas/avos.html">📊 Calculadora de Avos</a>
+          <a href="/ferramentas/reflexos.html">⚖️ Tabela de Reflexos</a>
+          <a href="/ferramentas/remover-espacos.html">✂️ Remover Espaços</a>
+        </div>
+      </div>
       <a href="/modelos.html">Modelos Gratuitos</a>
       <a href="/cursos.html">Cursos</a>
     </div>
@@ -27,7 +36,12 @@
     <a href="/quem-sou-eu.html">Quem Sou Eu</a>
     <a href="/publicacoes.html">Publicações</a>
     <a href="/artigos.html">Artigos</a>
-    <a href="/ferramentas.html">Ferramentas</a>
+    <a href="/ferramentas.html" style="font-weight:700">Ferramentas</a>
+    <a href="/ferramentas/prescricao.html" style="padding-left:1.5rem;font-size:0.85rem;opacity:0.85">⏱ Prescrição</a>
+    <a href="/ferramentas/aviso-previo.html" style="padding-left:1.5rem;font-size:0.85rem;opacity:0.85">📅 Aviso Prévio</a>
+    <a href="/ferramentas/avos.html" style="padding-left:1.5rem;font-size:0.85rem;opacity:0.85">📊 Avos</a>
+    <a href="/ferramentas/reflexos.html" style="padding-left:1.5rem;font-size:0.85rem;opacity:0.85">⚖️ Reflexos</a>
+    <a href="/ferramentas/remover-espacos.html" style="padding-left:1.5rem;font-size:0.85rem;opacity:0.85">✂️ Remover Espaços</a>
     <a href="/modelos.html">Modelos Gratuitos</a>
     <a href="/cursos.html">Cursos</a>
   </nav>
@@ -39,15 +53,13 @@
     <div class="footer-grid">
       <div class="footer-brand">
         <div class="footer-logo-name">Marina Trabalhista</div>
-        <div class="footer-logo-sub">Direito do Trabalho &amp; IA</div>
+        <div class="footer-logo-sub">Direito do Trabalho</div>
         <p class="footer-desc">
-          Servidora pública, assistente de juiz do trabalho e criadora de conteúdo
-          sobre direito do trabalho e inteligência artificial aplicada ao direito.
+          Analista Judiciária do TRT da 3ª Região e assistente de juiz do trabalho.
+          Conteúdo prático sobre processo do trabalho para advogados e operadores do direito.
         </p>
         <div class="footer-socials">
-          <a href="#" class="social-btn" aria-label="Instagram">&#x1F4F7;</a>
-          <a href="#" class="social-btn" aria-label="LinkedIn">&#x1F4BC;</a>
-          <a href="#" class="social-btn" aria-label="YouTube">&#x25B6;</a>
+          <a href="https://www.instagram.com/marinatrabalhista" target="_blank" rel="noopener" class="social-btn" aria-label="Instagram @marinatrabalhista">📷 @marinatrabalhista</a>
         </div>
       </div>
       <div>
@@ -69,13 +81,13 @@
         </div>
       </div>
       <div>
-        <div class="footer-col-title">Contato</div>
+        <div class="footer-col-title">Siga no Instagram</div>
         <div class="footer-links">
-          <a href="#">Instagram</a>
-          <a href="#">LinkedIn</a>
-          <a href="#">YouTube</a>
-          <a href="mailto:contato@exemplo.com.br">E-mail</a>
+          <a href="https://www.instagram.com/marinatrabalhista" target="_blank" rel="noopener">📷 @marinatrabalhista</a>
         </div>
+        <p style="font-size:0.75rem;color:rgba(232,230,224,0.45);margin-top:0.75rem;line-height:1.5">
+          Conteúdo gratuito sobre<br>processo do trabalho
+        </p>
       </div>
     </div>
     <div class="footer-bottom">
