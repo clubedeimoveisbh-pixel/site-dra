@@ -714,11 +714,23 @@ app.post('/api/admin/snapshot-varas', dashAuth, async (req, res) => {
 });
 
 app.get('/api/admin/snapshot-status', dashAuth, async (req, res) => {
-  if (!pool) return res.json({ total: 0, atualizado_em: null });
+  if (!pool) return res.json({ total: 0, atualizado_em: null, db: false });
   try {
     const r = await dbq('SELECT COUNT(*) as total, MAX(atualizado_em) as atualizado_em FROM trt3_varas_snapshot');
-    res.json(r.rows[0]);
+    res.json({ ...r.rows[0], db: true });
   } catch (e) { res.status(502).json({ error: e.message }); }
+});
+
+app.post('/api/admin/test-db', dashAuth, async (req, res) => {
+  if (!pool) return res.status(503).json({ error: 'sem DATABASE_URL' });
+  try {
+    await dbq(`INSERT INTO trt3_varas_snapshot (nome, acervo) VALUES ($1, $2)
+               ON CONFLICT (nome) DO UPDATE SET acervo=EXCLUDED.acervo`,
+               ['__teste__', 1]);
+    const r = await dbq('SELECT COUNT(*) as total FROM trt3_varas_snapshot');
+    await dbq("DELETE FROM trt3_varas_snapshot WHERE nome='__teste__'");
+    res.json({ ok: true, total_antes: r.rows[0].total });
+  } catch (e) { res.status(502).json({ error: e.message, stack: e.stack?.slice(0,300) }); }
 });
 
 // ── Dashboard (protected) ─────────────────────────────────────────────────────
