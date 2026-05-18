@@ -335,13 +335,17 @@ tr:hover td{background:rgba(200,167,91,.04)}
 .period-active-label.show{display:block}
 .btn-clear{background:rgba(200,167,91,.08);color:rgba(232,230,224,.55);border:1px solid var(--border);border-radius:var(--r);font-size:.73rem;font-weight:600;padding:.42rem .7rem;flex:1}
 .btn-clear:hover{color:var(--text)}
-/* ── Period slider ──────────────────────────────────────────── */
+/* ── Dual-range period slider ───────────────────────────────── */
 .period-slider-wrap{margin-bottom:.5rem}
-.period-slider{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;background:var(--border);outline:none;margin-bottom:.5rem;cursor:pointer}
-.period-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-b));cursor:pointer;box-shadow:0 0 6px rgba(200,167,91,.4)}
-.period-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-b));cursor:pointer;border:none}
-.period-slider-label{text-align:center;font-size:.88rem;color:var(--gold);font-weight:700;padding:.2rem 0}
-.period-slider-ends{display:flex;justify-content:space-between;font-size:.62rem;color:rgba(232,230,224,.3);margin-top:.1rem}
+.slider-labels-row{display:flex;justify-content:space-between;margin-bottom:.35rem}
+.slider-label-from,.slider-label-to{font-size:.82rem;font-weight:700;color:var(--gold)}
+.dual-slider-container{position:relative;height:22px;margin:.3rem 0}
+.dual-slider-track{position:absolute;top:50%;left:0;right:0;height:4px;transform:translateY(-50%);background:rgba(255,255,255,.08);border-radius:2px;pointer-events:none}
+.dual-slider-fill{position:absolute;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-b));border-radius:2px}
+.dual-slider{position:absolute;width:100%;top:50%;transform:translateY(-50%);-webkit-appearance:none;appearance:none;background:transparent;pointer-events:none;height:4px;outline:none}
+.dual-slider::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:all;width:17px;height:17px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-b));cursor:pointer;box-shadow:0 0 5px rgba(200,167,91,.5);position:relative;z-index:2}
+.dual-slider::-moz-range-thumb{pointer-events:all;width:17px;height:17px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-b));cursor:pointer;border:none}
+.slider-ends-row{display:flex;justify-content:space-between;font-size:.61rem;color:rgba(232,230,224,.28);margin-top:.2rem}
 /* ── Comparativo tipo toggle ────────────────────────────────── */
 .comp-tipo-wrap{display:flex;align-items:center;gap:.6rem;margin-bottom:1.25rem}
 .comp-tipo-label{font-size:.72rem;color:var(--muted)}
@@ -451,10 +455,20 @@ tr:hover td{background:rgba(200,167,91,.04)}
   <div>
     <div class="sec-label">Período</div>
     <div class="period-slider-wrap">
-      <div class="period-slider-label" id="mes-slider-label">—</div>
-      <input type="range" id="mes-slider" class="period-slider" min="0" max="0" value="0"
-             oninput="onSliderInput(this)">
-      <div class="period-slider-ends">
+      <div class="slider-labels-row">
+        <span class="slider-label-from" id="slider-from-label">—</span>
+        <span class="slider-label-to"   id="slider-to-label">—</span>
+      </div>
+      <div class="dual-slider-container">
+        <div class="dual-slider-track">
+          <div class="dual-slider-fill" id="slider-fill"></div>
+        </div>
+        <input type="range" id="slider-from" class="dual-slider" min="0" max="0" value="0"
+               oninput="onSliderFrom(this)">
+        <input type="range" id="slider-to"   class="dual-slider" min="0" max="0" value="0"
+               oninput="onSliderTo(this)">
+      </div>
+      <div class="slider-ends-row">
         <span id="slider-start-label">—</span>
         <span id="slider-end-label">—</span>
       </div>
@@ -872,54 +886,80 @@ async function apiFetch(endpoint, vara, extra = {}) {
 }
 
 function periodParams() {
-  if (periodType === 'mes' && selectedMes) return { mes: selectedMes };
-  if (periodType === 'ano' && selectedAno) return { ano: selectedAno };
+  // selectedMes = "de" (início), selectedAno = "ate" (fim)
+  if (selectedMes) return { de: selectedMes, ate: selectedAno || selectedMes };
   return {};
 }
 
 // ── Period / Tab ──────────────────────────────────────────────────────────────
-// ── Slider helpers ────────────────────────────────────────────
-const _nomeMes = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+// ── Dual-range slider ─────────────────────────────────────────
+const _nomeMes     = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const _nomeMesFull = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho',
                       'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 function _labelMes(ym) {
   if (!ym) return '—';
   const [a, m] = ym.split('-');
-  return `${_nomeMes[+m]} ${a}`;
+  return `${_nomeMes[+m]}/${a}`;
 }
 
-function onSliderInput(el) {
-  const ym = _mesesArr[el.value];
-  document.getElementById('mes-slider-label').textContent = _labelMes(ym);
+function _updateSliderUI() {
+  const fEl = document.getElementById('slider-from');
+  const tEl = document.getElementById('slider-to');
+  const max  = +fEl.max || 1;
+  const from = +fEl.value;
+  const to   = +tEl.value;
+  const pF   = (from / max) * 100;
+  const pT   = (to   / max) * 100;
+  const fill = document.getElementById('slider-fill');
+  fill.style.left  = pF + '%';
+  fill.style.width = (pT - pF) + '%';
+  document.getElementById('slider-from-label').textContent = _labelMes(_mesesArr[from]);
+  document.getElementById('slider-to-label').textContent   = _labelMes(_mesesArr[to]);
+}
+
+function onSliderFrom(el) {
+  const tEl = document.getElementById('slider-to');
+  if (+el.value >= +tEl.value) el.value = Math.max(0, +tEl.value - 1);
+  _updateSliderUI();
+}
+
+function onSliderTo(el) {
+  const fEl = document.getElementById('slider-from');
+  if (+el.value <= +fEl.value) el.value = Math.min(+el.max, +fEl.value + 1);
+  _updateSliderUI();
 }
 
 function initSlider() {
-  // Gera array de meses de Jan/2020 até mês atual
-  const hoje = new Date();
   _mesesArr = [];
+  const hoje = new Date();
   for (let a = 2020; a <= hoje.getFullYear(); a++) {
     const mFim = a === hoje.getFullYear() ? hoje.getMonth() + 1 : 12;
     for (let m = 1; m <= mFim; m++) {
       _mesesArr.push(`${a}-${String(m).padStart(2,'0')}`);
     }
   }
-  const slider = document.getElementById('mes-slider');
-  slider.max   = _mesesArr.length - 1;
-  slider.value = _mesesArr.length - 1;
-  document.getElementById('mes-slider-label').textContent  = _labelMes(_mesesArr[_mesesArr.length - 1]);
+  const n = _mesesArr.length - 1;
+  const fEl = document.getElementById('slider-from');
+  const tEl = document.getElementById('slider-to');
+  fEl.max = n; fEl.value = 0;
+  tEl.max = n; tEl.value = n;
   document.getElementById('slider-start-label').textContent = _labelMes(_mesesArr[0]);
-  document.getElementById('slider-end-label').textContent   = _labelMes(_mesesArr[_mesesArr.length - 1]);
+  document.getElementById('slider-end-label').textContent   = _labelMes(_mesesArr[n]);
+  _updateSliderUI();
 }
 
 function applyPeriod() {
-  const slider = document.getElementById('mes-slider');
-  const ym = _mesesArr[slider.value];
-  if (!ym) return;
-  selectedMes = ym; selectedAno = '';
-  const [a, m] = ym.split('-');
+  const from = _mesesArr[+document.getElementById('slider-from').value];
+  const to   = _mesesArr[+document.getElementById('slider-to').value];
+  if (!from || !to) return;
+  selectedMes = from; selectedAno = to;           // reuso: from=de, to=ate
+  const [fa, fm] = from.split('-');
+  const [ta, tm] = to.split('-');
   const el = document.getElementById('period-active-label');
-  el.textContent = `${_nomeMesFull[+m]} ${a}`;
+  el.textContent = from === to
+    ? `${_nomeMesFull[+fm]} ${fa}`
+    : `${_nomeMes[+fm]}/${fa} → ${_nomeMes[+tm]}/${ta}`;
   el.classList.add('show');
   switchTab('metricas');
   if (currentVara) loadAll(currentVara);
@@ -928,9 +968,10 @@ function applyPeriod() {
 function clearPeriod() {
   selectedMes = ''; selectedAno = '';
   document.getElementById('period-active-label').classList.remove('show');
-  const slider = document.getElementById('mes-slider');
-  slider.value = _mesesArr.length - 1;
-  document.getElementById('mes-slider-label').textContent = _labelMes(_mesesArr[_mesesArr.length - 1]);
+  const n = _mesesArr.length - 1;
+  document.getElementById('slider-from').value = 0;
+  document.getElementById('slider-to').value   = n;
+  _updateSliderUI();
   if (currentVara) loadAll(currentVara);
 }
 

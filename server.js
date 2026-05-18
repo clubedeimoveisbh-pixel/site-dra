@@ -145,8 +145,20 @@ function buildFilter(varaNomeParam) {
 function hasConfig() { return !!DATAJUD_KEY; }
 
 function buildPeriodFilter(req) {
+  const de  = req.query.de;   // 'YYYY-MM' início do range
+  const ate = req.query.ate;  // 'YYYY-MM' fim do range (inclusivo)
+  if (de || ate) {
+    const r = {};
+    if (de)  r.gte = `${de}-01`;
+    if (ate) {
+      const [y, m] = ate.split('-').map(Number);
+      const next   = new Date(y, m, 1);
+      r.lt = `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-01`;
+    }
+    return { range: { dataAjuizamento: r } };
+  }
+  // compatibilidade legada
   const mes = req.query.mes;
-  const ano = req.query.ano;
   if (mes && /^\d{4}-\d{2}$/.test(mes)) {
     const [y, m] = mes.split('-').map(Number);
     const next = new Date(y, m, 1);
@@ -155,10 +167,15 @@ function buildPeriodFilter(req) {
       lt:  `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-01`,
     } } };
   }
+  const ano = req.query.ano;
   if (ano && /^\d{4}$/.test(ano)) {
     return { range: { dataAjuizamento: { gte: `${ano}-01-01`, lt: `${Number(ano)+1}-01-01` } } };
   }
   return null;
+}
+
+function hasPeriodFilter(req) {
+  return !!(req.query.de || req.query.ate || req.query.mes || req.query.ano);
 }
 
 function buildQuery(req) {
@@ -232,7 +249,7 @@ app.get('/api/pje/varas', async (req, res) => {
 app.get('/api/pje/stats', async (req, res) => {
   const q = buildQuery(req);
   if (!q) return res.json({ ...MOCK_STATS, ultima_atualizacao: new Date().toISOString() });
-  const hasPeriod = !!(req.query.mes || req.query.ano);
+  const hasPeriod = hasPeriodFilter(req);
   try {
     // _count retorna total exato sem limitação de 10k
     const [rCount, rAggs] = await Promise.all([
