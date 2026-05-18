@@ -219,6 +219,43 @@ function buildQuery(req) {
   return { bool: { filter: filters } };
 }
 
+// ── Análise de fases processuais (server-side) ────────────────────────────────
+function analisarFasesServer(proc) {
+  const rawAj = String(proc.dataAjuizamento || '').replace(/\D/g, '');
+  if (rawAj.length < 8) return null;
+  const dtAj = new Date(+rawAj.slice(0,4), +rawAj.slice(4,6)-1, +rawAj.slice(6,8));
+  if (isNaN(dtAj)) return null;
+
+  const movs = (proc.movimentos || [])
+    .filter(m => m.dataHora)
+    .sort((a,b) => a.dataHora.localeCompare(b.dataHora));
+
+  const dias = (d1, d2) => Math.max(0, Math.round((new Date(d2) - new Date(d1)) / 86400000));
+
+  let dataSentenca = null, dataRecurso = null, dataExecucao = null, dataConclusao = null;
+
+  for (const m of movs) {
+    const n = (m.nome || '').toLowerCase();
+    const t = m.dataHora;
+    if (!dataSentenca && /senten[cç]|homolog.*acordo|acordo.*homolog|improcedente|procedente.*mérito|dispensa.*cumprimento/.test(n))
+      dataSentenca = t;
+    if (!dataRecurso && /recurso ordinário|agravo de peti[cç]|embargos de declara[cç]|recurso de revist/.test(n))
+      dataRecurso = t;
+    if (!dataExecucao && /execu[cç]|penhora|arrest|bloqueio.*bacen|bacen.*bloqueio|cálculo.*homolog|homolog.*cálculo/.test(n))
+      dataExecucao = t;
+    if (/arquivamento|baixa definitiv|extinção do processo|extinção da execu|trânsito.*julgado.*quit|quit.*trânsito|pagamento total|satisfa[cç]/.test(n))
+      dataConclusao = t;
+  }
+
+  if (!dataConclusao) return null;
+  return {
+    total_dias:        dias(dtAj, dataConclusao),
+    conhecimento_dias: dataSentenca ? dias(dtAj, dataSentenca) : null,
+    recursal_dias:     (dataRecurso && dataSentenca) ? dias(dataSentenca, dataRecurso) : null,
+    execucao_dias:     dataExecucao ? dias(dataExecucao, dataConclusao) : null,
+  };
+}
+
 // ── Auth middleware for dashboard ─────────────────────────────────────────────
 function dashAuth(req, res, next) {
   const pw = req.query.pw || req.headers['x-dashboard-password'] || '';
@@ -366,6 +403,40 @@ const MOCK_EFICIENCIA = {
   indice_eficiencia: 15.5,
   mock: true,
 };
+
+// ── API: eficiência por fases (amostra de processos concluídos) ───────────────
+app.get('/api/pje/eficiencia-fases', async (req, res) => {
+  const q = varaQuery(req);
+  if (!q) return res.json({ mock: true, total_amostrado: 0, total_concluidos: 0,
+    tempo_medio_total_dias: null, tempo_medio_conhecimento_dias: null,
+    tempo_medio_recursal_dias: null, tempo_medio_execucao_dias: null,
+    pct_com_recurso: 0, pct_com_execucao: 0 });
+  try {
+    const r = await datajudPost(IDX, {
+      query: q, size: 50,
+      sort: [{ dataAjuizamento: { order: 'desc' } }],
+      _source: ['dataAjuizamento', 'movimentos', 'classe'],
+    });
+    if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
+    const hits  = r.body.hits?.hits ?? [];
+    const fases = hits.map(h => analisarFasesServer(h._source)).filter(Boolean);
+    const avg   = arr => arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : null;
+    const tc    = fases.map(f=>f.conhecimento_dias).filter(v=>v!=null);
+    const tr    = fases.map(f=>f.recursal_dias).filter(v=>v!=null);
+    const te    = fases.map(f=>f.execucao_dias).filter(v=>v!=null);
+    res.json({
+      mock: false,
+      total_amostrado:               hits.length,
+      total_concluidos:              fases.length,
+      tempo_medio_total_dias:        avg(fases.map(f=>f.total_dias)),
+      tempo_medio_conhecimento_dias: avg(tc),
+      tempo_medio_recursal_dias:     avg(tr),
+      tempo_medio_execucao_dias:     avg(te),
+      pct_com_recurso:  fases.length ? +((tr.length/fases.length)*100).toFixed(0) : 0,
+      pct_com_execucao: fases.length ? +((te.length/fases.length)*100).toFixed(0) : 0,
+    });
+  } catch(e) { console.error('[eficiencia-fases]', e.message); res.status(502).json({ error: e.message }); }
+});
 
 app.get('/api/pje/eficiencia', async (req, res) => {
   const q = buildQuery(req);

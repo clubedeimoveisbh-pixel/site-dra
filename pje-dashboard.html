@@ -401,11 +401,22 @@ tr:hover td{background:rgba(200,167,91,.04)}
 .efic-gauge-fill{height:100%;border-radius:5px;transition:width .6s ease}
 .efic-gauge-labels{display:flex;justify-content:space-between;font-size:.6rem;color:rgba(232,230,224,.3);margin-top:.3rem}
 /* Small KPI cards */
-.efic-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem}
-.efic-kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.2rem 1.5rem;position:relative;overflow:hidden}
-.efic-kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-b))}
-.efic-kpi-val{font-size:1.9rem;font-weight:700;color:var(--gold-b);line-height:1;margin-bottom:.2rem}
-.efic-kpi-label{font-size:.75rem;color:var(--muted);font-weight:500}
+.efic-section-label{font-size:.67rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem}
+.efic-total-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.5rem 2rem;margin-bottom:1.25rem;border-left:4px solid var(--gold)}
+.efic-total-val{font-size:2.8rem;font-weight:700;color:var(--gold-b);line-height:1;margin-bottom:.3rem}
+.efic-total-label{font-size:.82rem;color:var(--muted)}
+.efic-total-sample{font-size:.71rem;color:rgba(232,230,224,.3);margin-top:.3rem}
+.efic-fases-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.25rem 1.5rem;margin-bottom:1.25rem}
+.efic-fases-label{font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:1.1rem}
+.efic-fase-row{margin-bottom:.9rem}
+.efic-fase-row:last-child{margin-bottom:0}
+.efic-fase-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:.35rem}
+.efic-fase-nome{font-size:.8rem;font-weight:600;color:var(--text)}
+.efic-fase-val{font-size:.82rem;font-weight:700}
+.efic-fase-obs{font-size:.68rem;color:var(--muted);margin-left:.35rem}
+.efic-fase-track{height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+.efic-fase-fill{height:100%;border-radius:4px;transition:width .6s ease}
+.efic-note{background:rgba(200,167,91,.04);border:1px solid rgba(200,167,91,.12);border-radius:var(--r);padding:.85rem 1.1rem;font-size:.78rem;color:var(--muted);line-height:1.6}
 /* Small metric cards in 2-col slot */
 .efic-sub-cards{display:flex;flex-direction:column;gap:.75rem}
 .efic-sub-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:1rem 1.25rem;position:relative;overflow:hidden}
@@ -773,83 +784,54 @@ tr:hover td{background:rgba(200,167,91,.04)}
     <div id="eficiencia-view" style="display:none">
       <div class="comp-header">
         <h3>Eficiência da Vara</h3>
-        <p>Índice composto de eficiência — quanto menor a proporção de processos antigos e maior a taxa de giro, mais eficiente a vara.</p>
+        <p>Tempo do ajuizamento até o arquivamento — quanto menor, mais eficiente.</p>
       </div>
 
-      <!-- Seção 1: Índice de Eficiência -->
-      <div style="font-size:.67rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:.7rem">Índice de Eficiência</div>
-      <div class="efic-top-grid">
-        <!-- Card principal: índice -->
-        <div class="efic-main-card" id="efic-main-card">
-          <div class="efic-indice-label">Índice de Eficiência · 0 – 100</div>
-          <div class="efic-indice-val" id="efic-indice-val">—</div>
-          <div class="efic-gauge">
-            <div class="efic-gauge-track">
-              <div class="efic-gauge-fill" id="efic-gauge-fill" style="width:0%"></div>
-            </div>
-            <div class="efic-gauge-labels">
-              <span>0 · Baixo</span>
-              <span>40 · Médio</span>
-              <span>60 · Bom</span>
-              <span>100</span>
-            </div>
-          </div>
-          <div class="efic-indice-sublabel" id="efic-indice-sublabel">—</div>
+      <!-- PRINCIPAL: Tempo real até conclusão -->
+      <div class="efic-section-label">Tempo médio até conclusão · baseado em processos arquivados</div>
+
+      <div id="efic-fases-loading" style="display:flex;align-items:center;gap:.75rem;color:var(--muted);padding:1.25rem 0;font-size:.84rem">
+        <span class="spinner"></span> Analisando processos concluídos da vara...
+      </div>
+
+      <div id="efic-fases-content" style="display:none">
+        <div class="efic-total-card">
+          <div class="efic-total-val" id="efic-total-val">—</div>
+          <div class="efic-total-label">tempo médio do ajuizamento até o arquivamento</div>
+          <div class="efic-total-sample" id="efic-total-sample"></div>
         </div>
 
-        <!-- 2 cards menores -->
-        <div class="efic-sub-cards">
-          <div class="efic-sub-card">
-            <div class="efic-sub-val" id="efic-tempo-medio" style="color:var(--gold-b)">—</div>
-            <div class="efic-sub-label">Tempo médio estimado do acervo (anos)</div>
-          </div>
-          <div class="efic-sub-card" id="efic-giro-card">
-            <div class="efic-sub-val" id="efic-taxa-giro" style="color:var(--gold-b)">—</div>
-            <div class="efic-sub-label">Taxa de giro anual · % do acervo nos últimos 12m</div>
-          </div>
+        <div class="efic-fases-wrap">
+          <div class="efic-fases-label">Tempo médio em cada fase processual</div>
+          <div id="efic-fases-bars"></div>
         </div>
       </div>
 
-      <!-- Frase interpretativa -->
-      <div class="efic-frase" id="efic-frase" style="display:none"></div>
+      <div id="efic-fases-error" style="display:none;color:#f87171;font-size:.83rem;padding:.75rem 0;background:rgba(239,68,68,.07);border-radius:var(--r);padding:.75rem 1rem;margin-bottom:1rem"></div>
 
-      <!-- Seção 2: Perfil de Antiguidade -->
-      <div style="font-size:.67rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:.7rem">Perfil de Antiguidade do Acervo</div>
-      <div class="charts-grid" style="margin-bottom:1.25rem">
+      <!-- Divider -->
+      <div style="height:1px;background:var(--border);margin:1.75rem 0;opacity:.4"></div>
+
+      <!-- SECUNDÁRIO: Perfil do backlog -->
+      <div class="efic-section-label">Perfil de Antiguidade do Acervo · processos ainda abertos</div>
+      <div class="charts-grid" style="margin-bottom:1rem">
         <div class="chart-card">
-          <div class="chart-title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            Distribuição por Antiguidade do Acervo Aberto
-          </div>
-          <div class="chart-wrap">
-            <canvas id="chart-eficiencia"></canvas>
-          </div>
+          <div class="chart-title">Distribuição por tempo em tramitação</div>
+          <div class="chart-wrap"><canvas id="chart-eficiencia"></canvas></div>
         </div>
-
         <div class="chart-card">
-          <div class="chart-title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-            Detalhamento por Faixa
-          </div>
+          <div class="chart-title">Detalhamento</div>
           <div style="overflow-x:auto">
             <table>
-              <thead>
-                <tr>
-                  <th>Faixa</th>
-                  <th>Processos</th>
-                  <th>%</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Faixa</th><th>Processos</th><th>%</th></tr></thead>
               <tbody id="tbody-eficiencia"></tbody>
             </table>
           </div>
-          <div class="efic-note" id="efic-frase-pct" style="margin-top:.75rem"></div>
         </div>
       </div>
 
-      <!-- Seção 3: Contexto -->
       <div class="efic-note">
-        <strong style="color:var(--gold)">Como interpretar:</strong> Eficiência medida pelo tempo dos processos em aberto. Quanto menor a proporção de processos antigos e maior a taxa de giro, mais eficiente a vara. O tempo médio é estimado pela faixa de antiguidade do acervo — apenas processos concluídos individualmente têm duração exata (ver busca de processo). A API pública não fornece data de encerramento em massa; usamos a <em>distribuição etária do acervo aberto</em> como proxy de eficiência.
+        <strong style="color:var(--gold)">Metodologia:</strong> O tempo até conclusão é calculado do ajuizamento ao arquivamento/extinção, detectado nos movimentos processuais de uma amostra de 50 processos recentes da vara. As fases são identificadas por palavras-chave nos registros de movimentação (Tabela Unificada CNJ). Processos sem movimento de encerramento identificado não entram na média — são tratados como ainda em andamento.
       </div>
     </div><!-- /eficiencia-view -->
 
@@ -1382,12 +1364,85 @@ function renderComparativo(data) {
 
 // ── Eficiência ────────────────────────────────────────────────────────────────
 async function loadEficiencia(vara) {
+  // Reset fases section
+  const loadEl = document.getElementById('efic-fases-loading');
+  const contEl = document.getElementById('efic-fases-content');
+  const errEl  = document.getElementById('efic-fases-error');
+  if (loadEl) loadEl.style.display = 'flex';
+  if (contEl) contEl.style.display = 'none';
+  if (errEl)  errEl.style.display  = 'none';
+
+  // Backlog profile (secondary)
   try {
-    const data = await apiFetch('/api/pje/eficiencia', vara);
+    const data = await apiFetch('/api/pje/eficiencia', vara, periodParams());
     renderEficiencia(data);
-  } catch(e) {
-    console.error('[eficiencia]', e);
+  } catch(e) { console.error('[eficiencia]', e); }
+
+  // Real phase analysis (primary) — fires independently
+  apiFetch('/api/pje/eficiencia-fases', vara)
+    .then(renderFasesEficiencia)
+    .catch(e => {
+      if (loadEl) loadEl.style.display = 'none';
+      if (errEl) { errEl.textContent = 'Erro ao analisar fases: ' + e.message; errEl.style.display = ''; }
+    });
+}
+
+function renderFasesEficiencia(data) {
+  const loadEl = document.getElementById('efic-fases-loading');
+  const contEl = document.getElementById('efic-fases-content');
+  const errEl  = document.getElementById('efic-fases-error');
+  if (loadEl) loadEl.style.display = 'none';
+
+  if (!data.total_concluidos) {
+    if (errEl) {
+      errEl.textContent = `Nenhum processo concluído identificado na amostra de ${data.total_amostrado} processos. A detecção de arquivamento depende de palavras-chave nos movimentos — tente uma vara com mais processos concluídos.`;
+      errEl.style.display = '';
+    }
+    return;
   }
+
+  // Total card
+  const d    = data.tempo_medio_total_dias || 0;
+  const anos = Math.floor(d / 365);
+  const meses = Math.round((d % 365) / 30);
+  const totalStr = anos > 0
+    ? `${anos} ano${anos>1?'s':''} ${meses > 0 ? `e ${meses} ${meses===1?'mês':'meses'}` : ''}`
+    : `${meses} ${meses===1?'mês':'meses'}`;
+  setEl('efic-total-val', totalStr.trim());
+  setEl('efic-total-sample', `Baseado em ${data.total_concluidos} processos concluídos · amostra de ${data.total_amostrado}`);
+
+  // Phase bars
+  const fases = [
+    { nome: 'Conhecimento (1º Grau)',  dias: data.tempo_medio_conhecimento_dias, cor: '#60a5fa', obs: null },
+    { nome: 'Recursal (2º Grau)',      dias: data.tempo_medio_recursal_dias,     cor: '#a78bfa', obs: `${data.pct_com_recurso}% dos processos chegaram ao 2º grau` },
+    { nome: 'Execução',                dias: data.tempo_medio_execucao_dias,     cor: '#f97316', obs: `${data.pct_com_execucao}% dos processos passaram por execução` },
+  ].filter(f => f.dias != null && f.dias > 0);
+
+  const maxD = Math.max(...fases.map(f => f.dias), 1);
+  const barsEl = document.getElementById('efic-fases-bars');
+  if (!barsEl) return;
+
+  if (!fases.length) {
+    barsEl.innerHTML = '<span style="color:var(--muted);font-size:.82rem">Não foi possível identificar fases nos movimentos desta amostra.</span>';
+  } else {
+    barsEl.innerHTML = fases.map(f => {
+      const label = f.dias > 365 ? `${(f.dias/365).toFixed(1)} anos` : `${Math.round(f.dias/30)} meses`;
+      const w = ((f.dias / maxD) * 100).toFixed(0);
+      return `<div class="efic-fase-row">
+        <div class="efic-fase-header">
+          <span class="efic-fase-nome">${f.nome}</span>
+          <span>
+            <span class="efic-fase-val" style="color:${f.cor}">${label}</span>
+            ${f.obs ? `<span class="efic-fase-obs">(${f.obs})</span>` : ''}
+          </span>
+        </div>
+        <div class="efic-fase-track">
+          <div class="efic-fase-fill" style="width:${w}%;background:${f.cor}70"></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  if (contEl) contEl.style.display = '';
 }
 
 function renderEficiencia(data) {
