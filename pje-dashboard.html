@@ -389,11 +389,34 @@ tr:hover td{background:rgba(200,167,91,.04)}
 .comp-stat-sub{font-size:.7rem;color:rgba(232,230,224,.4);margin-top:.2rem}
 
 /* ── Eficiência KPI grid ────────────────────────────────────── */
+.efic-top-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:1rem;margin-bottom:1.25rem;align-items:start}
+.efic-main-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.4rem 1.5rem;position:relative;overflow:hidden}
+.efic-main-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-b))}
+.efic-indice-label{font-size:.67rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem}
+.efic-indice-val{font-size:3rem;font-weight:700;line-height:1;margin-bottom:.35rem}
+.efic-indice-sublabel{font-size:.74rem;color:var(--muted)}
+/* Gauge bar */
+.efic-gauge{margin:.85rem 0 .5rem}
+.efic-gauge-track{height:10px;background:rgba(255,255,255,.07);border-radius:5px;overflow:hidden;position:relative}
+.efic-gauge-fill{height:100%;border-radius:5px;transition:width .6s ease}
+.efic-gauge-labels{display:flex;justify-content:space-between;font-size:.6rem;color:rgba(232,230,224,.3);margin-top:.3rem}
+/* Small KPI cards */
 .efic-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem}
 .efic-kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.2rem 1.5rem;position:relative;overflow:hidden}
 .efic-kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-b))}
 .efic-kpi-val{font-size:1.9rem;font-weight:700;color:var(--gold-b);line-height:1;margin-bottom:.2rem}
 .efic-kpi-label{font-size:.75rem;color:var(--muted);font-weight:500}
+/* Small metric cards in 2-col slot */
+.efic-sub-cards{display:flex;flex-direction:column;gap:.75rem}
+.efic-sub-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:1rem 1.25rem;position:relative;overflow:hidden}
+.efic-sub-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold-b))}
+.efic-sub-val{font-size:1.55rem;font-weight:700;line-height:1;margin-bottom:.2rem}
+.efic-sub-label{font-size:.73rem;color:var(--muted)}
+/* Frase interpretativa */
+.efic-frase{font-size:.8rem;padding:.75rem 1rem;border-radius:var(--r);margin-bottom:1.25rem;line-height:1.55;border:1px solid}
+.efic-frase.alerta{background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.25);color:#fca5a5}
+.efic-frase.atencao{background:rgba(251,191,36,.07);border-color:rgba(251,191,36,.25);color:#fde68a}
+.efic-frase.ok{background:rgba(74,222,128,.07);border-color:rgba(74,222,128,.25);color:#86efac}
 .efic-note{font-size:.72rem;color:rgba(232,230,224,.35);background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:var(--r);padding:.7rem 1rem;margin-top:1.25rem;line-height:1.5}
 
 /* ── Varas comparativo ──────────────────────────────────────────── */
@@ -418,12 +441,18 @@ tr:hover td{background:rgba(200,167,91,.04)}
 .rank-badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:.68rem;font-weight:700;background:rgba(200,167,91,.12);border:1px solid rgba(200,167,91,.25);color:var(--gold)}
 .varas-delay-note{text-align:center;font-size:.68rem;color:rgba(232,230,224,.25);letter-spacing:.05em;padding:1rem 0}
 .varas-loading{display:flex;align-items:center;gap:.75rem;color:var(--muted);padding:2.5rem 0;font-size:.85rem;justify-content:center}
+/* Indice bar inline */
+.indice-bar-wrap{display:flex;align-items:center;gap:.45rem}
+.indice-bar-track{width:52px;height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;flex-shrink:0}
+.indice-bar-fill{height:100%;border-radius:3px;transition:width .5s ease}
 
 /* ── Responsive ─────────────────────────────────────────────── */
 @media(max-width:1100px){
   .metrics-grid{grid-template-columns:repeat(2,1fr)}
   .comp-stat-grid{grid-template-columns:1fr 1fr}
   .efic-kpi-grid{grid-template-columns:1fr 1fr}
+  .efic-top-grid{grid-template-columns:1fr;grid-template-rows:auto auto}
+  .efic-sub-cards{flex-direction:row}
 }
 @media(max-width:860px){
   .charts-grid{grid-template-columns:1fr}
@@ -744,36 +773,53 @@ tr:hover td{background:rgba(200,167,91,.04)}
     <div id="eficiencia-view" style="display:none">
       <div class="comp-header">
         <h3>Eficiência da Vara</h3>
-        <p>Taxa de giro anual e perfil do backlog — processos em acervo por antiguidade.</p>
+        <p>Índice composto de eficiência — quanto menor a proporção de processos antigos e maior a taxa de giro, mais eficiente a vara.</p>
       </div>
 
-      <!-- KPI cards: taxa de giro principal + contexto -->
-      <div class="efic-kpi-grid">
-        <div class="efic-kpi" id="efic-giro-card">
-          <div class="efic-kpi-val" id="efic-taxa-giro">—</div>
-          <div class="efic-kpi-label">Taxa de giro anual · % do acervo distribuído nos últimos 12 meses</div>
+      <!-- Seção 1: Índice de Eficiência -->
+      <div style="font-size:.67rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:.7rem">Índice de Eficiência</div>
+      <div class="efic-top-grid">
+        <!-- Card principal: índice -->
+        <div class="efic-main-card" id="efic-main-card">
+          <div class="efic-indice-label">Índice de Eficiência · 0 – 100</div>
+          <div class="efic-indice-val" id="efic-indice-val">—</div>
+          <div class="efic-gauge">
+            <div class="efic-gauge-track">
+              <div class="efic-gauge-fill" id="efic-gauge-fill" style="width:0%"></div>
+            </div>
+            <div class="efic-gauge-labels">
+              <span>0 · Baixo</span>
+              <span>40 · Médio</span>
+              <span>60 · Bom</span>
+              <span>100</span>
+            </div>
+          </div>
+          <div class="efic-indice-sublabel" id="efic-indice-sublabel">—</div>
         </div>
-        <div class="efic-kpi">
-          <div class="efic-kpi-val" id="efic-pct-menos2">—</div>
-          <div class="efic-kpi-label">% processos com menos de 2 anos no acervo</div>
-        </div>
-        <div class="efic-kpi">
-          <div class="efic-kpi-val" id="efic-pct-mais4">—</div>
-          <div class="efic-kpi-label">% processos com mais de 4 anos no acervo</div>
+
+        <!-- 2 cards menores -->
+        <div class="efic-sub-cards">
+          <div class="efic-sub-card">
+            <div class="efic-sub-val" id="efic-tempo-medio" style="color:var(--gold-b)">—</div>
+            <div class="efic-sub-label">Tempo médio estimado do acervo (anos)</div>
+          </div>
+          <div class="efic-sub-card" id="efic-giro-card">
+            <div class="efic-sub-val" id="efic-taxa-giro" style="color:var(--gold-b)">—</div>
+            <div class="efic-sub-label">Taxa de giro anual · % do acervo nos últimos 12m</div>
+          </div>
         </div>
       </div>
 
-      <div class="efic-note" style="margin-bottom:1.25rem">
-        <strong style="color:var(--gold)">Eficiência real</strong> = tempo do ajuizamento até a conclusão do processo. Calculável individualmente (veja a view de processo). Em massa, a API pública não fornece data de encerramento por processo — usamos <strong>taxa de giro</strong> como proxy: quanto maior, mais ativa é a vara em relação ao seu backlog.
-      </div>
+      <!-- Frase interpretativa -->
+      <div class="efic-frase" id="efic-frase" style="display:none"></div>
 
-      <!-- Perfil do Backlog: doughnut + tabela -->
-      <div style="font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem">Perfil do Backlog</div>
+      <!-- Seção 2: Perfil de Antiguidade -->
+      <div style="font-size:.67rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:.7rem">Perfil de Antiguidade do Acervo</div>
       <div class="charts-grid" style="margin-bottom:1.25rem">
         <div class="chart-card">
           <div class="chart-title">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            Distribuição por Antiguidade do Acervo
+            Distribuição por Antiguidade do Acervo Aberto
           </div>
           <div class="chart-wrap">
             <canvas id="chart-eficiencia"></canvas>
@@ -797,10 +843,13 @@ tr:hover td{background:rgba(200,167,91,.04)}
               <tbody id="tbody-eficiencia"></tbody>
             </table>
           </div>
-          <div class="efic-note">
-            Baseado na data de ajuizamento dos processos em acervo. Processos com datas inconsistentes no DataJud podem distorcer levemente os resultados.
-          </div>
+          <div class="efic-note" id="efic-frase-pct" style="margin-top:.75rem"></div>
         </div>
+      </div>
+
+      <!-- Seção 3: Contexto -->
+      <div class="efic-note">
+        <strong style="color:var(--gold)">Como interpretar:</strong> Eficiência medida pelo tempo dos processos em aberto. Quanto menor a proporção de processos antigos e maior a taxa de giro, mais eficiente a vara. O tempo médio é estimado pela faixa de antiguidade do acervo — apenas processos concluídos individualmente têm duração exata (ver busca de processo). A API pública não fornece data de encerramento em massa; usamos a <em>distribuição etária do acervo aberto</em> como proxy de eficiência.
       </div>
     </div><!-- /eficiencia-view -->
 
@@ -1342,34 +1391,60 @@ async function loadEficiencia(vara) {
 }
 
 function renderEficiencia(data) {
-  const faixas = data.faixas || [];
-  const total  = data.total_acervo || 0;
+  const faixas     = data.faixas || [];
+  const total      = data.total_acervo || 0;
+  const taxaGiro   = +(data.taxa_giro ?? 0);
+  const tempoMedio = +(data.tempo_medio_estimado_anos ?? 0);
+  const indice     = +(data.indice_eficiencia ?? 0);
 
-  // Taxa de giro — card principal com cor semafórica
-  const taxaGiro = data.taxa_giro ?? 0;
-  const giroEl   = document.getElementById('efic-taxa-giro');
-  if (giroEl) {
-    giroEl.textContent = taxaGiro + '%';
-    const card = document.getElementById('efic-giro-card');
-    if (card) {
-      const cor = taxaGiro >= 15 ? '#4ade80' : taxaGiro >= 8 ? '#fbbf24' : '#f87171';
-      card.style.borderColor = cor + '66';
-      card.style.setProperty('--efic-giro-color', cor);
-      giroEl.style.color = cor;
-    }
+  // ── Card principal: índice de eficiência ──────────────────────
+  const corIndice  = indice >= 60 ? '#4ade80' : indice >= 40 ? '#fbbf24' : '#f87171';
+  const lblIndice  = indice >= 60 ? 'Boa eficiência' : indice >= 40 ? 'Eficiência moderada' : 'Baixa eficiência';
+  const mainCard   = document.getElementById('efic-main-card');
+  if (mainCard) mainCard.style.borderColor = corIndice + '55';
+  const indiceEl = document.getElementById('efic-indice-val');
+  if (indiceEl) { indiceEl.textContent = indice.toFixed(1); indiceEl.style.color = corIndice; }
+  setEl('efic-indice-sublabel', lblIndice);
+  const gaugeFill = document.getElementById('efic-gauge-fill');
+  if (gaugeFill) { gaugeFill.style.width = indice + '%'; gaugeFill.style.background = corIndice; }
+
+  // ── Sub-cards ─────────────────────────────────────────────────
+  setEl('efic-tempo-medio', tempoMedio.toFixed(1) + ' anos');
+  const corGiro = taxaGiro >= 15 ? '#4ade80' : taxaGiro >= 8 ? '#fbbf24' : '#f87171';
+  const giroEl  = document.getElementById('efic-taxa-giro');
+  if (giroEl) { giroEl.textContent = taxaGiro.toFixed(1) + '%'; giroEl.style.color = corGiro; }
+
+  // ── Frase interpretativa ──────────────────────────────────────
+  const mais4Pct   = faixas.find(f => f.key === 'mais_4anos' || f.nome === 'Mais de 4 anos')?.pct ?? 0;
+  const fraseEl    = document.getElementById('efic-frase');
+  const fracaoPct4 = mais4Pct.toFixed(1);
+  let fraseTxt, fraseClasse;
+  if (mais4Pct >= 50) {
+    fraseTxt   = `${fracaoPct4}% do acervo está com mais de 4 anos sem resolução — sinal de alerta: backlog crônico elevado.`;
+    fraseClasse = 'alerta';
+  } else if (mais4Pct >= 30) {
+    fraseTxt   = `${fracaoPct4}% do acervo está com mais de 4 anos — atenção: parcela significativa de processos antigos.`;
+    fraseClasse = 'atencao';
+  } else {
+    fraseTxt   = `${fracaoPct4}% do acervo tem mais de 4 anos — boa gestão: proporção de processos antigos relativamente baixa.`;
+    fraseClasse = 'ok';
+  }
+  if (fraseEl) {
+    fraseEl.textContent = fraseTxt;
+    fraseEl.className   = `efic-frase ${fraseClasse}`;
+    fraseEl.style.display = '';
   }
 
-  const menos2 = faixas.filter(f => f.nome === 'Menos de 1 ano' || f.nome === '1 a 2 anos')
-                        .reduce((s, f) => s + f.pct, 0);
-  const mais4  = faixas.find(f => f.nome === 'Mais de 4 anos')?.pct ?? 0;
-  setEl('efic-pct-menos2', menos2.toFixed(1) + '%');
-  setEl('efic-pct-mais4',  mais4.toFixed(1) + '%');
+  // Nota interna no card
+  const fraseNotaEl = document.getElementById('efic-frase-pct');
+  if (fraseNotaEl) fraseNotaEl.textContent =
+    `Baseado na data de ajuizamento dos processos em acervo. Processos com datas inconsistentes no DataJud podem distorcer levemente os resultados.`;
 
-  // Doughnut chart
+  // ── Doughnut chart ────────────────────────────────────────────
   if (chartEfic) { chartEfic.destroy(); chartEfic = null; }
   const ctx = document.getElementById('chart-eficiencia');
   if (ctx) {
-    const colors = ['#4ade80', '#C8A75B', '#f97316', '#ef4444'];
+    const colors = ['#4ade80', '#fbbf24', '#f97316', '#ef4444'];
     chartEfic = new Chart(ctx, {
       type: 'doughnut',
       data: {
@@ -1395,17 +1470,21 @@ function renderEficiencia(data) {
     });
   }
 
-  // Table
+  // ── Table ─────────────────────────────────────────────────────
   const tbody = document.getElementById('tbody-eficiencia');
+  const corFaixa = { 'Menos de 1 ano': '#4ade80', '1 a 2 anos': '#fbbf24', '2 a 4 anos': '#f97316', 'Mais de 4 anos': '#ef4444' };
   if (!faixas.length) {
     tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:1.5rem">Sem dados</td></tr>';
     return;
   }
-  tbody.innerHTML = faixas.map(f => `<tr>
-    <td>${esc(f.nome)}</td>
-    <td>${fmt(f.total)}</td>
-    <td style="color:var(--gold);font-weight:600">${f.pct.toFixed(1)}%</td>
-  </tr>`).join('');
+  tbody.innerHTML = faixas.map(f => {
+    const cor = corFaixa[f.nome] ?? 'var(--gold)';
+    return `<tr>
+      <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${cor};margin-right:.5rem;vertical-align:middle"></span>${esc(f.nome)}</td>
+      <td>${fmt(f.total)}</td>
+      <td style="color:${cor};font-weight:600">${f.pct.toFixed(1)}%</td>
+    </tr>`;
+  }).join('');
 }
 
 // ── Varas comparativo ─────────────────────────────────────────────────────────
@@ -1472,10 +1551,12 @@ function renderVarasComparativo(data) {
     return varasSortDir === 'desc' ? -cmp : cmp;
   });
 
-  const maxAcervo  = Math.max(...varas.map(v => v.acervo), 1);
-  const maxDist    = Math.max(...varas.map(v => v.ultimos_12m), 1);
-  const maxMensal  = Math.max(...varas.map(v => v.media_mensal ?? 0), 1);
-  const maxAntigos = Math.max(...varas.map(v => v.pct_antigos ?? 0), 1);
+  const maxAcervo   = Math.max(...varas.map(v => v.acervo), 1);
+  const maxDist     = Math.max(...varas.map(v => v.ultimos_12m), 1);
+  const maxMensal   = Math.max(...varas.map(v => v.media_mensal ?? 0), 1);
+  const maxAntigos  = Math.max(...varas.map(v => v.pct_antigos ?? 0), 1);
+  const maxIndice   = Math.max(...varas.map(v => v.indice_eficiencia ?? 0), 1);
+  const maxTempo    = Math.max(...varas.map(v => v.tempo_medio_estimado ?? 0), 1);
 
   // Thème para cada coluna sortável
   const thCls = key => {
@@ -1529,14 +1610,33 @@ function renderVarasComparativo(data) {
     </div>`;
   }).join('');
 
+  const barsIndice = byAcervo.map(v => {
+    const idx  = +(v.indice_eficiencia ?? 0);
+    const pct  = ((idx / Math.max(maxIndice, 1)) * 100).toFixed(0);
+    const nm   = v.nome.replace(/^(\d+)ª VARA DO TRABALHO DE BELO HORIZONTE$/, '$1ª');
+    const isPr = v.nome === principal;
+    const cor  = idx >= 60 ? '#4ade80' : idx >= 40 ? '#fbbf24' : '#f87171';
+    return `<div class="varas-bar-row${isPr?' principal':''}">
+      <div class="varas-bar-label">${esc(nm.length>6?nm.slice(0,5)+'…':nm)}</div>
+      <div class="varas-bar-track">
+        <div class="varas-bar-fill" style="width:${pct}%;background:${isPr?cor:cor+'80'}"></div>
+      </div>
+      <div class="varas-bar-val">${idx.toFixed(0)}</div>
+    </div>`;
+  }).join('');
+
   // ── Tabela ──────────────────────────────────────────────────────
   const rows = sorted.map((v, i) => {
-    const isPr = v.nome === principal;
-    const acPct = ((v.acervo / maxAcervo) * 100).toFixed(0);
-    const diPct = ((v.ultimos_12m / maxDist) * 100).toFixed(0);
-    const anCor = (v.pct_antigos??0)>60?'#f87171':(v.pct_antigos??0)>40?'#fbbf24':'#4ade80';
-    const g = v.taxa_giro ?? 0;
-    const giroCor = g >= 15 ? '#4ade80' : g >= 8 ? '#fbbf24' : '#f87171';
+    const isPr      = v.nome === principal;
+    const acPct     = ((v.acervo / maxAcervo) * 100).toFixed(0);
+    const diPct     = ((v.ultimos_12m / maxDist) * 100).toFixed(0);
+    const anCor     = (v.pct_antigos??0)>60?'#f87171':(v.pct_antigos??0)>40?'#fbbf24':'#4ade80';
+    const g         = v.taxa_giro ?? 0;
+    const giroCor   = g >= 15 ? '#4ade80' : g >= 8 ? '#fbbf24' : '#f87171';
+    const idx       = +(v.indice_eficiencia ?? 0);
+    const idxCor    = idx >= 60 ? '#4ade80' : idx >= 40 ? '#fbbf24' : '#f87171';
+    const idxPct    = ((idx / 100) * 100).toFixed(0);
+    const tempo     = +(v.tempo_medio_estimado ?? 0);
     return `<tr class="${isPr?'vara-row-principal':''}">
       <td><div style="display:flex;align-items:center;gap:.6rem">
         <span class="rank-badge">${i+1}</span>
@@ -1554,44 +1654,49 @@ function renderVarasComparativo(data) {
           <div class="ranking-bar-fill" style="width:${diPct}%;background:linear-gradient(90deg,#60a5fa,#3b82f6)"></div>
         </div>
       </td>
-      <td style="font-size:.82rem;color:${isPr?'var(--gold)':'var(--text)'};font-weight:600">
-        ${fmt(v.media_mensal??0)}<span style="font-size:.65rem;color:var(--muted);font-weight:400">/mês</span>
-      </td>
       <td style="font-size:.82rem;color:${giroCor};font-weight:600" title="Taxa de giro = distribuídos 12m / acervo total">${g}%</td>
       <td style="font-size:.82rem;color:${anCor};font-weight:600" title="% do acervo com data de ajuizamento há mais de 4 anos">${(v.pct_antigos??0).toFixed(1)}%</td>
-      <td style="color:var(--muted);font-size:.76rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
-          title="${esc(v.top_classe)}">${esc(v.top_classe)}</td>
-      <td style="color:var(--muted);font-size:.76rem;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
-          title="${esc(v.top_assunto??'—')}">${esc(v.top_assunto??'—')}</td>
+      <td>
+        <div class="indice-bar-wrap">
+          <div class="indice-bar-track">
+            <div class="indice-bar-fill" style="width:${idxPct}%;background:${idxCor}"></div>
+          </div>
+          <span style="font-size:.82rem;font-weight:700;color:${idxCor}">${idx > 0 ? idx.toFixed(0) : '—'}</span>
+        </div>
+      </td>
+      <td style="font-size:.82rem;color:var(--text);font-weight:600">${tempo > 0 ? tempo.toFixed(1) + ' a' : '—'}</td>
     </tr>`;
   }).join('');
 
   document.getElementById('varas-table-content').innerHTML = `
-    <div class="varas-charts-grid" style="grid-template-columns:1fr 1fr 1fr">
+    <div class="varas-charts-grid" style="grid-template-columns:1fr 1fr 1fr 1fr">
       <div class="varas-chart-card">
-        <div class="varas-chart-title">📊 Acervo total</div>
+        <div class="varas-chart-title">Acervo total</div>
         ${barsAcervo}
       </div>
       <div class="varas-chart-card">
-        <div class="varas-chart-title" title="% do acervo com ajuizamento há mais de 4 anos">⏳ % Antigos (&gt;4 anos)</div>
+        <div class="varas-chart-title" title="% do acervo com ajuizamento há mais de 4 anos">% Acervo Antigo (&gt;4 anos)</div>
         ${barsAntigos}
       </div>
       <div class="varas-chart-card">
-        <div class="varas-chart-title" title="Distribuídos nos últimos 12 meses ÷ acervo total · verde ≥15% · amarelo ≥8% · vermelho &lt;8%">🔄 Giro/ano</div>
+        <div class="varas-chart-title" title="Distribuídos nos últimos 12 meses ÷ acervo total · verde ≥15% · amarelo ≥8% · vermelho &lt;8%">Giro/ano</div>
         ${barsGiro}
+      </div>
+      <div class="varas-chart-card">
+        <div class="varas-chart-title" title="Índice composto: taxa de giro × 2 − % antigos × 0,8 · verde ≥60 · amarelo ≥40 · vermelho &lt;40">Índice de Eficiência</div>
+        ${barsIndice}
       </div>
     </div>
     <div style="overflow-x:auto">
       <table>
         <thead><tr>
-          <th class="${thCls('nome')}"      onclick="varasSortBy('nome')">Vara</th>
-          <th class="${thCls('acervo')}"    onclick="varasSortBy('acervo')">Acervo</th>
-          <th class="${thCls('ultimos_12m')}" onclick="varasSortBy('ultimos_12m')">Distribuídos (12m)</th>
-          <th class="${thCls('media_mensal')}" onclick="varasSortBy('media_mensal')">Média/mês</th>
-          <th class="${thCls('taxa_giro')}"  onclick="varasSortBy('taxa_giro')">Giro/ano</th>
-          <th class="${thCls('pct_antigos')}" onclick="varasSortBy('pct_antigos')">% Antigos</th>
-          <th class="${thCls('top_classe')}"  onclick="varasSortBy('top_classe')">Top Classe</th>
-          <th class="${thCls('top_assunto')}" onclick="varasSortBy('top_assunto')">Top Assunto</th>
+          <th class="${thCls('nome')}"                onclick="varasSortBy('nome')">Vara</th>
+          <th class="${thCls('acervo')}"              onclick="varasSortBy('acervo')">Acervo</th>
+          <th class="${thCls('ultimos_12m')}"         onclick="varasSortBy('ultimos_12m')">Distribuídos (12m)</th>
+          <th class="${thCls('taxa_giro')}"            onclick="varasSortBy('taxa_giro')">Giro/ano</th>
+          <th class="${thCls('pct_antigos')}"          onclick="varasSortBy('pct_antigos')">% Antigos</th>
+          <th class="${thCls('indice_eficiencia')}"    onclick="varasSortBy('indice_eficiencia')">Índice Efic.</th>
+          <th class="${thCls('tempo_medio_estimado')}" onclick="varasSortBy('tempo_medio_estimado')">Tempo Médio Est.</th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>

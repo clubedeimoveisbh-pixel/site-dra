@@ -27,6 +27,12 @@ async function initDB() {
     pct_antigos  NUMERIC(5,2) DEFAULT 0,
     atualizado_em TIMESTAMPTZ DEFAULT NOW()
   )`);
+  await dbq(`ALTER TABLE trt3_varas_snapshot ADD COLUMN IF NOT EXISTS menos_1ano INTEGER DEFAULT 0`);
+  await dbq(`ALTER TABLE trt3_varas_snapshot ADD COLUMN IF NOT EXISTS um_2anos INTEGER DEFAULT 0`);
+  await dbq(`ALTER TABLE trt3_varas_snapshot ADD COLUMN IF NOT EXISTS dois_4anos INTEGER DEFAULT 0`);
+  await dbq(`ALTER TABLE trt3_varas_snapshot ADD COLUMN IF NOT EXISTS mais_4anos INTEGER DEFAULT 0`);
+  await dbq(`ALTER TABLE trt3_varas_snapshot ADD COLUMN IF NOT EXISTS tempo_medio_estimado NUMERIC(5,2) DEFAULT 0`);
+  await dbq(`ALTER TABLE trt3_varas_snapshot ADD COLUMN IF NOT EXISTS indice_eficiencia NUMERIC(5,1) DEFAULT 0`);
   console.log('[DB] tabela trt3_varas_snapshot ok');
 }
 initDB().catch(e => console.error('[DB init]', e.message));
@@ -347,15 +353,17 @@ app.get('/api/pje/tempos', async (req, res) => {
 // ── API: eficiência — taxa de giro + distribuição do acervo por antiguidade ───
 const MOCK_EFICIENCIA = {
   faixas: [
-    { nome: 'Menos de 1 ano', total: 94,  pct: 11.1 },
-    { nome: '1 a 2 anos',     total: 178, pct: 21.0 },
-    { nome: '2 a 4 anos',     total: 253, pct: 29.9 },
-    { nome: 'Mais de 4 anos', total: 322, pct: 38.0 },
+    { nome: 'Menos de 1 ano', key: 'menos_1ano', total: 94,  pct: 11.1 },
+    { nome: '1 a 2 anos',     key: 'um_2anos',   total: 178, pct: 21.0 },
+    { nome: '2 a 4 anos',     key: 'dois_4anos', total: 253, pct: 29.9 },
+    { nome: 'Mais de 4 anos', key: 'mais_4anos', total: 322, pct: 38.0 },
   ],
   total_acervo: 847,
   ultimos_12m: 198,
   taxa_giro: 23,
   tempo_medio_estimado_anos: 2.9,
+  menos_1ano: 94, um_2anos: 178, dois_4anos: 253, mais_4anos: 322,
+  indice_eficiencia: 15.5,
   mock: true,
 };
 
@@ -371,10 +379,10 @@ app.get('/api/pje/eficiencia', async (req, res) => {
           date_range: {
             field: 'dataAjuizamento',
             ranges: [
-              { key: 'Menos de 1 ano', from: 'now-1y/d' },
-              { key: '1 a 2 anos',     from: 'now-2y/d', to: 'now-1y/d' },
-              { key: '2 a 4 anos',     from: 'now-4y/d', to: 'now-2y/d' },
-              { key: 'Mais de 4 anos', to:   'now-4y/d' },
+              { key: 'menos_1ano', from: 'now-1y/d' },
+              { key: 'um_2anos',   from: 'now-2y/d', to: 'now-1y/d' },
+              { key: 'dois_4anos', from: 'now-4y/d', to: 'now-2y/d' },
+              { key: 'mais_4anos', to:   'now-4y/d' },
             ],
           },
         },
@@ -385,21 +393,32 @@ app.get('/api/pje/eficiencia', async (req, res) => {
     };
     const r = await datajudPost(IDX, body);
     if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
-    const aggs      = r.body.aggregations ?? {};
-    const buckets   = aggs.por_faixa?.buckets ?? [];
-    const total     = buckets.reduce((s, b) => s + b.doc_count, 0);
-    const ult12m    = aggs.ultimos_12m?.doc_count ?? 0;
-    const taxaGiro  = total > 0 ? Math.round((ult12m / total) * 100) : 0;
-    const midpoints = { 'Menos de 1 ano': 0.5, '1 a 2 anos': 1.5, '2 a 4 anos': 3, 'Mais de 4 anos': 5 };
-    const faixas    = buckets.map(b => ({
-      nome:  b.key,
+    const aggs    = r.body.aggregations ?? {};
+    const buckets = aggs.por_faixa?.buckets ?? [];
+    const f       = key => buckets.find(b => b.key === key)?.doc_count ?? 0;
+    const menos1  = f('menos_1ano');
+    const um2     = f('um_2anos');
+    const dois4   = f('dois_4anos');
+    const mais4   = f('mais_4anos');
+    const total   = menos1 + um2 + dois4 + mais4 || 1;
+    const ult12m  = aggs.ultimos_12m?.doc_count ?? 0;
+    const taxaGiro  = total > 0 ? +(ult12m / total * 100).toFixed(1) : 0;
+    const tempoMedio = +((menos1*0.5 + um2*1.5 + dois4*3 + mais4*5.5) / total).toFixed(2);
+    const pctMais4   = +(mais4 / total * 100).toFixed(1);
+    const indice     = +Math.max(0, Math.min(100, taxaGiro * 2 - pctMais4 * 0.8)).toFixed(1);
+    const nomesFaixas = { menos_1ano: 'Menos de 1 ano', um_2anos: '1 a 2 anos', dois_4anos: '2 a 4 anos', mais_4anos: 'Mais de 4 anos' };
+    const faixas = buckets.map(b => ({
+      nome:  nomesFaixas[b.key] ?? b.key,
+      key:   b.key,
       total: b.doc_count,
-      pct:   total ? Number((b.doc_count / total * 100).toFixed(1)) : 0,
+      pct:   total > 0 ? Number((b.doc_count / total * 100).toFixed(1)) : 0,
     }));
-    const tempoMedio = total
-      ? Number((faixas.reduce((s, f) => s + f.total * (midpoints[f.nome] ?? 3), 0) / total).toFixed(2))
-      : 0;
-    res.json({ faixas, total_acervo: total, ultimos_12m: ult12m, taxa_giro: taxaGiro, tempo_medio_estimado_anos: tempoMedio, mock: false });
+    res.json({
+      faixas, total_acervo: total, ultimos_12m: ult12m,
+      taxa_giro: taxaGiro, tempo_medio_estimado_anos: tempoMedio,
+      menos_1ano: menos1, um_2anos: um2, dois_4anos: dois4, mais_4anos: mais4,
+      indice_eficiencia: indice, mock: false,
+    });
   } catch (e) { console.error('[pje/eficiencia]', e.message); res.status(502).json({ error: e.message }); }
 });
 
@@ -515,14 +534,20 @@ app.get('/api/pje/varas-comparativo', async (req, res) => {
           }
         }
         const detalhes = grupoVaras.map(v => ({
-          nome:         v.nome,
-          acervo:       +v.acervo,
-          ultimos_12m:  +v.ultimos_12m,
-          media_mensal: +v.media_mensal,
-          top_classe:   v.top_classe,
-          top_assunto:  v.top_assunto,
-          pct_antigos:  +v.pct_antigos,
-          taxa_giro:    +v.acervo > 0 ? Math.round((+v.ultimos_12m / +v.acervo) * 100) : 0,
+          nome:                 v.nome,
+          acervo:               +v.acervo,
+          ultimos_12m:          +v.ultimos_12m,
+          media_mensal:         +v.media_mensal,
+          top_classe:           v.top_classe,
+          top_assunto:          v.top_assunto,
+          pct_antigos:          +v.pct_antigos,
+          taxa_giro:            +v.acervo > 0 ? Math.round((+v.ultimos_12m / +v.acervo) * 100) : 0,
+          menos_1ano:           +(v.menos_1ano ?? 0),
+          um_2anos:             +(v.um_2anos   ?? 0),
+          dois_4anos:           +(v.dois_4anos  ?? 0),
+          mais_4anos:           +(v.mais_4anos  ?? 0),
+          tempo_medio_estimado: +(v.tempo_medio_estimado ?? 0),
+          indice_eficiencia:    +(v.indice_eficiencia    ?? 0),
         }));
         return res.json({ vara_principal: varaPrincipal, ranking_bh: rankingBH,
                           varas: detalhes, mock: false, fonte: 'banco' });
@@ -616,6 +641,17 @@ app.get('/api/pje/varas-comparativo', async (req, res) => {
             },
           },
           antigos: { filter: { range: { dataAjuizamento: { lt: gte4yStr } } } },
+          por_faixa: {
+            date_range: {
+              field: 'dataAjuizamento',
+              ranges: [
+                { key: 'menos_1ano', from: 'now-1y/d' },
+                { key: 'um_2anos',   from: 'now-2y/d', to: 'now-1y/d' },
+                { key: 'dois_4anos', from: 'now-4y/d', to: 'now-2y/d' },
+                { key: 'mais_4anos', to:   'now-4y/d' },
+              ],
+            },
+          },
         },
       };
       try {
@@ -626,14 +662,28 @@ app.get('/api/pje/varas-comparativo', async (req, res) => {
         const topClasse  = aggs.ultimos_12m?.por_classe?.buckets?.[0]?.key  ?? '—';
         const topAssunto = aggs.ultimos_12m?.por_assunto?.buckets?.[0]?.key ?? '—';
         const pctAntigos = acervoLocal > 0 ? +((antigos / acervoLocal) * 100).toFixed(1) : 0;
-        const taxaGiro = acervoLocal > 0 ? Math.round((hits12m / acervoLocal) * 100) : 0;
+        const taxaGiro   = acervoLocal > 0 ? +(hits12m / acervoLocal * 100).toFixed(1) : 0;
+        const fBuckets   = aggs.por_faixa?.buckets ?? [];
+        const fv         = key => fBuckets.find(b => b.key === key)?.doc_count ?? 0;
+        const menos1     = fv('menos_1ano');
+        const um2        = fv('um_2anos');
+        const dois4      = fv('dois_4anos');
+        const mais4      = fv('mais_4anos');
+        const tot        = acervoLocal || 1;
+        const tempoMedio = +((menos1*0.5 + um2*1.5 + dois4*3 + mais4*5.5) / tot).toFixed(2);
+        const pctMais4   = +(mais4 / tot * 100).toFixed(1);
+        const indice     = +Math.max(0, Math.min(100, taxaGiro * 2 - pctMais4 * 0.8)).toFixed(1);
         return { nome, acervo: acervoLocal, ultimos_12m: hits12m,
                  media_mensal: Math.round(hits12m / 12),
                  top_classe: topClasse, top_assunto: topAssunto,
-                 pct_antigos: pctAntigos, taxa_giro: taxaGiro };
+                 pct_antigos: pctAntigos, taxa_giro: taxaGiro,
+                 menos_1ano: menos1, um_2anos: um2, dois_4anos: dois4, mais_4anos: mais4,
+                 tempo_medio_estimado: tempoMedio, indice_eficiencia: indice };
       } catch {
         return { nome, acervo: acervoLocal, ultimos_12m: 0, media_mensal: 0,
-                 top_classe: '—', top_assunto: '—', pct_antigos: 0, taxa_giro: 0 };
+                 top_classe: '—', top_assunto: '—', pct_antigos: 0, taxa_giro: 0,
+                 menos_1ano: 0, um_2anos: 0, dois_4anos: 0, mais_4anos: 0,
+                 tempo_medio_estimado: 0, indice_eficiencia: 0 };
       }
     }));
 
@@ -685,24 +735,53 @@ app.post('/api/admin/snapshot-varas', dashAuth, async (req, res) => {
                   },
                 },
                 antigos: { filter: { range: { dataAjuizamento: { lt: gte4yStr } } } },
+                por_faixa: {
+                  date_range: {
+                    field: 'dataAjuizamento',
+                    ranges: [
+                      { key: 'menos_1ano', from: 'now-1y/d' },
+                      { key: 'um_2anos',   from: 'now-2y/d', to: 'now-1y/d' },
+                      { key: 'dois_4anos', from: 'now-4y/d', to: 'now-2y/d' },
+                      { key: 'mais_4anos', to:   'now-4y/d' },
+                    ],
+                  },
+                },
               },
             });
-            const aggs    = r.body?.aggregations ?? {};
-            const hits12m = aggs.ultimos_12m?.doc_count ?? 0;
-            const antigos = aggs.antigos?.doc_count ?? 0;
-            const topC    = aggs.ultimos_12m?.por_classe?.buckets?.[0]?.key  ?? '—';
-            const topA    = aggs.ultimos_12m?.por_assunto?.buckets?.[0]?.key ?? '—';
-            const pctAnt  = v.doc_count > 0 ? +((antigos / v.doc_count) * 100).toFixed(1) : 0;
+            const aggs     = r.body?.aggregations ?? {};
+            const hits12m  = aggs.ultimos_12m?.doc_count ?? 0;
+            const antigos  = aggs.antigos?.doc_count ?? 0;
+            const topC     = aggs.ultimos_12m?.por_classe?.buckets?.[0]?.key  ?? '—';
+            const topA     = aggs.ultimos_12m?.por_assunto?.buckets?.[0]?.key ?? '—';
+            const pctAnt   = v.doc_count > 0 ? +((antigos / v.doc_count) * 100).toFixed(1) : 0;
+            const fBuckets = aggs.por_faixa?.buckets ?? [];
+            const fv       = key => fBuckets.find(b => b.key === key)?.doc_count ?? 0;
+            const menos1   = fv('menos_1ano');
+            const um2      = fv('um_2anos');
+            const dois4    = fv('dois_4anos');
+            const mais4    = fv('mais_4anos');
+            const tot      = v.doc_count || 1;
+            const tempoMed = +((menos1*0.5 + um2*1.5 + dois4*3 + mais4*5.5) / tot).toFixed(2);
+            const taxaG    = v.doc_count > 0 ? +(hits12m / v.doc_count * 100).toFixed(1) : 0;
+            const pctM4    = +(mais4 / tot * 100).toFixed(1);
+            const indice   = +Math.max(0, Math.min(100, taxaG * 2 - pctM4 * 0.8)).toFixed(1);
             await dbq(`
               INSERT INTO trt3_varas_snapshot
-                (nome, acervo, ultimos_12m, media_mensal, top_classe, top_assunto, pct_antigos, atualizado_em)
-              VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())
+                (nome, acervo, ultimos_12m, media_mensal, top_classe, top_assunto, pct_antigos,
+                 menos_1ano, um_2anos, dois_4anos, mais_4anos, tempo_medio_estimado, indice_eficiencia,
+                 atualizado_em)
+              VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,NOW())
               ON CONFLICT (nome) DO UPDATE SET
                 acervo=EXCLUDED.acervo, ultimos_12m=EXCLUDED.ultimos_12m,
                 media_mensal=EXCLUDED.media_mensal, top_classe=EXCLUDED.top_classe,
                 top_assunto=EXCLUDED.top_assunto, pct_antigos=EXCLUDED.pct_antigos,
+                menos_1ano=EXCLUDED.menos_1ano, um_2anos=EXCLUDED.um_2anos,
+                dois_4anos=EXCLUDED.dois_4anos, mais_4anos=EXCLUDED.mais_4anos,
+                tempo_medio_estimado=EXCLUDED.tempo_medio_estimado,
+                indice_eficiencia=EXCLUDED.indice_eficiencia,
                 atualizado_em=NOW()
-            `, [v.key, v.doc_count, hits12m, Math.round(hits12m / 12), topC, topA, pctAnt]);
+            `, [v.key, v.doc_count, hits12m, Math.round(hits12m / 12), topC, topA, pctAnt,
+                menos1, um2, dois4, mais4, tempoMed, indice]);
             ok++;
           } catch (e) { console.error(`[snapshot] ${v.key}: ${e.message}`); }
         }));
