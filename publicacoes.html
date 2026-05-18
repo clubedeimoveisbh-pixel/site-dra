@@ -131,7 +131,7 @@
         <details class="pub-citar">
           <summary>Como citar (ABNT)</summary>
           <div class="pub-citar-box">
-            <p class="pub-citar-texto">COUTO, Marina Grojpen. A desumanização como risco ético: IA e Justiça do Trabalho. <strong>Revista do Tribunal Regional do Trabalho da 3ª Região</strong>, Belo Horizonte, n. 110.</p>
+            <p class="pub-citar-texto" id="cit-desumanizacao">COUTO, Marina Grojpen. A desumanização como risco ético: IA e Justiça do Trabalho. <strong>Revista do Tribunal Regional do Trabalho da 3ª Região</strong>, Belo Horizonte, n. 110, p. [X-Y], [mês] [ano]. Disponível em: https://www.trt3.jus.br/publicacoes_ej/revista_110/. Acesso em: <span class="data-acesso"></span>.</p>
             <button class="btn-copiar" onclick="copiarCitacao(this)">Copiar citação</button>
           </div>
         </details>
@@ -164,7 +164,7 @@
         <details class="pub-citar">
           <summary>Como citar (ABNT)</summary>
           <div class="pub-citar-box">
-            <p class="pub-citar-texto">COUTO, Marina Grojpen. Pandemia, Justiça do Trabalho e a história do presente. <strong>Revista do Tribunal Regional do Trabalho da 3ª Região</strong>, Belo Horizonte, n. 107.</p>
+            <p class="pub-citar-texto" id="cit-pandemia">COUTO, Marina Grojpen. Pandemia, Justiça do Trabalho e a história do presente. <strong>Revista do Tribunal Regional do Trabalho da 3ª Região</strong>, Belo Horizonte, n. 107, p. [X-Y], [mês] [ano]. Disponível em: https://www.trt3.jus.br/publicacoes_ej/revista_107/. Acesso em: <span class="data-acesso"></span>.</p>
             <button class="btn-copiar" onclick="copiarCitacao(this)">Copiar citação</button>
           </div>
         </details>
@@ -197,7 +197,7 @@
         <details class="pub-citar">
           <summary>Como citar (ABNT)</summary>
           <div class="pub-citar-box">
-            <p class="pub-citar-texto">COUTO, Marina Grojpen. Sindicatos e acesso à justiça na pandemia. In: Temas transversais do acesso à justiça: uma abordagem pela via dos direitos. Belo Horizonte: Editora Dialética.</p>
+            <p class="pub-citar-texto" id="cit-sindicatos">COUTO, Marina Grojpen. Sindicatos e acesso à justiça na pandemia. In: Temas transversais do acesso à justiça: uma abordagem pela via dos direitos. Belo Horizonte: Editora Dialética, [ano]. p. [X-Y]. Disponível em: https://loja.editoradialetica.com/humanidades/temas-transversais-do-acesso-a-justica-uma-abordagem-pela-via-dos-direitos. Acesso em: <span class="data-acesso"></span>.</p>
             <button class="btn-copiar" onclick="copiarCitacao(this)">Copiar citação</button>
           </div>
         </details>
@@ -230,7 +230,7 @@
         <details class="pub-citar">
           <summary>Como citar (ABNT)</summary>
           <div class="pub-citar-box">
-            <p class="pub-citar-texto">COUTO, Marina Grojpen. Trabalho plataformizado no capitalismo pandêmico: o labor no pós-pandemia. <strong>Revista do Tribunal Regional do Trabalho da 3ª Região</strong>, Belo Horizonte, n. 108.</p>
+            <p class="pub-citar-texto" id="cit-plataformizado">COUTO, Marina Grojpen. Trabalho plataformizado no capitalismo pandêmico: o labor no pós-pandemia. <strong>Revista do Tribunal Regional do Trabalho da 3ª Região</strong>, Belo Horizonte, n. 108, p. [X-Y], [mês] [ano]. Disponível em: https://www.trt3.jus.br/publicacoes_ej/revista_108/. Acesso em: <span class="data-acesso"></span>.</p>
             <button class="btn-copiar" onclick="copiarCitacao(this)">Copiar citação</button>
           </div>
         </details>
@@ -256,8 +256,16 @@
 <div id="footer-placeholder"></div>
 <script src="js/nav.js"></script>
 <script>
+const MESES_ABNT = ['jan.','fev.','mar.','abr.','maio','jun.','jul.','ago.','set.','out.','nov.','dez.'];
+function dataAcessoHoje() {
+  const d = new Date();
+  return d.getDate() + ' ' + MESES_ABNT[d.getMonth()] + ' ' + d.getFullYear();
+}
+document.querySelectorAll('.data-acesso').forEach(el => { el.textContent = dataAcessoHoje(); });
+
 function copiarCitacao(btn) {
-  const texto = btn.previousElementSibling.textContent;
+  const p = btn.previousElementSibling;
+  const texto = p.textContent;
   navigator.clipboard.writeText(texto).then(() => {
     const orig = btn.textContent;
     btn.textContent = 'Copiado! ✓';

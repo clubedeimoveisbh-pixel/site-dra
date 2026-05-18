@@ -173,29 +173,36 @@
     <div class="tool-card">
       <div class="tool-card-body">
 
-        <div class="tool-card-title">✂️ Configurações</div>
+        <div class="tool-card-title">✂️ Opções de limpeza</div>
 
         <!-- Mode pills -->
         <div class="mode-pills" id="mode-pills">
-          <button class="mode-pill active" data-mode="normalizar" onclick="setMode(this)">
+          <button class="mode-pill active" data-mode="normalizar" onclick="setMode(this)"
+            title="Substitui dois ou mais espaços consecutivos por um único espaço. Preserva quebras de linha.">
             Normalizar espaços<small>múltiplos → um</small>
           </button>
-          <button class="mode-pill" data-mode="cortar-linhas" onclick="setMode(this)">
-            Cortar linhas<small>trim em cada linha</small>
+          <button class="mode-pill" data-mode="cortar-linhas" onclick="setMode(this)"
+            title="Remove os espaços e tabulações no início e no fim de cada linha, sem alterar o conteúdo interno.">
+            Cortar linhas<small>remove espaços nas bordas de cada linha</small>
           </button>
-          <button class="mode-pill" data-mode="remover-vazias" onclick="setMode(this)">
+          <button class="mode-pill" data-mode="remover-vazias" onclick="setMode(this)"
+            title="Exclui as linhas que não contêm nenhum texto, mantendo o conteúdo das demais intacto.">
             Remover linhas em branco<small>mantém o texto</small>
           </button>
-          <button class="mode-pill" data-mode="compacto" onclick="setMode(this)">
+          <button class="mode-pill" data-mode="compacto" onclick="setMode(this)"
+            title="Combina: remove espaços nas bordas de cada linha, exclui linhas vazias e normaliza espaços múltiplos.">
             Modo compacto<small>trim + sem vazias + normalizar</small>
           </button>
-          <button class="mode-pill" data-mode="linha-unica" onclick="setMode(this)">
+          <button class="mode-pill" data-mode="linha-unica" onclick="setMode(this)"
+            title="Une todo o texto em uma única linha, substituindo quebras de linha e espaços múltiplos por um espaço.">
             Linha única<small>tudo em uma linha</small>
           </button>
-          <button class="mode-pill" data-mode="remover-todos" onclick="setMode(this)">
+          <button class="mode-pill" data-mode="remover-todos" onclick="setMode(this)"
+            title="Remove todos os caracteres de espaço simples. Não afeta tabulações nem quebras de linha.">
             Remover todos espaços<small>remove cada espaço</small>
           </button>
-          <button class="mode-pill" data-mode="remover-tudo" onclick="setMode(this)">
+          <button class="mode-pill" data-mode="remover-tudo" onclick="setMode(this)"
+            title="Remove qualquer espaço em branco: espaços, tabulações e quebras de linha. Resulta em texto sem separações.">
             Remover tudo<small>espaços + tabs + quebras</small>
           </button>
         </div>

@@ -86,7 +86,7 @@
           <a href="https://www.instagram.com/marinatrabalhista" target="_blank" rel="noopener">📷 @marinatrabalhista</a>
         </div>
         <p style="font-size:0.75rem;color:rgba(232,230,224,0.45);margin-top:0.75rem;line-height:1.5">
-          Conteúdo gratuito sobre<br>processo do trabalho
+          Conteúdo gratuito sobre<br>direito material e processual do trabalho
         </p>
       </div>
     </div>

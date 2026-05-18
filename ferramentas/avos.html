@@ -156,11 +156,14 @@
           </div>
         </div>
 
-        <!-- Faltas slider -->
+        <!-- Faltas slider + input manual -->
         <div class="slider-section">
           <div class="slider-header">
             <span class="slider-lbl">Faltas injustificadas</span>
-            <div class="slider-val" id="faltas-display">0<small>faltas</small></div>
+            <div style="display:flex;align-items:center;gap:0.75rem">
+              <input type="number" id="faltas-input" min="0" max="99" value="0" style="width:70px;padding:0.3rem 0.5rem;border:1.5px solid rgba(200,167,91,0.35);border-radius:var(--radius);font-family:var(--ff-body);font-size:0.95rem;font-weight:700;color:var(--gold-muted);background:var(--cream);outline:none;text-align:center" oninput="syncFaltasInput(this.value)">
+              <div class="slider-val" id="faltas-display" style="min-width:60px">0<small>faltas</small></div>
+            </div>
           </div>
           <input type="range" class="faltas-slider" id="faltas-slider" min="0" max="33" value="0" step="1">
           <div class="faltas-scale">
@@ -177,13 +180,12 @@
           </div>
         </div>
 
-        <!-- Art. 133 accordion -->
-        <div class="accordion" id="art133-accordion">
-          <div class="accordion-header" onclick="toggleAcordeon()">
-            <span class="accordion-title">&#9660;&nbsp; Hip&oacute;teses Art. 133 CLT — perda do per&iacute;odo aquisitivo</span>
-            <span class="accordion-chevron">▲</span>
+        <!-- Art. 133 — sempre visível -->
+        <div class="accordion open" id="art133-accordion">
+          <div class="accordion-header" style="cursor:default">
+            <span class="accordion-title">Hip&oacute;teses Art. 133 CLT — perda do per&iacute;odo aquisitivo</span>
           </div>
-          <div class="accordion-body">
+          <div class="accordion-body" style="display:block">
             <label class="art133-item"><input type="checkbox" id="art133-1"> <span>Licen&ccedil;a remunerada por mais de 30 dias (inc. I)</span></label>
             <label class="art133-item"><input type="checkbox" id="art133-2"> <span>Licen&ccedil;a por acidente ou doen&ccedil;a por mais de 6 meses (inc. II)</span></label>
             <label class="art133-item"><input type="checkbox" id="art133-3"> <span>Recebimento de presta&ccedil;&otilde;es de acidente do trabalho (inc. III)</span></label>
@@ -200,7 +202,7 @@
       </div>
     </div>
 
-    <p class="legal-note">&#9432;&nbsp; Esta calculadora é informativa. Mês conta como avo quando o empregado trabalhou mais de 14 dias naquele mês (Art. 142, §2º, CLT). Para casos com hipóteses do Art. 133 simultâneas ou regras coletivas diferenciadas, consulte um advogado.</p>
+    <p class="legal-note">&#9432;&nbsp; Esta calculadora é informativa. Para férias, o mês conta como avo quando o empregado trabalhou mais de 14 dias (Art. 142, §2º, CLT). Para o 13º salário, o mês conta como avo quando o empregado trabalhou 15 dias ou mais no mês (Art. 1º, §2º, Lei 4.090/1962). Para casos com hipóteses do Art. 133 simultâneas ou regras coletivas diferenciadas, consulte um advogado.</p>
   </div>
 </section>
 
@@ -226,14 +228,10 @@ function avosEntre(inicio,fim){
   return Math.min(avos,12);
 }
 
-function toggleAcordeon(){
-  const acc=document.getElementById('art133-accordion');
-  acc.classList.toggle('open');
-}
-
-// Faltas slider
-document.getElementById('faltas-slider').addEventListener('input', function(){
-  const f=parseInt(this.value);
+function atualizarFaltasUI(f){
+  const sliderMax = 33;
+  document.getElementById('faltas-slider').value = Math.min(f, sliderMax);
+  document.getElementById('faltas-input').value = f;
   document.getElementById('faltas-display').innerHTML = f + '<small>faltas</small>';
   const dias=diasFeriasPorFaltas(f);
   const badge=document.getElementById('faltas-badge');
@@ -245,6 +243,16 @@ document.getElementById('faltas-slider').addEventListener('input', function(){
   else if(dias===18){ badge.classList.add('faltas-dias-badge--warn'); art.textContent='Art. 130, III CLT'; }
   else if(dias===12){ badge.classList.add('faltas-dias-badge--warn'); art.textContent='Art. 130, IV CLT'; }
   else { badge.classList.add('faltas-dias-badge--bad'); art.textContent='Art. 130, §2º — perda total'; }
+}
+
+function syncFaltasInput(val){
+  const f = Math.max(0, parseInt(val)||0);
+  atualizarFaltasUI(f);
+}
+
+// Faltas slider
+document.getElementById('faltas-slider').addEventListener('input', function(){
+  atualizarFaltasUI(parseInt(this.value));
 });
 
 // Ainda contratado
@@ -266,7 +274,7 @@ function calcAvos(){
   const saida=parseLocalDate(saidaVal);
   if(saida<admissao){alert('A data de saída deve ser posterior à admissão.');return;}
 
-  const faltas=parseInt(document.getElementById('faltas-slider').value)||0;
+  const faltas=Math.max(0,parseInt(document.getElementById('faltas-input').value)||0);
   const diasFerias=diasFeriasPorFaltas(faltas);
   const temHip133=[1,2,3,4,5].some(i=>document.getElementById('art133-'+i)?.checked);
 
@@ -355,7 +363,8 @@ function calcAvos(){
   }
 
   html+=`<div class="explain-box" style="margin-top:0.75rem">
-    <p>&#9432;&nbsp; Mês conta como avo quando o empregado trabalhou mais de 14 dias naquele mês (Art. 142, §2º, CLT).</p>
+    <p>&#9432;&nbsp; <strong>Férias:</strong> Mês conta como avo quando o empregado trabalhou mais de 14 dias (Art. 142, §2º, CLT).<br>
+    <strong>13º salário:</strong> Mês conta como avo quando o empregado trabalhou 15 dias ou mais no mês (Art. 1º, §2º, Lei 4.090/1962).</p>
   </div>`;
 
   html+='</div>';

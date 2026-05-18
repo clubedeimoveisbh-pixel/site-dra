@@ -236,9 +236,9 @@
       Ferramentas
     </a>
     <span class="section-label">Calculadora</span>
-    <h1>Aviso Pr&eacute;vio Proporcional</h1>
+    <h1>Aviso Pr&eacute;vio Indenizado</h1>
     <div class="gold-divider"></div>
-    <p class="hero-sub">Lei 12.506/2011 &mdash; 30 dias base + 3 dias por ano completo al&eacute;m do primeiro, at&eacute; 90 dias. Use as datas ou o slider para ver o resultado em tempo real.</p>
+    <p class="hero-sub">Lei 12.506/2011 &mdash; 30 dias base + 3 dias por ano completo al&eacute;m do primeiro, at&eacute; 90 dias. <strong style="color:rgba(255,255,255,0.75)">Este c&aacute;lculo corresponde ao aviso pr&eacute;vio indenizado.</strong> Use as datas ou o slider para ver o resultado em tempo real.</p>
   </div>
 </section>
 
@@ -349,9 +349,9 @@
                 <div class="detail-chip-label">Proje&ccedil;&atilde;o fim aviso</div>
                 <div class="detail-chip-val" id="r-projecao">—</div>
               </div>
-              <div class="detail-chip">
+              <div class="detail-chip" id="r-limite-chip" style="display:none">
                 <div class="detail-chip-label">Limite m&aacute;ximo</div>
-                <div class="detail-chip-val" id="r-limite" style="color:var(--text-mid)">Não atingido</div>
+                <div class="detail-chip-val" id="r-limite" style="color:#f87171">Atingido &#9888;</div>
               </div>
             </div>
 
@@ -404,8 +404,7 @@ function calcFromAnos(anos, dispensa) {
     document.getElementById('r-projecao').textContent = '—';
   }
 
-  document.getElementById('r-limite').textContent = total === 90 ? 'Atingido ⚠' : 'Não atingido';
-  document.getElementById('r-limite').style.color = total === 90 ? '#f87171' : 'var(--text-mid)';
+  document.getElementById('r-limite-chip').style.display = total === 90 ? '' : 'none';
 
   // Bar
   const basePct = (30/90)*100;
@@ -417,7 +416,7 @@ function calcFromAnos(anos, dispensa) {
   // Explain
   document.getElementById('r-explain').innerHTML =
     '<strong>Base legal:</strong> Art. 1º da Lei 12.506/2011. O acréscimo de 3 dias incide a partir do 2º ano completo de serviço (o 1º ano não gera acréscimo). ' +
-    (total === 90 ? '<strong>O limite máximo de 90 dias foi atingido.</strong>' : 'O limite máximo é de 90 dias (30 base + 60 adicionais).');
+    (total === 90 ? '<strong>O limite máximo de 90 dias foi atingido.</strong>' : 'Trata-se de aviso prévio indenizado.');
 
   // Slider sync
   document.getElementById('anos-slider').value = Math.min(23, anos);
