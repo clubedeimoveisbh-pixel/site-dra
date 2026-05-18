@@ -1,8 +1,35 @@
 const express = require('express');
 const path    = require('path');
 const https   = require('https');
+const { Pool } = require('pg');
 const app     = express();
 const PORT    = process.env.PORT || 3000;
+
+// ── PostgreSQL ────────────────────────────────────────────────────────────────
+const pool = process.env.DATABASE_URL
+  ? new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
+  : null;
+
+async function dbq(sql, p = []) {
+  const c = await pool.connect();
+  try { return await c.query(sql, p); } finally { c.release(); }
+}
+
+async function initDB() {
+  if (!pool) return;
+  await dbq(`CREATE TABLE IF NOT EXISTS trt3_varas_snapshot (
+    nome         TEXT PRIMARY KEY,
+    acervo       INTEGER DEFAULT 0,
+    ultimos_12m  INTEGER DEFAULT 0,
+    media_mensal INTEGER DEFAULT 0,
+    top_classe   TEXT    DEFAULT '—',
+    top_assunto  TEXT    DEFAULT '—',
+    pct_antigos  NUMERIC(5,2) DEFAULT 0,
+    atualizado_em TIMESTAMPTZ DEFAULT NOW()
+  )`);
+  console.log('[DB] tabela trt3_varas_snapshot ok');
+}
+initDB().catch(e => console.error('[DB init]', e.message));
 
 app.use(express.json());
 
@@ -451,6 +478,50 @@ app.get('/api/pje/varas-comparativo', async (req, res) => {
   const grupo         = req.query.grupo || 'proximas';
   if (!varaPrincipal) return res.json({ ...MOCK_VARAS_COMPARATIVO });
 
+  // ── Servir do banco se tiver snapshot ────────────────────────
+  if (pool) {
+    try {
+      const snap = await dbq('SELECT * FROM trt3_varas_snapshot ORDER BY acervo DESC');
+      if (snap.rows.length > 0) {
+        const todas = snap.rows;
+        const varasBH = todas; // snapshot já é só BH
+        const idxPrincipal = varasBH.findIndex(v => v.nome === varaPrincipal);
+        const rankingBH = idxPrincipal === -1
+          ? { posicao: null, total_varas: varasBH.length, percentil: null }
+          : { posicao: idxPrincipal + 1, total_varas: varasBH.length,
+              percentil: Math.round((1 - idxPrincipal / varasBH.length) * 100) };
+
+        let grupoVaras;
+        if (grupo === 'bh') {
+          grupoVaras = varasBH;
+        } else {
+          const numMatch = varaPrincipal.match(/(\d+)ª/);
+          if (numMatch) {
+            const num = parseInt(numMatch[1], 10);
+            grupoVaras = varasBH.filter(v => {
+              const m = v.nome.match(/(\d+)ª/);
+              return m && Math.abs(parseInt(m[1], 10) - num) <= 3;
+            });
+          } else {
+            grupoVaras = varasBH.slice(0, 8);
+          }
+        }
+        const detalhes = grupoVaras.map(v => ({
+          nome:         v.nome,
+          acervo:       +v.acervo,
+          ultimos_12m:  +v.ultimos_12m,
+          media_mensal: +v.media_mensal,
+          top_classe:   v.top_classe,
+          top_assunto:  v.top_assunto,
+          pct_antigos:  +v.pct_antigos,
+        }));
+        return res.json({ vara_principal: varaPrincipal, ranking_bh: rankingBH,
+                          varas: detalhes, mock: false, fonte: 'banco' });
+      }
+    } catch (e) { console.error('[varas-comp db]', e.message); }
+  }
+
+  // ── Fallback: cache em memória → DataJud ──────────────────────
   const cacheKey = `varas-comp:${varaPrincipal}:${grupo}`;
   const cached = cacheGet(cacheKey);
   if (cached) return res.json(cached);
@@ -563,6 +634,81 @@ app.get('/api/pje/varas-comparativo', async (req, res) => {
     console.error('[pje/varas-comparativo]', e.message);
     res.status(502).json({ error: e.message });
   }
+});
+
+// ── Admin: snapshot de todas as varas BH ─────────────────────────────────────
+app.post('/api/admin/snapshot-varas', dashAuth, async (req, res) => {
+  if (!pool) return res.status(503).json({ error: 'DATABASE_URL não configurado' });
+  res.json({ status: 'iniciado', msg: 'Snapshot rodando em background (~2-5 min para todas as varas de BH)' });
+
+  (async () => {
+    try {
+      const rVaras = await datajudPost(IDX, {
+        size: 0,
+        aggs: { varas: { terms: { field: 'orgaoJulgador.nome.keyword', size: 300, order: { _count: 'desc' } } } },
+      });
+      const todas   = rVaras.body.aggregations?.varas?.buckets ?? [];
+      const varasBH = todas.filter(v => /BELO HORIZONTE/i.test(v.key));
+      console.log(`[snapshot] ${varasBH.length} varas BH encontradas`);
+
+      const gte12m = new Date(); gte12m.setFullYear(gte12m.getFullYear() - 1);
+      const gte4y  = new Date(); gte4y.setFullYear(gte4y.getFullYear() - 4);
+      const gte12mStr = gte12m.toISOString().slice(0, 10);
+      const gte4yStr  = gte4y.toISOString().slice(0, 10);
+
+      const BATCH = 4;
+      let ok = 0;
+      for (let i = 0; i < varasBH.length; i += BATCH) {
+        const lote = varasBH.slice(i, i + BATCH);
+        await Promise.all(lote.map(async v => {
+          const varaFilter = { term: { 'orgaoJulgador.nome.keyword': v.key } };
+          try {
+            const r = await datajudPost(IDX, {
+              query: { bool: { filter: [varaFilter] } },
+              size: 0,
+              aggs: {
+                ultimos_12m: {
+                  filter: { range: { dataAjuizamento: { gte: gte12mStr } } },
+                  aggs: {
+                    por_classe:  { terms: { field: 'classe.nome.keyword',   size: 1 } },
+                    por_assunto: { terms: { field: 'assuntos.nome.keyword', size: 1 } },
+                  },
+                },
+                antigos: { filter: { range: { dataAjuizamento: { lt: gte4yStr } } } },
+              },
+            });
+            const aggs    = r.body?.aggregations ?? {};
+            const hits12m = aggs.ultimos_12m?.doc_count ?? 0;
+            const antigos = aggs.antigos?.doc_count ?? 0;
+            const topC    = aggs.ultimos_12m?.por_classe?.buckets?.[0]?.key  ?? '—';
+            const topA    = aggs.ultimos_12m?.por_assunto?.buckets?.[0]?.key ?? '—';
+            const pctAnt  = v.doc_count > 0 ? +((antigos / v.doc_count) * 100).toFixed(1) : 0;
+            await dbq(`
+              INSERT INTO trt3_varas_snapshot
+                (nome, acervo, ultimos_12m, media_mensal, top_classe, top_assunto, pct_antigos, atualizado_em)
+              VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())
+              ON CONFLICT (nome) DO UPDATE SET
+                acervo=EXCLUDED.acervo, ultimos_12m=EXCLUDED.ultimos_12m,
+                media_mensal=EXCLUDED.media_mensal, top_classe=EXCLUDED.top_classe,
+                top_assunto=EXCLUDED.top_assunto, pct_antigos=EXCLUDED.pct_antigos,
+                atualizado_em=NOW()
+            `, [v.key, v.doc_count, hits12m, Math.round(hits12m / 12), topC, topA, pctAnt]);
+            ok++;
+          } catch (e) { console.error(`[snapshot] ${v.key}: ${e.message}`); }
+        }));
+        await new Promise(r => setTimeout(r, 300)); // pausa entre batches
+      }
+      console.log(`[snapshot] concluído: ${ok}/${varasBH.length} varas salvas`);
+    } catch (e) { console.error('[snapshot] erro geral:', e.message); }
+  })();
+});
+
+app.get('/api/admin/snapshot-status', dashAuth, async (req, res) => {
+  if (!pool) return res.json({ total: 0, atualizado_em: null });
+  try {
+    const r = await dbq('SELECT COUNT(*) as total, MAX(atualizado_em) as atualizado_em FROM trt3_varas_snapshot');
+    res.json(r.rows[0]);
+  } catch (e) { res.status(502).json({ error: e.message }); }
 });
 
 // ── Dashboard (protected) ─────────────────────────────────────────────────────
