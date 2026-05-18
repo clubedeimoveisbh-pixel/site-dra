@@ -93,13 +93,13 @@ const MOCK_VARAS_COMPARATIVO = {
   vara_principal: '17ª VARA DO TRABALHO DE BELO HORIZONTE',
   ranking_bh: { posicao: 42, total_varas: 67, percentil: 37 },
   varas: [
-    { nome: '14ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 1203, ultimos_12m: 287, top_classe: 'Reclamação Trabalhista' },
-    { nome: '15ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 985,  ultimos_12m: 241, top_classe: 'Reclamação Trabalhista' },
-    { nome: '16ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 1074, ultimos_12m: 263, top_classe: 'Execução de Título Extrajudicial' },
-    { nome: '17ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 847,  ultimos_12m: 198, top_classe: 'Reclamação Trabalhista' },
-    { nome: '18ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 921,  ultimos_12m: 219, top_classe: 'Reclamação Trabalhista' },
-    { nome: '19ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 1138, ultimos_12m: 274, top_classe: 'Mandado de Segurança' },
-    { nome: '20ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 762,  ultimos_12m: 183, top_classe: 'Reclamação Trabalhista' },
+    { nome: '14ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 1203, ultimos_12m: 287, pct_antigos: 42, taxa_giro: 24, top_classe: 'Reclamação Trabalhista' },
+    { nome: '15ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 985,  ultimos_12m: 241, pct_antigos: 38, taxa_giro: 24, top_classe: 'Reclamação Trabalhista' },
+    { nome: '16ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 1074, ultimos_12m: 263, pct_antigos: 55, taxa_giro: 24, top_classe: 'Execução de Título Extrajudicial' },
+    { nome: '17ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 847,  ultimos_12m: 198, pct_antigos: 47, taxa_giro: 23, top_classe: 'Reclamação Trabalhista' },
+    { nome: '18ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 921,  ultimos_12m: 219, pct_antigos: 51, taxa_giro: 24, top_classe: 'Reclamação Trabalhista' },
+    { nome: '19ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 1138, ultimos_12m: 274, pct_antigos: 62, taxa_giro: 24, top_classe: 'Mandado de Segurança' },
+    { nome: '20ª VARA DO TRABALHO DE BELO HORIZONTE', acervo: 762,  ultimos_12m: 183, pct_antigos: 33, taxa_giro: 24, top_classe: 'Reclamação Trabalhista' },
   ],
   mock: true,
 };
@@ -344,7 +344,7 @@ app.get('/api/pje/tempos', async (req, res) => {
   res.json({ tempos: MOCK_TEMPOS, mock: true });
 });
 
-// ── API: eficiência — distribuição do acervo por antiguidade ─────────────────
+// ── API: eficiência — taxa de giro + distribuição do acervo por antiguidade ───
 const MOCK_EFICIENCIA = {
   faixas: [
     { nome: 'Menos de 1 ano', total: 94,  pct: 11.1 },
@@ -353,6 +353,8 @@ const MOCK_EFICIENCIA = {
     { nome: 'Mais de 4 anos', total: 322, pct: 38.0 },
   ],
   total_acervo: 847,
+  ultimos_12m: 198,
+  taxa_giro: 23,
   tempo_medio_estimado_anos: 2.9,
   mock: true,
 };
@@ -376,12 +378,18 @@ app.get('/api/pje/eficiencia', async (req, res) => {
             ],
           },
         },
+        ultimos_12m: {
+          filter: { range: { dataAjuizamento: { gte: 'now-1y/d' } } },
+        },
       },
     };
     const r = await datajudPost(IDX, body);
     if (r.status !== 200) throw new Error(`DataJud ${r.status}`);
-    const buckets   = r.body.aggregations?.por_faixa?.buckets ?? [];
+    const aggs      = r.body.aggregations ?? {};
+    const buckets   = aggs.por_faixa?.buckets ?? [];
     const total     = buckets.reduce((s, b) => s + b.doc_count, 0);
+    const ult12m    = aggs.ultimos_12m?.doc_count ?? 0;
+    const taxaGiro  = total > 0 ? Math.round((ult12m / total) * 100) : 0;
     const midpoints = { 'Menos de 1 ano': 0.5, '1 a 2 anos': 1.5, '2 a 4 anos': 3, 'Mais de 4 anos': 5 };
     const faixas    = buckets.map(b => ({
       nome:  b.key,
@@ -391,7 +399,7 @@ app.get('/api/pje/eficiencia', async (req, res) => {
     const tempoMedio = total
       ? Number((faixas.reduce((s, f) => s + f.total * (midpoints[f.nome] ?? 3), 0) / total).toFixed(2))
       : 0;
-    res.json({ faixas, total_acervo: total, tempo_medio_estimado_anos: tempoMedio, mock: false });
+    res.json({ faixas, total_acervo: total, ultimos_12m: ult12m, taxa_giro: taxaGiro, tempo_medio_estimado_anos: tempoMedio, mock: false });
   } catch (e) { console.error('[pje/eficiencia]', e.message); res.status(502).json({ error: e.message }); }
 });
 
@@ -514,6 +522,7 @@ app.get('/api/pje/varas-comparativo', async (req, res) => {
           top_classe:   v.top_classe,
           top_assunto:  v.top_assunto,
           pct_antigos:  +v.pct_antigos,
+          taxa_giro:    +v.acervo > 0 ? Math.round((+v.ultimos_12m / +v.acervo) * 100) : 0,
         }));
         return res.json({ vara_principal: varaPrincipal, ranking_bh: rankingBH,
                           varas: detalhes, mock: false, fonte: 'banco' });
@@ -617,13 +626,14 @@ app.get('/api/pje/varas-comparativo', async (req, res) => {
         const topClasse  = aggs.ultimos_12m?.por_classe?.buckets?.[0]?.key  ?? '—';
         const topAssunto = aggs.ultimos_12m?.por_assunto?.buckets?.[0]?.key ?? '—';
         const pctAntigos = acervoLocal > 0 ? +((antigos / acervoLocal) * 100).toFixed(1) : 0;
+        const taxaGiro = acervoLocal > 0 ? Math.round((hits12m / acervoLocal) * 100) : 0;
         return { nome, acervo: acervoLocal, ultimos_12m: hits12m,
                  media_mensal: Math.round(hits12m / 12),
                  top_classe: topClasse, top_assunto: topAssunto,
-                 pct_antigos: pctAntigos };
+                 pct_antigos: pctAntigos, taxa_giro: taxaGiro };
       } catch {
         return { nome, acervo: acervoLocal, ultimos_12m: 0, media_mensal: 0,
-                 top_classe: '—', top_assunto: '—', pct_antigos: 0 };
+                 top_classe: '—', top_assunto: '—', pct_antigos: 0, taxa_giro: 0 };
       }
     }));
 

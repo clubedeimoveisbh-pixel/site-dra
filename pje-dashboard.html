@@ -743,32 +743,37 @@ tr:hover td{background:rgba(200,167,91,.04)}
     <!-- Eficiência view -->
     <div id="eficiencia-view" style="display:none">
       <div class="comp-header">
-        <h3>Eficiência — Antiguidade do Acervo</h3>
-        <p>Distribuição dos processos em acervo por tempo desde o ajuizamento.</p>
+        <h3>Eficiência da Vara</h3>
+        <p>Taxa de giro anual e perfil do backlog — processos em acervo por antiguidade.</p>
       </div>
 
-      <!-- KPI cards -->
+      <!-- KPI cards: taxa de giro principal + contexto -->
       <div class="efic-kpi-grid">
-        <div class="efic-kpi">
-          <div class="efic-kpi-val" id="efic-tempo-medio">—</div>
-          <div class="efic-kpi-label">Tempo médio estimado (anos)</div>
+        <div class="efic-kpi" id="efic-giro-card">
+          <div class="efic-kpi-val" id="efic-taxa-giro">—</div>
+          <div class="efic-kpi-label">Taxa de giro anual · % do acervo distribuído nos últimos 12 meses</div>
         </div>
         <div class="efic-kpi">
           <div class="efic-kpi-val" id="efic-pct-menos2">—</div>
-          <div class="efic-kpi-label">% processos com menos de 2 anos</div>
+          <div class="efic-kpi-label">% processos com menos de 2 anos no acervo</div>
         </div>
         <div class="efic-kpi">
           <div class="efic-kpi-val" id="efic-pct-mais4">—</div>
-          <div class="efic-kpi-label">% processos com mais de 4 anos</div>
+          <div class="efic-kpi-label">% processos com mais de 4 anos no acervo</div>
         </div>
       </div>
 
-      <!-- Doughnut chart + table side by side -->
+      <div class="efic-note" style="margin-bottom:1.25rem">
+        <strong style="color:var(--gold)">Eficiência real</strong> = tempo do ajuizamento até a conclusão do processo. Calculável individualmente (veja a view de processo). Em massa, a API pública não fornece data de encerramento por processo — usamos <strong>taxa de giro</strong> como proxy: quanto maior, mais ativa é a vara em relação ao seu backlog.
+      </div>
+
+      <!-- Perfil do Backlog: doughnut + tabela -->
+      <div style="font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem">Perfil do Backlog</div>
       <div class="charts-grid" style="margin-bottom:1.25rem">
         <div class="chart-card">
           <div class="chart-title">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            Distribuição por Faixa de Antiguidade
+            Distribuição por Antiguidade do Acervo
           </div>
           <div class="chart-wrap">
             <canvas id="chart-eficiencia"></canvas>
@@ -1340,8 +1345,19 @@ function renderEficiencia(data) {
   const faixas = data.faixas || [];
   const total  = data.total_acervo || 0;
 
-  // KPIs
-  setEl('efic-tempo-medio', data.tempo_medio_estimado_anos != null ? data.tempo_medio_estimado_anos.toFixed(1) + ' anos' : '—');
+  // Taxa de giro — card principal com cor semafórica
+  const taxaGiro = data.taxa_giro ?? 0;
+  const giroEl   = document.getElementById('efic-taxa-giro');
+  if (giroEl) {
+    giroEl.textContent = taxaGiro + '%';
+    const card = document.getElementById('efic-giro-card');
+    if (card) {
+      const cor = taxaGiro >= 15 ? '#4ade80' : taxaGiro >= 8 ? '#fbbf24' : '#f87171';
+      card.style.borderColor = cor + '66';
+      card.style.setProperty('--efic-giro-color', cor);
+      giroEl.style.color = cor;
+    }
+  }
 
   const menos2 = faixas.filter(f => f.nome === 'Menos de 1 ano' || f.nome === '1 a 2 anos')
                         .reduce((s, f) => s + f.pct, 0);
@@ -1497,12 +1513,30 @@ function renderVarasComparativo(data) {
     </div>`;
   }).join('');
 
+  const maxGiro = Math.max(...varas.map(v => v.taxa_giro ?? 0), 1);
+  const barsGiro = byAcervo.map(v => {
+    const g    = v.taxa_giro ?? 0;
+    const pct  = ((g / maxGiro) * 100).toFixed(0);
+    const nm   = v.nome.replace(/^(\d+)ª VARA DO TRABALHO DE BELO HORIZONTE$/, '$1ª');
+    const isPr = v.nome === principal;
+    const cor  = g >= 15 ? '#4ade80' : g >= 8 ? '#fbbf24' : '#f87171';
+    return `<div class="varas-bar-row${isPr?' principal':''}">
+      <div class="varas-bar-label">${esc(nm.length>6?nm.slice(0,5)+'…':nm)}</div>
+      <div class="varas-bar-track">
+        <div class="varas-bar-fill" style="width:${pct}%;background:${isPr?cor:cor+'80'}"></div>
+      </div>
+      <div class="varas-bar-val">${g}%</div>
+    </div>`;
+  }).join('');
+
   // ── Tabela ──────────────────────────────────────────────────────
   const rows = sorted.map((v, i) => {
     const isPr = v.nome === principal;
     const acPct = ((v.acervo / maxAcervo) * 100).toFixed(0);
     const diPct = ((v.ultimos_12m / maxDist) * 100).toFixed(0);
     const anCor = (v.pct_antigos??0)>60?'#f87171':(v.pct_antigos??0)>40?'#fbbf24':'#4ade80';
+    const g = v.taxa_giro ?? 0;
+    const giroCor = g >= 15 ? '#4ade80' : g >= 8 ? '#fbbf24' : '#f87171';
     return `<tr class="${isPr?'vara-row-principal':''}">
       <td><div style="display:flex;align-items:center;gap:.6rem">
         <span class="rank-badge">${i+1}</span>
@@ -1523,7 +1557,8 @@ function renderVarasComparativo(data) {
       <td style="font-size:.82rem;color:${isPr?'var(--gold)':'var(--text)'};font-weight:600">
         ${fmt(v.media_mensal??0)}<span style="font-size:.65rem;color:var(--muted);font-weight:400">/mês</span>
       </td>
-      <td style="font-size:.82rem;color:${anCor};font-weight:600">${(v.pct_antigos??0).toFixed(1)}%</td>
+      <td style="font-size:.82rem;color:${giroCor};font-weight:600" title="Taxa de giro = distribuídos 12m / acervo total">${g}%</td>
+      <td style="font-size:.82rem;color:${anCor};font-weight:600" title="% do acervo com data de ajuizamento há mais de 4 anos">${(v.pct_antigos??0).toFixed(1)}%</td>
       <td style="color:var(--muted);font-size:.76rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
           title="${esc(v.top_classe)}">${esc(v.top_classe)}</td>
       <td style="color:var(--muted);font-size:.76rem;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
@@ -1532,14 +1567,18 @@ function renderVarasComparativo(data) {
   }).join('');
 
   document.getElementById('varas-table-content').innerHTML = `
-    <div class="varas-charts-grid">
+    <div class="varas-charts-grid" style="grid-template-columns:1fr 1fr 1fr">
       <div class="varas-chart-card">
         <div class="varas-chart-title">📊 Acervo total</div>
         ${barsAcervo}
       </div>
       <div class="varas-chart-card">
-        <div class="varas-chart-title">⏳ % Processos &gt; 4 anos</div>
+        <div class="varas-chart-title" title="% do acervo com ajuizamento há mais de 4 anos">⏳ % Antigos (&gt;4 anos)</div>
         ${barsAntigos}
+      </div>
+      <div class="varas-chart-card">
+        <div class="varas-chart-title" title="Distribuídos nos últimos 12 meses ÷ acervo total · verde ≥15% · amarelo ≥8% · vermelho &lt;8%">🔄 Giro/ano</div>
+        ${barsGiro}
       </div>
     </div>
     <div style="overflow-x:auto">
@@ -1549,7 +1588,8 @@ function renderVarasComparativo(data) {
           <th class="${thCls('acervo')}"    onclick="varasSortBy('acervo')">Acervo</th>
           <th class="${thCls('ultimos_12m')}" onclick="varasSortBy('ultimos_12m')">Distribuídos (12m)</th>
           <th class="${thCls('media_mensal')}" onclick="varasSortBy('media_mensal')">Média/mês</th>
-          <th class="${thCls('pct_antigos')}" onclick="varasSortBy('pct_antigos')">% &gt; 4 anos</th>
+          <th class="${thCls('taxa_giro')}"  onclick="varasSortBy('taxa_giro')">Giro/ano</th>
+          <th class="${thCls('pct_antigos')}" onclick="varasSortBy('pct_antigos')">% Antigos</th>
           <th class="${thCls('top_classe')}"  onclick="varasSortBy('top_classe')">Top Classe</th>
           <th class="${thCls('top_assunto')}" onclick="varasSortBy('top_assunto')">Top Assunto</th>
         </tr></thead>
@@ -1833,11 +1873,12 @@ function renderProcessoDetail(proc) {
     const a = Math.floor(m/12);
     return `há ${a} ${a===1?'ano':'anos'}`;
   };
-  const idadeProc = raw => {
+  const idadeProc = (raw, dataFim = null) => {
     const d = String(raw||'').replace(/\D/g,'');
     if (d.length<8) return null;
     const dt = new Date(+d.slice(0,4), +d.slice(4,6)-1, +d.slice(6,8));
-    const anos = (Date.now()-dt)/(365.25*86400000);
+    const fim = dataFim ? new Date(dataFim) : new Date();
+    const anos = (fim - dt)/(365.25*86400000);
     if (anos<0) return null;
     if (anos<1) return `${Math.floor(anos*12)} meses`;
     return `${anos.toFixed(1).replace('.',',')} anos`;
@@ -1868,7 +1909,16 @@ function renderProcessoDetail(proc) {
   const assuntos  = proc.assuntos||[];
   const movs      = (proc.movimentos||[]).sort((a,b)=>(b.dataHora||'').localeCompare(a.dataHora||''));
   const ultimoMov = movs[0];
-  const idade     = idadeProc(proc.dataAjuizamento);
+
+  // Detectar conclusão via analisarFases para calcular idade correta
+  const fasesResult    = analisarFases(proc);
+  const isConcluido    = fasesResult?.faseAtual === 'encerrado';
+  const movExtincao    = fasesResult?.marcos?.movExtincao;
+  const dataConclusao  = movExtincao?.dataHora ?? null;
+  const idade          = isConcluido && dataConclusao
+    ? idadeProc(proc.dataAjuizamento, dataConclusao)
+    : idadeProc(proc.dataAjuizamento);
+  const idadeLabel     = isConcluido ? 'duração total' : 'em tramitação';
 
   // status de atividade
   let statusCls='status-paralisado', statusLabel='Paralisado';
@@ -1933,7 +1983,7 @@ function renderProcessoDetail(proc) {
       <div class="proc-qs-grid">
         <div class="proc-qs-item">
           <div class="proc-qs-val">${idade||'—'}</div>
-          <div class="proc-qs-label">em tramitação</div>
+          <div class="proc-qs-label">${idadeLabel}</div>
         </div>
         <div class="proc-qs-item">
           <div class="proc-qs-val">${movs.length}</div>
