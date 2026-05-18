@@ -260,6 +260,25 @@ tr:hover td{background:rgba(200,167,91,.04)}
 .sidebar-mode-btn{flex:1;padding:.4rem;border-radius:5px;font-size:.73rem;font-weight:600;color:var(--muted);text-align:center;transition:all .2s;cursor:pointer}
 .sidebar-mode-btn.active{background:linear-gradient(135deg,var(--gold),var(--gold-b));color:var(--navy)}
 
+/* ── Fases processuais ──────────────────────────────────────── */
+.fases-section{margin-bottom:1.25rem}
+.fases-section-title{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
+.fases-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.65rem;margin-bottom:.7rem}
+.fase-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--r);padding:.8rem 1rem;position:relative;overflow:hidden}
+.fase-card.fase-ativa{border-color:rgba(200,167,91,.45);background:rgba(200,167,91,.07)}
+.fase-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px}
+.fase-card.fase-conhecimento::before{background:#60a5fa}
+.fase-card.fase-recursal::before{background:#a78bfa}
+.fase-card.fase-liquidacao::before{background:#fbbf24}
+.fase-card.fase-execucao::before{background:#f97316}
+.fase-card.fase-encerrado::before{background:#4ade80}
+.fase-nome{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.3rem;display:flex;align-items:center;gap:.35rem}
+.fase-nome .fase-atual-badge{font-size:.56rem;background:rgba(200,167,91,.15);border:1px solid rgba(200,167,91,.3);color:var(--gold);padding:.08rem .4rem;border-radius:3px;font-weight:700;letter-spacing:.06em}
+.fase-tempo{font-size:1.15rem;font-weight:700;color:var(--text);line-height:1.1;margin-bottom:.1rem}
+.fase-tempo.nao-calc{font-size:.78rem;color:rgba(232,230,224,.3);font-weight:400}
+.fase-detalhe{font-size:.63rem;color:rgba(232,230,224,.35);line-height:1.4}
+.fases-nota{font-size:.63rem;color:rgba(232,230,224,.22);background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:6px;padding:.5rem .75rem;line-height:1.55}
+
 /* ── Process detail ─────────────────────────────────────────── */
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .proc-detail-wrap{animation:fadeIn .3s ease}
@@ -1539,6 +1558,226 @@ function renderVarasComparativo(data) {
     </div>`;
 }
 
+// ── Análise de fases processuais (DT / TUCNJ) ────────────────────────────────
+//
+// Referência CNJ — Tabela Unificada de Movimentos (TUCNJ):
+//  22  = Julgamento (sentença/acórdão)
+//  196 = Homologação de acordo
+//  198 = Extinção do processo
+//  60  = Remessa
+//  848 = Arquivamento
+//  854 = Extinção da execução
+//  372 = Penhora / arresto
+//  373 = Leilão / hasta pública
+//  386 = Liquidação de sentença
+//  387 = Homologação de cálculos
+//  985 = Recurso ordinário
+// 11009= Distribuição/autuação
+// 11010= Sentença (cód. específico TRT)
+// 11011= Baixa definitiva
+// 11012= Interposição de recurso
+// 11013= Acórdão
+// 11014= Início da liquidação
+// 11015= Encerramento da liquidação
+// 11016= Início da execução
+// 11017= Extinção da execução (cód. específico TRT)
+
+function analisarFases(proc) {
+  const movs = (proc.movimentos || []).slice().sort(
+    (a, b) => (a.dataHora || '').localeCompare(b.dataHora || '')
+  );
+  if (!movs.length) return null;
+
+  // Extrai a data de um movimento como objeto Date (ou null)
+  const dt = m => m?.dataHora ? new Date(m.dataHora) : null;
+
+  // Calcula intervalo legível entre dois momentos Date
+  function intervalo(inicio, fim) {
+    if (!inicio || !fim || fim < inicio) return null;
+    const dias  = Math.floor((fim - inicio) / 86400000);
+    const meses = Math.floor(dias / 30.4375);
+    const anos  = Math.floor(meses / 12);
+    if (anos >= 1) {
+      const mRest = meses % 12;
+      return mRest > 0 ? `${anos}a ${mRest}m` : `${anos} ${anos === 1 ? 'ano' : 'anos'}`;
+    }
+    if (meses >= 1) return `${meses} ${meses === 1 ? 'mês' : 'meses'}`;
+    return `${dias} ${dias === 1 ? 'dia' : 'dias'}`;
+  }
+
+  // Matchers por palavras-chave (campo nome) e por código CNJ
+  const match = (m, kwList, codList) => {
+    const n = (m.nome || '').toLowerCase();
+    if (kwList.some(kw => n.includes(kw))) return true;
+    if (codList.length && codList.includes(Number(m.codigo))) return true;
+    return false;
+  };
+
+  // ── Detectores de marco processual ───────────────────────────────────────
+  const ehSentenca = m => match(m,
+    ['sentença', 'homologação de acordo', 'resolução do mérito', 'julgamento de mérito', 'prolação de sentença'],
+    [22, 196, 11010]);
+
+  const ehAcordao = m => match(m,
+    ['acórdão', 'julgamento pelo trt', 'julgado pelo tribunal'],
+    [11013]);
+
+  const ehRecurso = m => match(m,
+    ['recurso ordinário', 'recurso de revista', 'recurso adesivo', 'agravo de instrumento',
+     'embargos de declaração', 'interposição de recurso', 'remessa ao trt'],
+    [11012, 985, 60]);
+
+  const ehLiquidacao = m => match(m,
+    ['liquidação', 'cálculo', 'apresentação de cálculo', 'homologação de cálculo'],
+    [386, 387, 11014, 11015]);
+
+  const ehExecucao = m => match(m,
+    ['execução', 'penhora', 'arresto', 'hasta pública', 'leilão', 'mandado de pagamento',
+     'mandado de citação para execução', 'auto de penhora'],
+    [11016, 372, 373]);
+
+  const ehExtincao = m => match(m,
+    ['arquivamento', 'baixa definitiva', 'extinção', 'arquivado definitivamente', 'quitação'],
+    [848, 854, 198, 11011, 11017]);
+
+  const ehAcordo = m => match(m,
+    ['acordo', 'conciliação', 'homologação de acordo', 'transação'],
+    [196]);
+
+  // ── Localizar marcos na sequência temporal ────────────────────────────────
+  const primeiro = movs[0];
+  const dtAjuiz  = proc.dataAjuizamento
+    ? new Date(String(proc.dataAjuizamento).replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'))
+    : dt(primeiro);
+
+  const movSentenca   = movs.find(ehSentenca);
+  const movAcordao    = movs.find(ehAcordao);
+  const movRecurso    = movs.find(ehRecurso);
+  const movLiquidacao = movs.find(ehLiquidacao);
+  const movExecucao   = movs.find(ehExecucao);
+  const movExtincao   = [...movs].reverse().find(ehExtincao);
+  const movAcordo     = movs.find(ehAcordo);
+
+  // ── Fases calculadas ──────────────────────────────────────────────────────
+  const fases = [];
+  const hoje  = new Date();
+
+  // 1. Conhecimento (1º Grau)
+  const fimConhecimento = movSentenca || movAcordo;
+  fases.push({
+    id:     'conhecimento',
+    nome:   'Conhecimento',
+    sub:    '1º Grau',
+    tempo:  fimConhecimento
+      ? intervalo(dtAjuiz, dt(fimConhecimento))
+      : null,
+    marco:  fimConhecimento ? (movAcordo && !movSentenca ? 'Acordo' : 'Sentença') : null,
+    dataFim: fimConhecimento ? dt(fimConhecimento) : null,
+  });
+
+  // 2. Recursal (2º Grau / TRT) — só aparece se G2 ou se detectado recurso
+  const isG2 = proc.grau === 'G2';
+  if (isG2 || movRecurso || movAcordao) {
+    const inicioRecursal = movRecurso || (isG2 ? primeiro : null);
+    const fimRecursal    = movAcordao;
+    fases.push({
+      id:     'recursal',
+      nome:   'Recursal',
+      sub:    '2º Grau / TRT',
+      tempo:  (inicioRecursal && fimRecursal)
+        ? intervalo(dt(inicioRecursal), dt(fimRecursal))
+        : null,
+      marco:  fimRecursal ? 'Acórdão' : null,
+      dataFim: fimRecursal ? dt(fimRecursal) : null,
+    });
+  }
+
+  // 3. Liquidação (se detectada)
+  if (movLiquidacao) {
+    const inicioLiq = movLiquidacao;
+    const fimLiq    = movExecucao;
+    fases.push({
+      id:     'liquidacao',
+      nome:   'Liquidação',
+      sub:    'Cálculos / Homologação',
+      tempo:  fimLiq
+        ? intervalo(dt(inicioLiq), dt(fimLiq))
+        : intervalo(dt(inicioLiq), hoje),
+      marco:  fimLiq ? 'Exec. iniciada' : 'Em andamento',
+      dataFim: fimLiq ? dt(fimLiq) : null,
+    });
+  }
+
+  // 4. Execução
+  if (movExecucao) {
+    const inicioExec = movExecucao;
+    const fimExec    = movExtincao;
+    fases.push({
+      id:     'execucao',
+      nome:   'Execução',
+      sub:    'Penhora / Pagamento',
+      tempo:  fimExec
+        ? intervalo(dt(inicioExec), dt(fimExec))
+        : intervalo(dt(inicioExec), hoje),
+      marco:  fimExec ? 'Extinção / Quitação' : 'Em andamento',
+      dataFim: fimExec ? dt(fimExec) : null,
+    });
+  }
+
+  // ── Determinar fase atual ─────────────────────────────────────────────────
+  let faseAtual = 'conhecimento';
+  if (movExtincao)   faseAtual = 'encerrado';
+  else if (movExecucao && !movExtincao) faseAtual = 'execucao';
+  else if (movLiquidacao && !movExecucao) faseAtual = 'liquidacao';
+  else if ((isG2 || movRecurso) && !movAcordao) faseAtual = 'recursal';
+  else if ((isG2 || movRecurso) && movAcordao && !movLiquidacao && !movExecucao) {
+    // Pós-acórdão, aguardando próxima fase
+    faseAtual = movExtincao ? 'encerrado' : 'execucao';
+  }
+  else if (movSentenca || movAcordo) faseAtual = 'encerrado'; // sentença sem exec/recurso detectado
+
+  return { fases, faseAtual, marcos: { movSentenca, movAcordao, movRecurso, movLiquidacao, movExecucao, movExtincao, movAcordo } };
+}
+
+function renderFasesHtml(proc) {
+  const resultado = analisarFases(proc);
+  if (!resultado || !resultado.fases.length) return '';
+
+  const { fases, faseAtual } = resultado;
+  const corPorId = { conhecimento: '#60a5fa', recursal: '#a78bfa', liquidacao: '#fbbf24', execucao: '#f97316', encerrado: '#4ade80' };
+
+  const cards = fases.map(f => {
+    const isAtiva = faseAtual === f.id;
+    return `<div class="fase-card fase-${f.id}${isAtiva ? ' fase-ativa' : ''}">
+      <div class="fase-nome" style="color:${corPorId[f.id]}">
+        ${esc(f.nome)}${isAtiva ? ' <span class="fase-atual-badge">ATUAL</span>' : ''}
+      </div>
+      <div class="fase-tempo${f.tempo ? '' : ' nao-calc'}">${f.tempo || 'não identificada'}</div>
+      <div class="fase-detalhe">${esc(f.sub)}${f.marco ? ' · ' + esc(f.marco) : ''}</div>
+    </div>`;
+  }).join('');
+
+  const faseAtualLabel = {
+    conhecimento: 'Conhecimento (1º Grau) — aguardando sentença',
+    recursal:     'Recursal (2º Grau / TRT) — aguardando acórdão',
+    liquidacao:   'Liquidação — aguardando homologação de cálculos',
+    execucao:     'Execução — aguardando pagamento/extinção',
+    encerrado:    'Encerrado / Arquivado',
+  }[faseAtual] || faseAtual;
+
+  return `<div class="fases-section">
+    <div class="fases-section-title">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Tempo por Fase Processual
+      <span style="font-weight:400;font-size:.62rem;color:rgba(232,230,224,.35);text-transform:none;letter-spacing:0">— Fase atual: ${esc(faseAtualLabel)}</span>
+    </div>
+    <div class="fases-grid">${cards}</div>
+    <div class="fases-nota">
+      Estimativa baseada nos movimentos públicos disponíveis no DataJud. O DataJud pode não registrar todos os atos processuais — fases não identificadas nos movimentos não aparecem. Nomenclatura dos movimentos varia entre tribunais e sistemas (PJe, e-SAJ, PROJUDI).
+    </div>
+  </div>`;
+}
+
 // ── Processo detail view ──────────────────────────────────────────────────────
 function copyProcNum(btn) {
   const num = btn.dataset.num;
@@ -1710,6 +1949,9 @@ function renderProcessoDetail(proc) {
         </div>
       </div>
     </div>
+
+    <!-- Fases processuais -->
+    ${renderFasesHtml(proc)}
 
     <!-- Body 2 colunas -->
     <div class="proc-body">
