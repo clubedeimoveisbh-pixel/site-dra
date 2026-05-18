@@ -2043,8 +2043,8 @@ async function buscarProcesso() {
     if (!stats.mock && stats.acervo > 0) {
       currentVara = '__server__';
       document.getElementById('topbar-vara').textContent = 'Vara configurada no servidor';
-      document.getElementById('vara-active-box').textContent = 'Vara do servidor (VARA_NOME)';
-      document.getElementById('vara-active-box').classList.add('show');
+      const toggleText = document.getElementById('vara-toggle-text');
+      if (toggleText) { toggleText.textContent = 'Vara do servidor'; document.getElementById('vara-toggle-btn')?.classList.add('selected'); }
       document.getElementById('empty-state').style.display = 'none';
       document.getElementById('dash-content').style.display = '';
       document.getElementById('view-tabs').classList.add('show');
