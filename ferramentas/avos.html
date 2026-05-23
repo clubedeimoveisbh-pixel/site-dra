@@ -142,17 +142,34 @@
 
         <div class="tool-card-title">📆 Dados do Vínculo</div>
 
+        <!-- Opção de preenchimento da data de saída -->
+        <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;background:rgba(200,167,91,0.06);border:1px solid rgba(200,167,91,0.16);border-radius:var(--radius);padding:0.35rem">
+          <button id="modo-btn-projecao" onclick="setModoSaida('projecao')" style="flex:1;padding:0.55rem 0.75rem;border:none;border-radius:6px;font-family:var(--ff-body);font-size:0.8rem;font-weight:600;cursor:pointer;background:var(--navy-deep);color:var(--gold);transition:all 0.2s">Data de sa&iacute;da (com proje&ccedil;&atilde;o do aviso)</button>
+          <button id="modo-btn-comunicacao" onclick="setModoSaida('comunicacao')" style="flex:1;padding:0.55rem 0.75rem;border:none;border-radius:6px;font-family:var(--ff-body);font-size:0.8rem;font-weight:600;cursor:pointer;background:transparent;color:var(--text-mid);transition:all 0.2s">Data da comunica&ccedil;&atilde;o da rescis&atilde;o</button>
+        </div>
+
         <div class="input-row">
           <div>
             <label class="input-label" for="avos-admissao">Data de admiss&atilde;o</label>
             <input type="date" id="avos-admissao" class="input-field" max="2099-12-31">
           </div>
           <div>
-            <label class="input-label" for="avos-saida">Data de sa&iacute;da</label>
-            <input type="date" id="avos-saida" class="input-field" max="2099-12-31">
-            <label class="checkbox-label">
-              <input type="checkbox" id="avos-ainda-contratado"> Ainda contratado (usar hoje)
-            </label>
+            <!-- Modo projeção: usuário informa a data final já com aviso projetado -->
+            <div id="campo-saida-projecao">
+              <label class="input-label" for="avos-saida">Data de sa&iacute;da <small style="text-transform:none;font-weight:400;color:var(--text-light)">(j&aacute; com proje&ccedil;&atilde;o do aviso)</small></label>
+              <input type="date" id="avos-saida" class="input-field" max="2099-12-31">
+              <label class="checkbox-label">
+                <input type="checkbox" id="avos-ainda-contratado"> Ainda contratado (usar hoje)
+              </label>
+            </div>
+            <!-- Modo comunicação: usuário informa a data da comunicação, calculamos a projeção -->
+            <div id="campo-saida-comunicacao" style="display:none">
+              <label class="input-label" for="avos-comunicacao">Data da comunica&ccedil;&atilde;o da rescis&atilde;o</label>
+              <input type="date" id="avos-comunicacao" class="input-field" max="2099-12-31">
+              <div id="aviso-projecao-info" style="margin-top:0.5rem;font-size:0.78rem;color:var(--text-light);display:none">
+                Aviso prévio: <strong id="aviso-dias-calculado" style="color:var(--gold-muted)">—</strong> dias &rarr; Projeção: <strong id="aviso-projecao-data" style="color:var(--navy-mid)">—</strong>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -265,6 +282,59 @@ document.getElementById('avos-ainda-contratado').addEventListener('change', func
   } else { el.disabled=false; el.value=''; }
 });
 
+// ── Dois modos de preenchimento ──────────────────────────────────────────────
+let modoSaida = 'projecao';
+
+function setModoSaida(modo) {
+  modoSaida = modo;
+  const btnP = document.getElementById('modo-btn-projecao');
+  const btnC = document.getElementById('modo-btn-comunicacao');
+  const campoP = document.getElementById('campo-saida-projecao');
+  const campoC = document.getElementById('campo-saida-comunicacao');
+  if (modo === 'projecao') {
+    btnP.style.background = 'var(--navy-deep)'; btnP.style.color = 'var(--gold)';
+    btnC.style.background = 'transparent'; btnC.style.color = 'var(--text-mid)';
+    campoP.style.display = ''; campoC.style.display = 'none';
+  } else {
+    btnC.style.background = 'var(--navy-deep)'; btnC.style.color = 'var(--gold)';
+    btnP.style.background = 'transparent'; btnP.style.color = 'var(--text-mid)';
+    campoP.style.display = 'none'; campoC.style.display = '';
+    atualizarProjecaoComunicacao();
+  }
+}
+
+function addDays(date, n) { const d = new Date(date); d.setDate(d.getDate()+n); return d; }
+
+function calcAvisoPrevia(admissao, comunicacao) {
+  let anos = comunicacao.getFullYear() - admissao.getFullYear();
+  if (comunicacao.getMonth() < admissao.getMonth() || (comunicacao.getMonth()===admissao.getMonth() && comunicacao.getDate()<admissao.getDate())) anos--;
+  anos = Math.max(0, anos);
+  return Math.min(30 + anos * 3, 90);
+}
+
+function atualizarProjecaoComunicacao() {
+  const admVal = document.getElementById('avos-admissao').value;
+  const comVal = document.getElementById('avos-comunicacao').value;
+  const info = document.getElementById('aviso-projecao-info');
+  if (!admVal || !comVal) { info.style.display = 'none'; return; }
+  const adm = parseLocalDate(admVal);
+  const com = parseLocalDate(comVal);
+  if (com < adm) { info.style.display = 'none'; return; }
+  const dias = calcAvisoPrevia(adm, com);
+  const proj = addDays(com, dias);
+  document.getElementById('aviso-dias-calculado').textContent = dias;
+  document.getElementById('aviso-projecao-data').textContent = fmt(proj);
+  info.style.display = '';
+  // Sincroniza o campo de saída interno para o cálculo usar a projeção
+  document.getElementById('avos-saida').value =
+    proj.getFullYear()+'-'+String(proj.getMonth()+1).padStart(2,'0')+'-'+String(proj.getDate()).padStart(2,'0');
+}
+
+document.getElementById('avos-comunicacao').addEventListener('change', atualizarProjecaoComunicacao);
+document.getElementById('avos-admissao').addEventListener('change', function(){
+  if (modoSaida === 'comunicacao') atualizarProjecaoComunicacao();
+});
+
 function calcAvos(){
   const admVal=document.getElementById('avos-admissao').value;
   const saidaVal=document.getElementById('avos-saida').value;
@@ -334,7 +404,7 @@ function calcAvos(){
   if(prop && prop.avos>0){
     html+=`<div class="result-section-title">Férias Proporcionais</div>
       <div class="avos-bar-wrap">
-        <div class="avos-bar-label">Período proporcional atual</div>
+        <div class="avos-bar-label">Per&iacute;odo aquisitivo: ${fmt(prop.ini)} &ndash; ${fmt(new Date(prop.fimAq.getTime()-86400000))}</div>
         <div class="avos-bar-fraction">${prop.avos}/12</div>
         <div class="avos-bar-track"><div class="avos-bar-fill" style="width:${(prop.avos/12*100).toFixed(0)}%"></div></div>
         <div class="avos-bar-sub">${prop.avos} meses completos × ${prop.diasFerias}/12 = <strong style="color:var(--gold-bright)">${prop.diasProp} dias</strong></div>

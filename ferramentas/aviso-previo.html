@@ -238,7 +238,7 @@
     <span class="section-label">Calculadora</span>
     <h1>Aviso Pr&eacute;vio Indenizado</h1>
     <div class="gold-divider"></div>
-    <p class="hero-sub">Lei 12.506/2011 &mdash; 30 dias base + 3 dias por ano completo al&eacute;m do primeiro, at&eacute; 90 dias. <strong style="color:rgba(255,255,255,0.75)">Este c&aacute;lculo corresponde ao aviso pr&eacute;vio indenizado.</strong> Use as datas ou o slider para ver o resultado em tempo real.</p>
+    <p class="hero-sub">Lei 12.506/2011 &mdash; 30 dias base + 3 dias por ano de servi&ccedil;o, at&eacute; 90 dias. <strong style="color:rgba(255,255,255,0.75)">Este c&aacute;lculo corresponde ao aviso pr&eacute;vio indenizado.</strong> Use as datas ou o slider para ver o resultado em tempo real.</p>
   </div>
 </section>
 
@@ -328,6 +328,13 @@
               </div>
             </div>
 
+            <!-- Projeção — destaque principal -->
+            <div style="background:linear-gradient(135deg,rgba(200,167,91,0.15),rgba(200,167,91,0.08));border:2px solid var(--gold);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;text-align:center">
+              <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem">Data de Proje&ccedil;&atilde;o do Aviso Pr&eacute;vio</div>
+              <div id="r-projecao" style="font-family:var(--ff-title);font-size:2rem;font-weight:700;color:var(--navy-deep)">—</div>
+              <div style="font-size:0.75rem;color:var(--text-light);margin-top:0.3rem">Data em que o contrato se encerra</div>
+            </div>
+
             <div class="detail-grid">
               <div class="detail-chip">
                 <div class="detail-chip-label">Tempo de servi&ccedil;o</div>
@@ -345,13 +352,9 @@
                 <div class="detail-chip-label">Dias adicionais</div>
                 <div class="detail-chip-val" id="r-adicionais">—</div>
               </div>
-              <div class="detail-chip">
-                <div class="detail-chip-label">Proje&ccedil;&atilde;o fim aviso</div>
-                <div class="detail-chip-val" id="r-projecao">—</div>
-              </div>
               <div class="detail-chip" id="r-limite-chip" style="display:none">
                 <div class="detail-chip-label">Limite m&aacute;ximo</div>
-                <div class="detail-chip-val" id="r-limite" style="color:#f87171">Atingido &#9888;</div>
+                <div class="detail-chip-val" style="color:#f87171">Atingido &#9888;</div>
               </div>
             </div>
 
@@ -365,7 +368,7 @@
       </div>
     </div>
 
-    <p class="legal-note">&#9432;&nbsp; Cálculo baseado na Lei 12.506/2011. Para empregados dispensados sem justa causa, o aviso prévio é de 30 dias acrescidos de 3 dias por ano de serviço completo além do primeiro. O texto da lei é interpretado de formas distintas em alguns tribunais — consulte um advogado para casos específicos.</p>
+    <p class="legal-note">&#9432;&nbsp; Cálculo baseado na Lei 12.506/2011. Para empregados dispensados sem justa causa, o aviso prévio é de 30 dias acrescidos de 3 dias por ano de serviço completo, até o máximo de 90 dias. O texto da lei é interpretado de formas distintas em alguns tribunais — consulte um advogado para casos específicos.</p>
   </div>
 </section>
 
@@ -388,7 +391,7 @@ function diffMonths(from, to) {
 }
 
 function calcFromAnos(anos, dispensa) {
-  const anosAcrescimo = Math.max(0, anos - 1);
+  const anosAcrescimo = anos;
   const diasAcrescimo = Math.min(anosAcrescimo * 3, 60);
   const total = 30 + diasAcrescimo;
 
@@ -415,7 +418,7 @@ function calcFromAnos(anos, dispensa) {
 
   // Explain
   document.getElementById('r-explain').innerHTML =
-    '<strong>Base legal:</strong> Art. 1º da Lei 12.506/2011. O acréscimo de 3 dias incide a partir do 2º ano completo de serviço (o 1º ano não gera acréscimo). ' +
+    '<strong>Base legal:</strong> Art. 1º da Lei 12.506/2011. O acréscimo de 3 dias incide por ano de serviço completo. ' +
     (total === 90 ? '<strong>O limite máximo de 90 dias foi atingido.</strong>' : 'Trata-se de aviso prévio indenizado.');
 
   // Slider sync
